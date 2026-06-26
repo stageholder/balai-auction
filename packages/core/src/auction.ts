@@ -31,11 +31,13 @@ export function resolveBids(
   events: BidEvent[],
   table: IncrementTable
 ): BidResolution {
-  if (events.length === 0) {
+  const validEvents = events.filter((e) => e.maxAmount >= startingPrice);
+
+  if (validEvents.length === 0) {
     return { winnerId: null, currentPrice: startingPrice, contested: false };
   }
 
-  const standings = rankBidders(events);
+  const standings = rankBidders(validEvents);
   const winner = standings[0]!;
 
   if (standings.length === 1) {

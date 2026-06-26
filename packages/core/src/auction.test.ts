@@ -80,4 +80,29 @@ describe("resolveBids", () => {
       contested: true,
     });
   });
+
+  it("treats a lone bidder below the starting price as no bid", () => {
+    const events: BidEvent[] = [
+      { bidderId: "A", maxAmount: 500_000, createdAt: 1 },
+    ];
+    // 500,000 < 1,000,000 → invalid bid → no winner
+    expect(resolveBids(START, events, table)).toEqual({
+      winnerId: null,
+      currentPrice: START,
+      contested: false,
+    });
+  });
+
+  it("ignores a below-start bid when mixed with a valid bid", () => {
+    const events: BidEvent[] = [
+      { bidderId: "A", maxAmount: 5_000_000, createdAt: 1 },
+      { bidderId: "B", maxAmount: 500_000, createdAt: 2 },
+    ];
+    // B's bid is below starting price → filtered; only A remains → lone valid bidder
+    expect(resolveBids(START, events, table)).toEqual({
+      winnerId: "A",
+      currentPrice: START,
+      contested: false,
+    });
+  });
 });
