@@ -4,5 +4,8 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "test": "pnpm -r test"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma"]
   }
 }
