@@ -4,3 +4,4 @@ export * from "./types";
 export * from "./increments";
 export * from "./auction";
 export * from "./softClose";
+export * from "./settlement";
