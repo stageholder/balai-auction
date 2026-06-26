@@ -1,0 +1,8 @@
+{
+  "name": "auction-web",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "pnpm -r test"
+  }
+}
