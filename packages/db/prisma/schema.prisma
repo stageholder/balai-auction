@@ -110,6 +110,7 @@ model Lot {
 
   @@unique([saleId, lotNumber])
   @@index([status, closesAt])
+  @@index([consignorId])
 }
 
 model Bid {
@@ -124,6 +125,7 @@ model Bid {
   createdAt DateTime @default(now())
 
   @@index([lotId, createdAt])
+  @@index([bidderId])
 }
 
 model Registration {
@@ -137,6 +139,7 @@ model Registration {
   createdAt       DateTime  @default(now())
 
   @@unique([userId, saleId])
+  @@index([saleId])
 }
 
 model Invoice {
@@ -153,6 +156,8 @@ model Invoice {
   xenditInvoiceId String?
   createdAt       DateTime      @default(now())
   ledgerEntries   LedgerEntry[]
+
+  @@index([buyerId])
 }
 
 model LedgerEntry {
@@ -167,4 +172,5 @@ model LedgerEntry {
   createdAt DateTime    @default(now())
 
   @@index([lotId])
+  @@index([invoiceId])
 }
