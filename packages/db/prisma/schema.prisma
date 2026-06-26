@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  buyer
+  staff
+  consignor
+}
+
+enum SaleStatus {
+  draft
+  scheduled
+  live
+  closed
+}
+
+enum LotStatus {
+  live
+  sold
+  unsold
+  paid
+  fulfilled
+}
+
+enum BidType {
+  bid
+  proxy_auto
+  reserve_check
+}
+
+enum KycStatus {
+  pending
+  approved
+  rejected
+}
+
+enum LedgerParty {
+  buyer
+  seller
+  house
+}
+
+enum LedgerKind {
+  hammer
+  premium
+  tax
+  deposit
+  payout
+  refund
+}
+
+enum InvoiceStatus {
+  pending
+  paid
+  refunded
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  role          UserRole       @default(buyer)
+  createdAt     DateTime       @default(now())
+  bids          Bid[]
+  registrations Registration[]
+  invoices      Invoice[]
+  consignedLots Lot[]          @relation("ConsignorLots")
+}
+
+model Sale {
+  id               String         @id @default(uuid())
+  title            String
+  description      String?
+  startsAt         DateTime
+  endsAt           DateTime
+  buyersPremiumPct Int            @default(20)
+  taxPct           Int            @default(0)
+  incrementTable   Json
+  status           SaleStatus     @default(draft)
+  createdAt        DateTime       @default(now())
+  lots             Lot[]
+  registrations    Registration[]
+}
+
+model Lot {
+  id            String        @id @default(uuid())
+  saleId        String
+  sale          Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  lotNumber     Int
+  title         String
+  description   String?
+  images        Json          @default("[]")
+  estimateLow   BigInt
+  estimateHigh  BigInt
+  startingPrice BigInt
+  reserve       BigInt?
+  closesAt      DateTime
+  status        LotStatus     @default(live)
+  consignorId   String?
+  consignor     User?         @relation("ConsignorLots", fields: [consignorId], references: [id])
+  createdAt     DateTime      @default(now())
+  bids          Bid[]
+  invoice       Invoice?
+  ledgerEntries LedgerEntry[]
+
+  @@unique([saleId, lotNumber])
+  @@index([status, closesAt])
+  @@index([consignorId])
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  lotId     String
+  lot       Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  bidderId  String
+  bidder    User     @relation(fields: [bidderId], references: [id])
+  maxAmount BigInt
+  amount    BigInt
+  type      BidType  @default(bid)
+  createdAt DateTime @default(now())
+
+  @@index([lotId, createdAt])
+  @@index([bidderId])
+}
+
+model Registration {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  saleId          String
+  sale            Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  kycStatus       KycStatus @default(pending)
+  xenditCardToken String?
+  createdAt       DateTime  @default(now())
+
+  @@unique([userId, saleId])
+  @@index([saleId])
+}
+
+model Invoice {
+  id              String        @id @default(uuid())
+  lotId           String        @unique
+  lot             Lot           @relation(fields: [lotId], references: [id])
+  buyerId         String
+  buyer           User          @relation(fields: [buyerId], references: [id])
+  hammer          BigInt
+  premium         BigInt
+  tax             BigInt
+  total           BigInt
+  status          InvoiceStatus @default(pending)
+  xenditInvoiceId String?
+  createdAt       DateTime      @default(now())
+  ledgerEntries   LedgerEntry[]
+
+  @@index([buyerId])
+}
+
+model LedgerEntry {
+  id        String      @id @default(uuid())
+  invoiceId String?
+  invoice   Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  lotId     String?
+  lot       Lot?        @relation(fields: [lotId], references: [id])
+  party     LedgerParty
+  kind      LedgerKind
+  amount    BigInt
+  createdAt DateTime    @default(now())
+
+  @@index([lotId])
+  @@index([invoiceId])
+}

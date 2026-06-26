@@ -3,3 +3,7 @@ dist/
 .env
 .env.local
 .next/
+# Prisma generated client
+packages/db/src/generated/
+# local env (keep .env.test and .env.example committed)
+packages/db/.env
