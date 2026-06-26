@@ -11,7 +11,7 @@ export default async function SalePage({
 }) {
   const { id } = await params;
   const sale = await getSale(prisma, id);
-  if (!sale) notFound();
+  if (!sale || sale.status === "draft") notFound();
 
   const lots = await listLotsForSale(prisma, id);
 

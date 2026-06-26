@@ -46,6 +46,7 @@ export interface NewSale {
   buyersPremiumPct: number;
   taxPct: number;
   incrementTable: IncrementTable;
+  status?: SaleStatus;
 }
 
 export interface LotRecord {

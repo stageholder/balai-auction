@@ -15,6 +15,7 @@ export async function createSale(
       buyersPremiumPct: input.buyersPremiumPct,
       taxPct: input.taxPct,
       incrementTable: input.incrementTable as unknown as Prisma.InputJsonValue,
+      ...(input.status !== undefined ? { status: input.status } : {}),
     },
   });
   return saleRowToRecord(row);
@@ -30,5 +31,13 @@ export async function getSale(
 
 export async function listSales(db: PrismaClient): Promise<SaleRecord[]> {
   const rows = await db.sale.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map(saleRowToRecord);
+}
+
+export async function listPublishedSales(db: PrismaClient): Promise<SaleRecord[]> {
+  const rows = await db.sale.findMany({
+    where: { status: { not: "draft" } },
+    orderBy: { createdAt: "desc" },
+  });
   return rows.map(saleRowToRecord);
 }

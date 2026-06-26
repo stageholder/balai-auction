@@ -1,10 +1,10 @@
-import { prisma, listSales } from "@/lib/db";
+import { prisma, listPublishedSales } from "@/lib/db";
 import { SaleCard } from "@/components/sale-card";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const sales = await listSales(prisma);
+  const sales = await listPublishedSales(prisma);
 
   return (
     <div>

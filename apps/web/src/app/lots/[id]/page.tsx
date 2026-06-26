@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { prisma, getLot } from "@/lib/db";
+import { prisma, getLot, getSale } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +14,9 @@ export default async function LotPage({
   const { id } = await params;
   const lot = await getLot(prisma, id);
   if (!lot) notFound();
+
+  const sale = await getSale(prisma, lot.saleId);
+  if (!sale || sale.status === "draft") notFound();
 
   const cover = lot.images[0];
 

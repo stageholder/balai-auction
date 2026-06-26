@@ -24,6 +24,7 @@ async function main(): Promise<void> {
     buyersPremiumPct: 20,
     taxPct: 11,
     incrementTable,
+    status: "live",
   });
 
   const lots = [
