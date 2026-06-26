@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { saleRowToRecord } from "../mappers";
 import type { NewSale, SaleRecord } from "../types";
 
@@ -14,7 +14,7 @@ export async function createSale(
       endsAt: input.endsAt,
       buyersPremiumPct: input.buyersPremiumPct,
       taxPct: input.taxPct,
-      incrementTable: input.incrementTable,
+      incrementTable: input.incrementTable as unknown as Prisma.InputJsonValue,
     },
   });
   return saleRowToRecord(row);
