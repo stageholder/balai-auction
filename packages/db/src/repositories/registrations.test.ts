@@ -59,6 +59,6 @@ describe("registrations repository", () => {
     await createRegistration(db, { userId: user.id, saleId: sale.id });
     await expect(
       createRegistration(db, { userId: user.id, saleId: sale.id })
-    ).rejects.toThrow();
+    ).rejects.toThrow(/[Uu]nique constraint/);
   });
 });

@@ -11,6 +11,7 @@ export async function createRegistration(
       userId: input.userId,
       saleId: input.saleId,
       xenditCardToken: input.xenditCardToken ?? null,
+      kycStatus: "pending",
     },
   });
   return registrationRowToRecord(row);
