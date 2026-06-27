@@ -9,3 +9,4 @@ export * from "./invoice";
 export * from "./timing";
 export * from "./live";
 export * from "./departments";
+export * from "./commission";
