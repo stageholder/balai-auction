@@ -65,6 +65,8 @@ model User {
   id            String         @id @default(uuid())
   email         String         @unique
   role          UserRole       @default(buyer)
+  legalName     String?
+  phone         String?
   createdAt     DateTime       @default(now())
   bids          Bid[]
   registrations Registration[]
