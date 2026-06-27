@@ -138,6 +138,14 @@ export interface InvoiceRecord {
   createdAt: Date;
 }
 
+export interface PendingRegistrationView {
+  id: string;
+  userEmail: string;
+  userLegalName: string | null;
+  saleTitle: string;
+  createdAt: Date;
+}
+
 export interface LedgerEntryRecord {
   id: string;
   invoiceId: string | null;

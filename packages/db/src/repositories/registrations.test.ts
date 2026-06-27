@@ -7,6 +7,7 @@ import {
   createRegistration,
   getRegistration,
   setRegistrationKyc,
+  listPendingRegistrations,
 } from "./registrations";
 
 const db = testDb();
@@ -60,5 +61,28 @@ describe("registrations repository", () => {
     await expect(
       createRegistration(db, { userId: user.id, saleId: sale.id })
     ).rejects.toThrow(/[Uu]nique constraint/);
+  });
+});
+
+describe("listPendingRegistrations", () => {
+  it("returns only pending registrations with user + sale info", async () => {
+    const { user, sale } = await scaffold();
+    await createRegistration(db, { userId: user.id, saleId: sale.id });
+
+    const pending = await listPendingRegistrations(db);
+    expect(pending).toHaveLength(1);
+    expect(pending[0]?.userEmail).toBe("buyer@example.com");
+    expect(pending[0]?.saleTitle).toBe("Sale");
+  });
+
+  it("excludes approved registrations", async () => {
+    const { user, sale } = await scaffold();
+    const reg = await createRegistration(db, {
+      userId: user.id,
+      saleId: sale.id,
+    });
+    await setRegistrationKyc(db, reg.id, "approved");
+
+    expect(await listPendingRegistrations(db)).toHaveLength(0);
   });
 });
