@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma, createLot, updateLot, getLot } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { uploadLotImage } from "@/lib/storage";
@@ -56,7 +56,8 @@ export async function updateLotAction(
 ): Promise<void> {
   await requireStaff();
   const lot = await getLot(prisma, lotId);
-  const images = await readImages(formData, lot?.images ?? []);
+  if (!lot) notFound();
+  const images = await readImages(formData, lot.images);
   await updateLot(prisma, lotId, { ...readFields(formData), images });
   revalidatePath(`/admin/sales/${saleId}/lots`);
   redirect(`/admin/sales/${saleId}/lots`);
