@@ -20,7 +20,13 @@ enum SaleStatus {
   closed
 }
 
+enum SaleMode {
+  timed
+  live
+}
+
 enum LotStatus {
+  queued
   live
   sold
   unsold
@@ -82,6 +88,8 @@ model Sale {
   endsAt           DateTime
   buyersPremiumPct Int            @default(20)
   taxPct           Int            @default(0)
+  mode             SaleMode       @default(timed)
+  liveLotSeconds   Int            @default(45)
   incrementTable   Json
   status           SaleStatus     @default(draft)
   createdAt        DateTime       @default(now())

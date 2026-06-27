@@ -72,6 +72,20 @@ export async function updateLotClosesAt(
   return lotRowToRecord(row);
 }
 
+export async function openQueuedLot(
+  db: PrismaClient,
+  id: string,
+  closesAt: Date
+): Promise<LotRecord | null> {
+  const claim = await db.lot.updateMany({
+    where: { id, status: "queued" },
+    data: { status: "live", closesAt },
+  });
+  if (claim.count === 0) return null;
+  const row = await db.lot.findUnique({ where: { id } });
+  return row ? lotRowToRecord(row) : null;
+}
+
 export async function updateLot(
   db: PrismaClient,
   id: string,

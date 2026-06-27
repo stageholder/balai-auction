@@ -10,6 +10,7 @@ import {
   updateLotStatus,
   updateLotClosesAt,
   updateLot,
+  openQueuedLot,
 } from "./lots";
 
 const db = testDb();
@@ -104,6 +105,44 @@ describe("updateLotClosesAt", () => {
     const newClose = new Date("2026-07-08T00:02:00.000Z");
     const updated = await updateLotClosesAt(db, lot.id, newClose);
     expect(updated.closesAt.getTime()).toBe(newClose.getTime());
+  });
+});
+
+describe("queued lot status", () => {
+  it("accepts the queued status via updateLotStatus", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    const updated = await updateLotStatus(db, lot.id, "queued");
+    expect(updated.status).toBe("queued");
+  });
+});
+
+describe("openQueuedLot", () => {
+  it("promotes a queued lot to live with a new closesAt", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    await updateLotStatus(db, lot.id, "queued");
+
+    const closesAt = new Date("2026-07-10T00:00:45.000Z");
+    const opened = await openQueuedLot(db, lot.id, closesAt);
+    expect(opened?.status).toBe("live");
+    expect(opened?.closesAt.getTime()).toBe(closesAt.getTime());
+  });
+
+  it("returns null when the lot is not queued (already opened/closed)", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    // lot is "live" by default, not "queued"
+    expect(await openQueuedLot(db, lot.id, new Date())).toBeNull();
   });
 });
 

@@ -1,8 +1,5 @@
 import "server-only";
 
-const SOFT_CLOSE_MS = 2 * 60_000;
-export const SOFT_CLOSE_WINDOW_MS = SOFT_CLOSE_MS;
-
 export interface LotPricePayload {
   currentPrice: number;
   closesAt: string;
