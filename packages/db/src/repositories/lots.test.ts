@@ -174,3 +174,47 @@ describe("updateLot", () => {
     expect(updated.reserve).toBeNull();
   });
 });
+
+describe("getLotsDueToClose excludes live-mode lots", () => {
+  it("returns only due lots whose sale is timed-mode", async () => {
+    const past = new Date("2026-07-01T00:00:00.000Z");
+    const now = new Date("2026-07-10T00:00:00.000Z");
+
+    const timedSale = await createSale(db, {
+      ...sampleSaleForLotsExcludeTest(),
+    });
+    const liveSale = await createSale(db, {
+      ...sampleSaleForLotsExcludeTest(),
+      mode: "live",
+    });
+    const timedLot = await createLot(db, lotInExcludeTest(timedSale.id, 1, past));
+    await createLot(db, lotInExcludeTest(liveSale.id, 1, past)); // live-mode, due, but excluded
+
+    const due = await getLotsDueToClose(db, now);
+    expect(due.map((l) => l.id)).toEqual([timedLot.id]);
+  });
+});
+
+// helpers local to getLotsDueToClose exclude test
+function sampleSaleForLotsExcludeTest() {
+  return {
+    title: "Sale",
+    startsAt: new Date("2026-07-01T00:00:00.000Z"),
+    endsAt: new Date("2026-07-08T00:00:00.000Z"),
+    buyersPremiumPct: 20,
+    taxPct: 11,
+    incrementTable: [{ upTo: null, step: 100_000 }],
+  };
+}
+function lotInExcludeTest(saleId: string, lotNumber: number, closesAt: Date) {
+  return {
+    saleId,
+    lotNumber,
+    title: `Lot ${lotNumber}`,
+    estimateLow: 1_000_000,
+    estimateHigh: 2_000_000,
+    startingPrice: 1_000_000,
+    reserve: null,
+    closesAt,
+  };
+}

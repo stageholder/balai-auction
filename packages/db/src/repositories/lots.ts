@@ -48,7 +48,11 @@ export async function getLotsDueToClose(
   now: Date
 ): Promise<LotRecord[]> {
   const rows = await db.lot.findMany({
-    where: { status: "live", closesAt: { lte: now } },
+    where: {
+      status: "live",
+      closesAt: { lte: now },
+      sale: { mode: "timed" },
+    },
     orderBy: { closesAt: "asc" },
   });
   return rows.map(lotRowToRecord);
