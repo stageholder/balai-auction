@@ -1,6 +1,7 @@
 "use client";
 
 import type { SaleRecord } from "@auction/db";
+import { DEPARTMENTS } from "@auction/core";
 import { Button } from "@/components/ui/button";
 
 const FIELD =
@@ -48,6 +49,20 @@ export function SaleForm({
           <label htmlFor="taxPct" className={LABEL}>Tax (PPN) %</label>
           <input id="taxPct" name="taxPct" type="number" min={0} required defaultValue={sale?.taxPct ?? 11} className={FIELD} />
         </div>
+      </div>
+      <div>
+        <label htmlFor="category" className={LABEL}>Department</label>
+        <select
+          id="category"
+          name="category"
+          defaultValue={sale?.category ?? ""}
+          className={FIELD}
+        >
+          <option value="">— None —</option>
+          {DEPARTMENTS.map((d) => (
+            <option key={d.slug} value={d.slug}>{d.label}</option>
+          ))}
+        </select>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
