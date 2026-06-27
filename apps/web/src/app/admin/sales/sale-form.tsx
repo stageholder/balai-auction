@@ -1,7 +1,7 @@
 "use client";
 
 import type { SaleRecord } from "@auction/db";
-import { DEPARTMENTS } from "@auction/core";
+import { DEPARTMENTS, DEFAULT_SELLER_COMMISSION_PCT } from "@auction/core";
 import { Button } from "@/components/ui/button";
 
 const FIELD =
@@ -48,6 +48,20 @@ export function SaleForm({
         <div>
           <label htmlFor="taxPct" className={LABEL}>Tax (PPN) %</label>
           <input id="taxPct" name="taxPct" type="number" min={0} required defaultValue={sale?.taxPct ?? 11} className={FIELD} />
+        </div>
+        <div>
+          <label htmlFor="sellerCommissionPct" className={LABEL}>
+            Seller commission (%)
+          </label>
+          <input
+            id="sellerCommissionPct"
+            name="sellerCommissionPct"
+            type="number"
+            min={0}
+            max={100}
+            defaultValue={sale?.sellerCommissionPct ?? DEFAULT_SELLER_COMMISSION_PCT}
+            className={FIELD}
+          />
         </div>
       </div>
       <div>

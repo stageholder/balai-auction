@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { IncrementTable } from "@auction/core";
-import { isDepartmentSlug } from "@auction/core";
+import { isDepartmentSlug, isValidCommissionPct, DEFAULT_SELLER_COMMISSION_PCT } from "@auction/core";
 import type { SaleStatus } from "@auction/db";
 import { prisma, createSale, updateSale, updateSaleStatus } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
@@ -28,6 +28,10 @@ function readForm(formData: FormData) {
     endsAt: new Date(String(formData.get("endsAt"))),
     buyersPremiumPct: Number(formData.get("buyersPremiumPct")),
     taxPct: Number(formData.get("taxPct")),
+    sellerCommissionPct: (() => {
+      const n = Number(formData.get("sellerCommissionPct"));
+      return isValidCommissionPct(n) ? n : DEFAULT_SELLER_COMMISSION_PCT;
+    })(),
     incrementTable: parseIncrements(
       String(formData.get("incrementTable") || JSON.stringify(DEFAULT_INCREMENTS))
     ),
