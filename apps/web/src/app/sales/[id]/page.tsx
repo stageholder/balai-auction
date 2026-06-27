@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma, getSale, listLotsForSale } from "@/lib/db";
+import { prisma, getPublishedSale, listLotsForSale } from "@/lib/db";
 import { LotCard } from "@/components/lot-card";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,8 @@ export default async function SalePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const sale = await getSale(prisma, id);
-  if (!sale || sale.status === "draft") notFound();
+  const sale = await getPublishedSale(prisma, id);
+  if (!sale) notFound();
 
   const lots = await listLotsForSale(prisma, id);
 
