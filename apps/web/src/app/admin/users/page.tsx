@@ -1,6 +1,6 @@
 import { prisma, listUsers } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { RoleToggle } from "./role-toggle";
+import { RoleSelect } from "./role-select";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export default async function AdminUsersPage() {
               <p className="text-ink">{u.email}</p>
               <p className="text-xs uppercase tracking-[0.15em] text-muted">{u.role}</p>
             </div>
-            <RoleToggle userId={u.id} role={u.role} disabled={u.id === me?.id} />
+            <RoleSelect userId={u.id} role={u.role} disabled={u.id === me?.id} />
           </li>
         ))}
       </ul>

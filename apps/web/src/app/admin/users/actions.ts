@@ -2,16 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 import type { UserRole } from "@auction/db";
-import { prisma, setUserRole } from "@/lib/db";
+import { prisma, setUserRole as updateUserRole } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 
-export async function setRoleAction(
+const ALLOWED_ROLES: readonly UserRole[] = ["buyer", "consignor", "staff"];
+
+export async function setUserRole(
   userId: string,
   role: UserRole
 ): Promise<void> {
   const staff = await requireStaff();
+  if (!ALLOWED_ROLES.includes(role)) {
+    throw new Error(`Invalid role: ${String(role)}`);
+  }
   // A staff member cannot change their own role (avoid self-lockout).
   if (staff.id === userId) return;
-  await setUserRole(prisma, userId, role);
+  await updateUserRole(prisma, userId, role);
   revalidatePath("/admin/users");
 }
