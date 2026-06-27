@@ -56,3 +56,24 @@ export async function createXenditInvoice(params: {
   const data = (await res.json()) as { id: string; invoice_url: string };
   return { id: data.id, invoiceUrl: data.invoice_url };
 }
+
+/** Fetch an existing Xendit invoice (to reuse a still-pending one). Returns
+ *  null if it cannot be retrieved. */
+export async function getXenditInvoice(
+  id: string
+): Promise<{ id: string; status: string; invoiceUrl: string } | null> {
+  const key = process.env.XENDIT_SECRET_KEY;
+  if (!key) throw new Error("XENDIT_SECRET_KEY is not set");
+
+  const auth = Buffer.from(`${key}:`).toString("base64");
+  const res = await fetch(`${XENDIT_API}/v2/invoices/${id}`, {
+    headers: { Authorization: `Basic ${auth}` },
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()) as {
+    id: string;
+    status: string;
+    invoice_url: string;
+  };
+  return { id: data.id, status: data.status, invoiceUrl: data.invoice_url };
+}

@@ -2,7 +2,7 @@
 
 import { prisma, getInvoiceById, setInvoiceXenditId } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { createXenditInvoice } from "@/lib/xendit";
+import { createXenditInvoice, getXenditInvoice } from "@/lib/xendit";
 
 export async function startInvoicePayment(
   invoiceId: string
@@ -19,6 +19,19 @@ export async function startInvoicePayment(
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   try {
+    // Reuse an already-open Xendit invoice instead of minting a new one, so a
+    // second "Pay now" (back-button / two tabs) can't lead to two completed
+    // checkouts (a double charge). Only create fresh if none exists or the
+    // prior one is no longer payable.
+    if (invoice.xenditInvoiceId) {
+      const existing = await getXenditInvoice(invoice.xenditInvoiceId).catch(
+        () => null
+      );
+      if (existing && existing.status === "PENDING") {
+        return { ok: true, url: existing.invoiceUrl };
+      }
+    }
+
     const xendit = await createXenditInvoice({
       externalId: invoice.id,
       amount: invoice.total,
