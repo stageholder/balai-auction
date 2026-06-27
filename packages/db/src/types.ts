@@ -155,3 +155,12 @@ export interface LedgerEntryRecord {
   amount: number;
   createdAt: Date;
 }
+
+export interface BuyerInvoiceView {
+  id: string;
+  lotId: string;
+  lotTitle: string;
+  total: number;
+  status: "pending" | "paid" | "refunded";
+  createdAt: Date;
+}

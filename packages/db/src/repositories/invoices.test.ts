@@ -15,6 +15,13 @@ import {
   getInvoice,
   getLedgerEntriesForInvoice,
 } from "./invoices";
+import {
+  getInvoiceById,
+  setInvoiceXenditId,
+  markInvoicePaid,
+  listInvoicesForBuyer,
+} from "./invoices";
+import { updateLotStatus } from "./lots";
 
 const db = testDb();
 const incrementTable: IncrementTable = [
@@ -102,5 +109,84 @@ describe("invoices repository", () => {
       "premium",
       "tax",
     ]);
+  });
+});
+
+async function soldLotWithInvoice() {
+  const sale = await createSale(db, {
+    title: "Sale",
+    startsAt: new Date("2026-07-01T00:00:00.000Z"),
+    endsAt: new Date("2026-07-08T00:00:00.000Z"),
+    buyersPremiumPct: 20,
+    taxPct: 11,
+    incrementTable,
+  });
+  const lot = await createLot(db, {
+    saleId: sale.id,
+    lotNumber: 1,
+    title: "Lot 1",
+    estimateLow: 1_000_000,
+    estimateHigh: 2_000_000,
+    startingPrice: 1_000_000,
+    reserve: null,
+    closesAt: new Date("2026-07-08T00:00:00.000Z"),
+  });
+  const buyer = await createUser(db, { email: "buyer@example.com" });
+  await updateLotStatus(db, lot.id, "sold");
+  const invoice = await createInvoiceWithLedger(db, {
+    lotId: lot.id,
+    buyerId: buyer.id,
+    invoice: {
+      hammer: 3_100_000,
+      premium: 620_000,
+      tax: 68_200,
+      total: 3_788_200,
+      entries: [
+        { party: "buyer", kind: "hammer", amount: 3_100_000 },
+        { party: "buyer", kind: "premium", amount: 620_000 },
+        { party: "buyer", kind: "tax", amount: 68_200 },
+      ],
+    },
+  });
+  return { lot, buyer, invoice };
+}
+
+describe("invoice payment repositories", () => {
+  it("gets an invoice by id and stores the Xendit id", async () => {
+    const { invoice } = await soldLotWithInvoice();
+    expect((await getInvoiceById(db, invoice.id))?.id).toBe(invoice.id);
+
+    const updated = await setInvoiceXenditId(db, invoice.id, "xnd-inv-123");
+    expect(updated.xenditInvoiceId).toBe("xnd-inv-123");
+  });
+
+  it("marks an invoice paid and flips the lot to paid (idempotently)", async () => {
+    const { lot, invoice } = await soldLotWithInvoice();
+
+    const first = await markInvoicePaid(db, invoice.id);
+    expect(first).toBe(true);
+    expect((await getInvoiceById(db, invoice.id))?.status).toBe("paid");
+    const { getLot } = await import("./lots");
+    expect((await getLot(db, lot.id))?.status).toBe("paid");
+
+    // Duplicate webhook delivery is a no-op.
+    const second = await markInvoicePaid(db, invoice.id);
+    expect(second).toBe(false);
+    expect((await getInvoiceById(db, invoice.id))?.status).toBe("paid");
+  });
+
+  it("returns false when marking an unknown invoice id", async () => {
+    expect(
+      await markInvoicePaid(db, "00000000-0000-0000-0000-000000000000")
+    ).toBe(false);
+  });
+
+  it("lists a buyer's invoices with the lot title, newest first", async () => {
+    const { buyer } = await soldLotWithInvoice();
+    const list = await listInvoicesForBuyer(db, buyer.id);
+    expect(list).toHaveLength(1);
+    expect(list[0]?.lotTitle).toBe("Lot 1");
+    expect(list[0]?.total).toBe(3_788_200);
+    expect(list[0]?.status).toBe("pending");
   });
 });
