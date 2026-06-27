@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { testDb, resetDb } from "../test/testDb";
 import { createUser, getUser } from "./users";
-import { upsertUserById, updateUserProfile } from "./users";
+import { upsertUserById, updateUserProfile, listUsers, setUserRole } from "./users";
 
 const db = testDb();
 
@@ -63,5 +63,16 @@ describe("updateUserProfile", () => {
     });
     expect(updated.legalName).toBe("Sukarno Putra");
     expect(updated.phone).toBe("+6281234567890");
+  });
+});
+
+describe("listUsers / setUserRole", () => {
+  it("lists users and promotes one to staff", async () => {
+    const a = await createUser(db, { email: "a@example.com" });
+    await createUser(db, { email: "b@example.com" });
+    expect((await listUsers(db)).length).toBe(2);
+
+    const promoted = await setUserRole(db, a.id, "staff");
+    expect(promoted.role).toBe("staff");
   });
 });

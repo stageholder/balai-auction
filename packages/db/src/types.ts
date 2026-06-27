@@ -164,3 +164,35 @@ export interface BuyerInvoiceView {
   status: "pending" | "paid" | "refunded";
   createdAt: Date;
 }
+
+export interface UpdateSale {
+  title?: string;
+  description?: string | null;
+  startsAt?: Date;
+  endsAt?: Date;
+  buyersPremiumPct?: number;
+  taxPct?: number;
+  incrementTable?: import("@auction/core").IncrementTable;
+}
+
+export interface UpdateLot {
+  lotNumber?: number;
+  title?: string;
+  description?: string | null;
+  images?: string[];
+  estimateLow?: number;
+  estimateHigh?: number;
+  startingPrice?: number;
+  reserve?: number | null;
+  closesAt?: Date;
+}
+
+export interface SaleResultRow {
+  lotId: string;
+  lotNumber: number;
+  title: string;
+  status: LotStatus;
+  hammer: number | null;
+  invoiceStatus: "pending" | "paid" | "refunded" | null;
+  buyerEmail: string | null;
+}

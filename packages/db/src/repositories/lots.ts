@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { lotRowToRecord, toDbMoney } from "../mappers";
-import type { LotRecord, LotStatus, NewLot } from "../types";
+import type { LotRecord, LotStatus, NewLot, UpdateLot } from "../types";
 
 export async function createLot(
   db: PrismaClient,
@@ -69,5 +69,29 @@ export async function updateLotClosesAt(
   closesAt: Date
 ): Promise<LotRecord> {
   const row = await db.lot.update({ where: { id }, data: { closesAt } });
+  return lotRowToRecord(row);
+}
+
+export async function updateLot(
+  db: PrismaClient,
+  id: string,
+  fields: UpdateLot
+): Promise<LotRecord> {
+  const row = await db.lot.update({
+    where: { id },
+    data: {
+      ...(fields.lotNumber !== undefined ? { lotNumber: fields.lotNumber } : {}),
+      ...(fields.title !== undefined ? { title: fields.title } : {}),
+      ...(fields.description !== undefined ? { description: fields.description } : {}),
+      ...(fields.images !== undefined ? { images: fields.images } : {}),
+      ...(fields.estimateLow !== undefined ? { estimateLow: toDbMoney(fields.estimateLow) } : {}),
+      ...(fields.estimateHigh !== undefined ? { estimateHigh: toDbMoney(fields.estimateHigh) } : {}),
+      ...(fields.startingPrice !== undefined ? { startingPrice: toDbMoney(fields.startingPrice) } : {}),
+      ...(fields.reserve !== undefined
+        ? { reserve: fields.reserve === null ? null : toDbMoney(fields.reserve) }
+        : {}),
+      ...(fields.closesAt !== undefined ? { closesAt: fields.closesAt } : {}),
+    },
+  });
   return lotRowToRecord(row);
 }

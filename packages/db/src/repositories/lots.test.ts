@@ -9,6 +9,7 @@ import {
   getLotsDueToClose,
   updateLotStatus,
   updateLotClosesAt,
+  updateLot,
 } from "./lots";
 
 const db = testDb();
@@ -103,5 +104,34 @@ describe("updateLotClosesAt", () => {
     const newClose = new Date("2026-07-08T00:02:00.000Z");
     const updated = await updateLotClosesAt(db, lot.id, newClose);
     expect(updated.closesAt.getTime()).toBe(newClose.getTime());
+  });
+});
+
+describe("updateLot", () => {
+  it("updates fields incl. money + images, leaving others unchanged", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    const updated = await updateLot(db, lot.id, {
+      title: "Updated Title",
+      reserve: 2_000_000,
+      images: ["https://example.com/a.jpg"],
+    });
+    expect(updated.title).toBe("Updated Title");
+    expect(updated.reserve).toBe(2_000_000);
+    expect(updated.images).toEqual(["https://example.com/a.jpg"]);
+    expect(updated.startingPrice).toBe(lot.startingPrice);
+  });
+
+  it("can clear the reserve", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    const updated = await updateLot(db, lot.id, { reserve: null });
+    expect(updated.reserve).toBeNull();
   });
 });

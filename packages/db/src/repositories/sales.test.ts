@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type { IncrementTable } from "@auction/core";
 import { testDb, resetDb } from "../test/testDb";
-import { createSale, getSale, listSales, listPublishedSales, isPublicSaleStatus, getPublishedSale } from "./sales";
+import { createSale, getSale, listSales, listPublishedSales, isPublicSaleStatus, getPublishedSale, updateSale, updateSaleStatus } from "./sales";
 
 const db = testDb();
 
@@ -114,5 +114,26 @@ describe("sales repository", () => {
   it("getPublishedSale returns null for an unknown id", async () => {
     const fetched = await getPublishedSale(db, "00000000-0000-0000-0000-000000000000");
     expect(fetched).toBeNull();
+  });
+});
+
+describe("updateSale / updateSaleStatus", () => {
+  it("updates provided fields and leaves others unchanged", async () => {
+    const sale = await createSale(db, sampleSale("Original"));
+    const updated = await updateSale(db, sale.id, {
+      title: "Renamed",
+      taxPct: 5,
+    });
+    expect(updated.title).toBe("Renamed");
+    expect(updated.taxPct).toBe(5);
+    expect(updated.buyersPremiumPct).toBe(sale.buyersPremiumPct);
+    expect(updated.incrementTable).toEqual(sale.incrementTable);
+  });
+
+  it("publishes a sale by setting its status", async () => {
+    const sale = await createSale(db, sampleSale("Draft"));
+    expect(sale.status).toBe("draft");
+    const live = await updateSaleStatus(db, sale.id, "live");
+    expect(live.status).toBe("live");
   });
 });

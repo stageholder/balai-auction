@@ -1,6 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { saleRowToRecord } from "../mappers";
-import type { NewSale, SaleRecord, SaleStatus } from "../types";
+import type { NewSale, SaleRecord, SaleStatus, UpdateSale } from "../types";
 
 /** Sale statuses that must NOT appear in the public catalogue. */
 export const NON_PUBLIC_SALE_STATUSES = ["draft"] as const;
@@ -56,4 +56,35 @@ export async function getPublishedSale(
 ): Promise<SaleRecord | null> {
   const sale = await getSale(db, id);
   return sale && isPublicSaleStatus(sale.status) ? sale : null;
+}
+
+export async function updateSale(
+  db: PrismaClient,
+  id: string,
+  fields: UpdateSale
+): Promise<SaleRecord> {
+  const row = await db.sale.update({
+    where: { id },
+    data: {
+      ...(fields.title !== undefined ? { title: fields.title } : {}),
+      ...(fields.description !== undefined ? { description: fields.description } : {}),
+      ...(fields.startsAt !== undefined ? { startsAt: fields.startsAt } : {}),
+      ...(fields.endsAt !== undefined ? { endsAt: fields.endsAt } : {}),
+      ...(fields.buyersPremiumPct !== undefined ? { buyersPremiumPct: fields.buyersPremiumPct } : {}),
+      ...(fields.taxPct !== undefined ? { taxPct: fields.taxPct } : {}),
+      ...(fields.incrementTable !== undefined
+        ? { incrementTable: fields.incrementTable as unknown as Prisma.InputJsonValue }
+        : {}),
+    },
+  });
+  return saleRowToRecord(row);
+}
+
+export async function updateSaleStatus(
+  db: PrismaClient,
+  id: string,
+  status: SaleStatus
+): Promise<SaleRecord> {
+  const row = await db.sale.update({ where: { id }, data: { status } });
+  return saleRowToRecord(row);
 }
