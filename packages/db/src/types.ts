@@ -96,6 +96,7 @@ export interface NewLot {
   reserve?: number | null;
   closesAt: Date;
   consignorId?: string | null;
+  status?: LotStatus;
 }
 
 export interface BidRecord {

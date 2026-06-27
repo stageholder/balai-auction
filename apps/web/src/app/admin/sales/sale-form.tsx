@@ -49,6 +49,33 @@ export function SaleForm({
           <input id="taxPct" name="taxPct" type="number" min={0} required defaultValue={sale?.taxPct ?? 11} className={FIELD} />
         </div>
       </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="mode" className={LABEL}>Mode</label>
+          <select
+            id="mode"
+            name="mode"
+            defaultValue={sale?.mode ?? "timed"}
+            className={FIELD}
+          >
+            <option value="timed">Timed</option>
+            <option value="live">Live</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="liveLotSeconds" className={LABEL}>
+            Live lot timer (seconds)
+          </label>
+          <input
+            id="liveLotSeconds"
+            name="liveLotSeconds"
+            type="number"
+            min={5}
+            defaultValue={sale?.liveLotSeconds ?? 45}
+            className={FIELD}
+          />
+        </div>
+      </div>
       <div>
         <label htmlFor="incrementTable" className={LABEL}>Increment table (JSON)</label>
         <textarea

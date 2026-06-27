@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { prisma, createLot, updateLot, getLot } from "@/lib/db";
+import { prisma, createLot, updateLot, getLot, getSale } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { uploadLotImage } from "@/lib/storage";
 
@@ -36,6 +36,8 @@ export async function createLotAction(
   formData: FormData
 ): Promise<void> {
   await requireStaff();
+  const sale = await getSale(prisma, saleId);
+  if (!sale) notFound();
   const images = await readImages(formData, []);
   const fields = readFields(formData);
   // NewLot.description is optional string (not nullable) — coerce null→undefined.
@@ -44,6 +46,8 @@ export async function createLotAction(
     ...fields,
     description: fields.description ?? undefined,
     images,
+    // Live sales queue their lots; the runner opens them one at a time.
+    status: sale.mode === "live" ? "queued" : undefined,
   });
   revalidatePath(`/admin/sales/${saleId}/lots`);
   redirect(`/admin/sales/${saleId}/lots`);

@@ -30,6 +30,8 @@ function readForm(formData: FormData) {
     incrementTable: parseIncrements(
       String(formData.get("incrementTable") || JSON.stringify(DEFAULT_INCREMENTS))
     ),
+    mode: formData.get("mode") === "live" ? ("live" as const) : ("timed" as const),
+    liveLotSeconds: Number(formData.get("liveLotSeconds") ?? 45),
   };
 }
 
