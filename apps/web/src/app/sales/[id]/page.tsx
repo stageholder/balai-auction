@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma, getPublishedSale, listLotsForSale } from "@/lib/db";
 import { LotCard } from "@/components/lot-card";
+import { SaleRegistration } from "@/components/sale-registration";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,10 @@ export default async function SalePage({
           <p className="mt-4 text-muted">{sale.description}</p>
         ) : null}
       </section>
+
+      <div className="mb-12">
+        <SaleRegistration saleId={sale.id} />
+      </div>
 
       {lots.length === 0 ? (
         <p className="text-muted">No lots have been catalogued yet.</p>
