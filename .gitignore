@@ -7,3 +7,7 @@ dist/
 packages/db/src/generated/
 # local env (keep .env.test and .env.example committed)
 packages/db/.env
+# Next.js
+apps/web/.next/
+apps/web/next-env.d.ts
+apps/web/.env.local
