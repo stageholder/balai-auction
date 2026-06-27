@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { prisma, createLot, updateLot, getLot, getSale } from "@/lib/db";
+import { prisma, createLot, updateLot, getLot, getSale, listConsignors } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { uploadLotImage } from "@/lib/storage";
 
@@ -38,6 +38,12 @@ export async function createLotAction(
   await requireStaff();
   const sale = await getSale(prisma, saleId);
   if (!sale) notFound();
+  const consignors = await listConsignors(prisma);
+  const rawConsignor = String(formData.get("consignorId") ?? "");
+  const consignorId =
+    rawConsignor && consignors.some((c) => c.id === rawConsignor)
+      ? rawConsignor
+      : null;
   const images = await readImages(formData, []);
   const fields = readFields(formData);
   // NewLot.description is optional string (not nullable) — coerce null→undefined.
@@ -45,6 +51,7 @@ export async function createLotAction(
     saleId,
     ...fields,
     description: fields.description ?? undefined,
+    consignorId,
     images,
     // Live sales queue their lots; the runner opens them one at a time.
     status: sale.mode === "live" ? "queued" : undefined,
@@ -61,8 +68,14 @@ export async function updateLotAction(
   await requireStaff();
   const lot = await getLot(prisma, lotId);
   if (!lot) notFound();
+  const consignors = await listConsignors(prisma);
+  const rawConsignor = String(formData.get("consignorId") ?? "");
+  const consignorId =
+    rawConsignor && consignors.some((c) => c.id === rawConsignor)
+      ? rawConsignor
+      : null;
   const images = await readImages(formData, lot.images);
-  await updateLot(prisma, lotId, { ...readFields(formData), images });
+  await updateLot(prisma, lotId, { ...readFields(formData), consignorId, images });
   revalidatePath(`/admin/sales/${saleId}/lots`);
   redirect(`/admin/sales/${saleId}/lots`);
 }

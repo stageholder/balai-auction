@@ -14,9 +14,11 @@ function toLocalInput(d: Date): string {
 export function LotForm({
   lot,
   action,
+  consignors,
 }: {
   lot?: LotRecord;
   action: (formData: FormData) => void;
+  consignors: { id: string; email: string }[];
 }) {
   return (
     <form action={action} className="max-w-xl space-y-4">
@@ -57,6 +59,20 @@ export function LotForm({
           <label htmlFor="closesAt" className={LABEL}>Closes at</label>
           <input id="closesAt" name="closesAt" type="datetime-local" required defaultValue={lot ? toLocalInput(lot.closesAt) : ""} className={FIELD} />
         </div>
+      </div>
+      <div>
+        <label htmlFor="consignorId" className={LABEL}>Consignor</label>
+        <select
+          id="consignorId"
+          name="consignorId"
+          defaultValue={lot?.consignorId ?? ""}
+          className={FIELD}
+        >
+          <option value="">— None —</option>
+          {consignors.map((c) => (
+            <option key={c.id} value={c.id}>{c.email}</option>
+          ))}
+        </select>
       </div>
       <div>
         <label htmlFor="image" className={LABEL}>Image (png/jpeg/webp)</label>

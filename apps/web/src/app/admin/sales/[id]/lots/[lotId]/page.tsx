@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma, getLot } from "@/lib/db";
+import { prisma, getLot, listConsignors } from "@/lib/db";
 import { LotForm } from "../lot-form";
 import { updateLotAction } from "../actions";
 
@@ -13,13 +13,14 @@ export default async function EditLotPage({
   const { id, lotId } = await params;
   const lot = await getLot(prisma, lotId);
   if (!lot || lot.saleId !== id) notFound();
+  const consignors = await listConsignors(prisma);
 
   return (
     <div className="space-y-8">
       <h1 className="text-2xl">
         Edit Lot {lot.lotNumber} — {lot.title}
       </h1>
-      <LotForm lot={lot} action={updateLotAction.bind(null, id, lot.id)} />
+      <LotForm lot={lot} consignors={consignors} action={updateLotAction.bind(null, id, lot.id)} />
     </div>
   );
 }

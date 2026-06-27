@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma, getSale, listLotsForSale } from "@/lib/db";
+import { prisma, getSale, listLotsForSale, listConsignors } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
 import { LotForm } from "./lot-form";
 import { createLotAction } from "./actions";
@@ -25,6 +25,8 @@ export default async function AdminLotsPage({
   const sale = await getSale(prisma, id);
   if (!sale) notFound();
   const lots = await listLotsForSale(prisma, id);
+  const consignors = await listConsignors(prisma);
+  const consignorEmail = new Map(consignors.map((c) => [c.id, c.email]));
 
   return (
     <div className="space-y-16">
@@ -99,7 +101,7 @@ export default async function AdminLotsPage({
                     )}
                   </div>
 
-                  {/* Title + description snippet */}
+                  {/* Title + description snippet + consignment */}
                   <div className="min-w-0">
                     <p className="truncate font-serif text-sm text-ink">
                       {lot.title}
@@ -109,6 +111,14 @@ export default async function AdminLotsPage({
                         {lot.description}
                       </p>
                     )}
+                    {/* Consignment — ledger provenance line */}
+                    <p className="truncate text-xs text-muted mt-0.5">
+                      <span className="uppercase tracking-[0.12em] text-[0.65rem]">
+                        Consignor
+                      </span>
+                      <span className="mx-1.5 text-line">·</span>
+                      {(lot.consignorId && consignorEmail.get(lot.consignorId)) || "—"}
+                    </p>
                   </div>
 
                   {/* Estimate — tabular, right-aligned */}
@@ -148,7 +158,7 @@ export default async function AdminLotsPage({
           <div className="h-px flex-1 bg-line" />
         </div>
 
-        <LotForm action={createLotAction.bind(null, id)} />
+        <LotForm consignors={consignors} action={createLotAction.bind(null, id)} />
       </section>
 
     </div>
