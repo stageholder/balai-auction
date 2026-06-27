@@ -27,15 +27,21 @@ export async function POST(request: NextRequest) {
   if (isPaidXenditStatus(status)) {
     const transitioned = await markInvoicePaid(prisma, external_id);
     if (transitioned) {
-      const invoice = await getInvoiceById(prisma, external_id);
-      if (invoice) {
-        const [buyer, lot] = await Promise.all([
-          getUser(prisma, invoice.buyerId),
-          getLot(prisma, invoice.lotId),
-        ]);
-        if (buyer && lot) {
-          await notifyReceipt(buyer.email, lot.title, invoice.total);
+      // Receipt email is best-effort and runs AFTER the payment is committed —
+      // a lookup/send failure here must not turn a recorded payment into a 500.
+      try {
+        const invoice = await getInvoiceById(prisma, external_id);
+        if (invoice) {
+          const [buyer, lot] = await Promise.all([
+            getUser(prisma, invoice.buyerId),
+            getLot(prisma, invoice.lotId),
+          ]);
+          if (buyer && lot) {
+            await notifyReceipt(buyer.email, lot.title, invoice.total);
+          }
         }
+      } catch (err) {
+        console.error(`receipt email failed for invoice ${external_id}:`, err);
       }
     }
     return NextResponse.json({ ok: true, transitioned });
