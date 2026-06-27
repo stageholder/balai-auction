@@ -34,6 +34,8 @@ export async function SaleRegistration({ saleId }: { saleId: string }) {
     rejected: "Your registration was not approved.",
   };
   return (
-    <p className="text-sm text-muted">{label[registration.kycStatus]}</p>
+    <p className="text-sm text-muted">
+      {label[registration.kycStatus] ?? "Registration status unknown."}
+    </p>
   );
 }

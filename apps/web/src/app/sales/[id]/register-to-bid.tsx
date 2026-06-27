@@ -14,13 +14,18 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
     e.preventDefault();
     setError(null);
     setPending(true);
-    const result = await registerToBid(saleId, new FormData(e.currentTarget));
-    setPending(false);
-    if (!result.ok) {
-      setError(result.error ?? "Registration failed.");
-      return;
+    try {
+      const result = await registerToBid(saleId, new FormData(e.currentTarget));
+      if (!result.ok) {
+        setError(result.error ?? "Registration failed.");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setPending(false);
     }
-    router.refresh();
   }
 
   return (
@@ -43,6 +48,7 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
         <input
           id="phone"
           name="phone"
+          type="tel"
           required
           className="mt-1 w-full border border-line bg-paper px-3 py-2 focus:border-ink focus:outline-none"
         />
