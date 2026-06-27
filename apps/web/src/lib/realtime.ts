@@ -31,7 +31,9 @@ export async function broadcastLotPrice(
         }),
       }
     );
-  } catch {
+  } catch (err) {
     // Realtime is best-effort; clients also see the fresh price on next load.
+    // Log so a persistently failing broadcast (bad key/URL/outage) is visible.
+    console.error(`broadcastLotPrice failed for lot ${lotId}:`, err);
   }
 }
