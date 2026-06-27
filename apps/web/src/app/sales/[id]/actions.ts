@@ -26,8 +26,15 @@ export async function registerToBid(
     return { ok: false, error: "You have already registered for this sale." };
   }
 
+  try {
+    await createRegistration(prisma, { userId: user.id, saleId });
+  } catch (e) {
+    if (e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2002") {
+      return { ok: false, error: "You have already registered for this sale." };
+    }
+    throw e;
+  }
   await updateUserProfile(prisma, user.id, { legalName, phone });
-  await createRegistration(prisma, { userId: user.id, saleId });
 
   revalidatePath(`/sales/${saleId}`);
   return { ok: true };
