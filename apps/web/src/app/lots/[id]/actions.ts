@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { resolveBids, nextBidFloor, applySoftClose } from "@auction/core";
+import { resolveBids, nextBidFloor, applySoftClose, softCloseWindowMs } from "@auction/core";
 import {
   prisma,
   getLot,
@@ -13,7 +13,7 @@ import {
   getUser,
 } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { broadcastLotPrice, SOFT_CLOSE_WINDOW_MS } from "@/lib/realtime";
+import { broadcastLotPrice } from "@/lib/realtime";
 import { notifyOutbid } from "@/lib/notifications";
 
 export async function placeBid(
@@ -71,7 +71,7 @@ export async function placeBid(
   const extended = applySoftClose(
     lot.closesAt.getTime(),
     now.getTime(),
-    SOFT_CLOSE_WINDOW_MS
+    softCloseWindowMs(sale.mode)
   );
   let closesAt = lot.closesAt;
   if (extended !== lot.closesAt.getTime()) {
