@@ -52,9 +52,18 @@ export function userRowToRecord(row: {
   id: string;
   email: string;
   role: UserRecord["role"];
+  legalName: string | null;
+  phone: string | null;
   createdAt: Date;
 }): UserRecord {
-  return { id: row.id, email: row.email, role: row.role, createdAt: row.createdAt };
+  return {
+    id: row.id,
+    email: row.email,
+    role: row.role,
+    legalName: row.legalName,
+    phone: row.phone,
+    createdAt: row.createdAt,
+  };
 }
 
 export function saleRowToRecord(row: {

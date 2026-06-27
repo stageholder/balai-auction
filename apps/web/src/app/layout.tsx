@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { AccountNav } from "@/components/account-nav";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${serif.variable} ${sans.variable}`}>
       <body className="min-h-screen">
-        <SiteHeader />
+        <SiteHeader accountSlot={<AccountNav />} />
         <main className="mx-auto max-w-6xl px-6 py-12">{children}</main>
         <SiteFooter />
       </body>

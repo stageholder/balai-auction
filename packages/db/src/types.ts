@@ -19,11 +19,26 @@ export interface UserRecord {
   id: string;
   email: string;
   role: UserRole;
+  legalName: string | null;
+  phone: string | null;
   createdAt: Date;
 }
 export interface NewUser {
   email: string;
   role?: UserRole;
+}
+
+export interface UpsertUser {
+  id: string;
+  email: string;
+  role?: UserRole;
+  legalName?: string | null;
+  phone?: string | null;
+}
+
+export interface UserProfileUpdate {
+  legalName?: string | null;
+  phone?: string | null;
 }
 
 export interface SaleRecord {
@@ -120,6 +135,14 @@ export interface InvoiceRecord {
   total: number;
   status: InvoiceStatus;
   xenditInvoiceId: string | null;
+  createdAt: Date;
+}
+
+export interface PendingRegistrationView {
+  id: string;
+  userEmail: string;
+  userLegalName: string | null;
+  saleTitle: string;
   createdAt: Date;
 }
 
