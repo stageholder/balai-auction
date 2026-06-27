@@ -203,3 +203,21 @@ describe("sale category", () => {
     expect(cleared.category).toBeNull();
   });
 });
+
+describe("seller commission", () => {
+  it("defaults sellerCommissionPct to 10", async () => {
+    const sale = await createSale(db, sampleSale("Default Commission"));
+    expect(sale.sellerCommissionPct).toBe(10);
+  });
+
+  it("creates and updates a custom seller commission", async () => {
+    const sale = await createSale(db, {
+      ...sampleSale("Custom Commission"),
+      sellerCommissionPct: 15,
+    });
+    expect(sale.sellerCommissionPct).toBe(15);
+
+    const updated = await updateSale(db, sale.id, { sellerCommissionPct: 12 });
+    expect(updated.sellerCommissionPct).toBe(12);
+  });
+});

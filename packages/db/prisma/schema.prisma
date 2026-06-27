@@ -86,8 +86,9 @@ model Sale {
   description      String?
   startsAt         DateTime
   endsAt           DateTime
-  buyersPremiumPct Int            @default(20)
-  taxPct           Int            @default(0)
+  buyersPremiumPct    Int            @default(20)
+  taxPct              Int            @default(0)
+  sellerCommissionPct Int            @default(10)
   mode             SaleMode       @default(timed)
   liveLotSeconds   Int            @default(45)
   category         String?

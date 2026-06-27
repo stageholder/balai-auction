@@ -74,6 +74,7 @@ export function saleRowToRecord(row: {
   endsAt: Date;
   buyersPremiumPct: number;
   taxPct: number;
+  sellerCommissionPct: number;
   mode: SaleRecord["mode"];
   liveLotSeconds: number;
   category: string | null;
@@ -89,6 +90,7 @@ export function saleRowToRecord(row: {
     endsAt: row.endsAt,
     buyersPremiumPct: row.buyersPremiumPct,
     taxPct: row.taxPct,
+    sellerCommissionPct: row.sellerCommissionPct,
     mode: row.mode,
     liveLotSeconds: row.liveLotSeconds,
     category: row.category,

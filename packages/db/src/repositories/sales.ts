@@ -22,6 +22,7 @@ export async function createSale(
       endsAt: input.endsAt,
       buyersPremiumPct: input.buyersPremiumPct,
       taxPct: input.taxPct,
+      ...(input.sellerCommissionPct !== undefined ? { sellerCommissionPct: input.sellerCommissionPct } : {}),
       ...(input.mode !== undefined ? { mode: input.mode } : {}),
       ...(input.liveLotSeconds !== undefined ? { liveLotSeconds: input.liveLotSeconds } : {}),
       ...(input.category !== undefined ? { category: input.category } : {}),
@@ -75,6 +76,7 @@ export async function updateSale(
       ...(fields.endsAt !== undefined ? { endsAt: fields.endsAt } : {}),
       ...(fields.buyersPremiumPct !== undefined ? { buyersPremiumPct: fields.buyersPremiumPct } : {}),
       ...(fields.taxPct !== undefined ? { taxPct: fields.taxPct } : {}),
+      ...(fields.sellerCommissionPct !== undefined ? { sellerCommissionPct: fields.sellerCommissionPct } : {}),
       ...(fields.incrementTable !== undefined
         ? { incrementTable: fields.incrementTable as unknown as Prisma.InputJsonValue }
         : {}),

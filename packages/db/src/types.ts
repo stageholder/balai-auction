@@ -49,6 +49,7 @@ export interface SaleRecord {
   endsAt: Date;
   buyersPremiumPct: number;
   taxPct: number;
+  sellerCommissionPct: number;
   mode: SaleMode;
   liveLotSeconds: number;
   category: string | null;
@@ -63,6 +64,7 @@ export interface NewSale {
   endsAt: Date;
   buyersPremiumPct: number;
   taxPct: number;
+  sellerCommissionPct?: number;
   incrementTable: IncrementTable;
   status?: SaleStatus;
   mode?: SaleMode;
@@ -179,6 +181,7 @@ export interface UpdateSale {
   endsAt?: Date;
   buyersPremiumPct?: number;
   taxPct?: number;
+  sellerCommissionPct?: number;
   incrementTable?: import("@auction/core").IncrementTable;
   mode?: SaleMode;
   liveLotSeconds?: number;
