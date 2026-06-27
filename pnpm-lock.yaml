@@ -10,6 +10,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@auction/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@auction/db':
         specifier: workspace:*
         version: link:../../packages/db
