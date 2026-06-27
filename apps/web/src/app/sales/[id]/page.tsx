@@ -28,6 +28,17 @@ export default async function SalePage({
         ) : null}
       </section>
 
+      {sale.mode === "live" && sale.status === "live" ? (
+        <div className="mb-10">
+          <a
+            href={`/live/${sale.id}`}
+            className="inline-block border border-accent px-5 py-2 text-sm uppercase tracking-[0.15em] text-accent hover:bg-accent hover:text-paper"
+          >
+            ● Watch live
+          </a>
+        </div>
+      ) : null}
+
       <div className="mb-12">
         <SaleRegistration saleId={sale.id} />
       </div>
