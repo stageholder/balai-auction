@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma, getSale, listLotsForSale } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
@@ -60,11 +61,12 @@ export default async function AdminLotsPage({
             {lots.map((lot) => {
               const isLive = lot.status === "live";
               return (
-                <li
-                  key={lot.id}
+                <li key={lot.id}>
+                 <Link
+                  href={`/admin/sales/${id}/lots/${lot.id}`}
                   className="grid items-center gap-4 py-4 transition-colors hover:bg-line/40"
                   style={{ gridTemplateColumns: "3rem 3rem 1fr auto 6rem" }}
-                >
+                 >
                   {/* Lot number — catalogue plate numeral */}
                   <span
                     className={`font-serif text-xl leading-none tnum ${
@@ -124,6 +126,7 @@ export default async function AdminLotsPage({
                   >
                     {lot.status}
                   </span>
+                 </Link>
                 </li>
               );
             })}
