@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { prisma, getLot, getPublishedSale } from "@/lib/db";
+import { prisma, getLot, getSale, getBidEventsForLot, getRegistration } from "@/lib/db";
+import { resolveBids, nextBidFloor } from "@auction/core";
+import { getCurrentUser } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
-import { Button } from "@/components/ui/button";
+import { LotLive } from "./lot-live";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +17,33 @@ export default async function LotPage({
   const lot = await getLot(prisma, id);
   if (!lot) notFound();
 
-  const sale = await getPublishedSale(prisma, lot.saleId);
-  if (!sale) notFound();
+  const sale = await getSale(prisma, lot.saleId);
+  const events = await getBidEventsForLot(prisma, lot.id);
+  const currentPrice = sale
+    ? resolveBids(lot.startingPrice, events, sale.incrementTable).currentPrice
+    : lot.startingPrice;
+  const floor = sale
+    ? nextBidFloor(lot.startingPrice, events, sale.incrementTable)
+    : lot.startingPrice;
+
+  const now = new Date();
+  const user = await getCurrentUser();
+  let gate:
+    | { kind: "open"; floor: number }
+    | { kind: "signin" }
+    | { kind: "register"; saleId: string }
+    | { kind: "closed" };
+  if (lot.status !== "live" || lot.closesAt <= now) {
+    gate = { kind: "closed" };
+  } else if (!user) {
+    gate = { kind: "signin" };
+  } else {
+    const reg = await getRegistration(prisma, user.id, lot.saleId);
+    gate =
+      reg && reg.kycStatus === "approved"
+        ? { kind: "open", floor }
+        : { kind: "register", saleId: lot.saleId };
+  }
 
   const cover = lot.images[0];
 
@@ -128,14 +155,14 @@ export default async function LotPage({
             </p>
           ) : null}
 
-          {/* CTA block — pushed to bottom on larger screens */}
-          <div className="mt-auto pt-10">
-            <Button variant="accent" disabled className="w-full sm:w-auto">
-              Register to bid
-            </Button>
-            <p className="mt-3 font-sans text-[10px] uppercase tracking-[0.18em] text-muted opacity-70">
-              Bidding opens with registration &mdash; coming soon
-            </p>
+          {/* Live bidding panel */}
+          <div className="mt-10">
+            <LotLive
+              lotId={lot.id}
+              initialPrice={currentPrice}
+              initialClosesAt={lot.closesAt.toISOString()}
+              gate={gate}
+            />
           </div>
         </div>
       </div>
