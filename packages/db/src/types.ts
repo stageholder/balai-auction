@@ -9,10 +9,12 @@ export type LedgerParty = "buyer" | "seller" | "house";
 export type LedgerKind =
   | "hammer"
   | "premium"
+  | "commission"
   | "tax"
   | "deposit"
   | "payout"
   | "refund";
+export type PayoutStatus = "pending" | "released" | "paid" | "failed";
 export type InvoiceStatus = "pending" | "paid" | "refunded";
 
 export interface UserRecord {
@@ -22,6 +24,21 @@ export interface UserRecord {
   legalName: string | null;
   phone: string | null;
   createdAt: Date;
+  payoutBankCode: string | null;
+  payoutAccountNumber: string | null;
+  payoutAccountHolder: string | null;
+}
+
+export interface PayoutRecord {
+  id: string;
+  lotId: string;
+  consignorId: string;
+  amount: number; // rupiah
+  status: PayoutStatus;
+  xenditDisbursementId: string | null;
+  createdAt: Date;
+  releasedAt: Date | null;
+  paidAt: Date | null;
 }
 export interface NewUser {
   email: string;

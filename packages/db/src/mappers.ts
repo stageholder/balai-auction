@@ -4,6 +4,7 @@ import type {
   InvoiceRecord,
   LedgerEntryRecord,
   LotRecord,
+  PayoutRecord,
   RegistrationRecord,
   SaleRecord,
   UserRecord,
@@ -55,6 +56,9 @@ export function userRowToRecord(row: {
   legalName: string | null;
   phone: string | null;
   createdAt: Date;
+  payoutBankCode: string | null;
+  payoutAccountNumber: string | null;
+  payoutAccountHolder: string | null;
 }): UserRecord {
   return {
     id: row.id,
@@ -63,6 +67,33 @@ export function userRowToRecord(row: {
     legalName: row.legalName,
     phone: row.phone,
     createdAt: row.createdAt,
+    payoutBankCode: row.payoutBankCode,
+    payoutAccountNumber: row.payoutAccountNumber,
+    payoutAccountHolder: row.payoutAccountHolder,
+  };
+}
+
+export function payoutRowToRecord(row: {
+  id: string;
+  lotId: string;
+  consignorId: string;
+  amount: bigint;
+  status: PayoutRecord["status"];
+  xenditDisbursementId: string | null;
+  createdAt: Date;
+  releasedAt: Date | null;
+  paidAt: Date | null;
+}): PayoutRecord {
+  return {
+    id: row.id,
+    lotId: row.lotId,
+    consignorId: row.consignorId,
+    amount: toMoney(row.amount),
+    status: row.status,
+    xenditDisbursementId: row.xenditDisbursementId,
+    createdAt: row.createdAt,
+    releasedAt: row.releasedAt,
+    paidAt: row.paidAt,
   };
 }
 

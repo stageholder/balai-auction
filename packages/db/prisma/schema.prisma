@@ -55,10 +55,18 @@ enum LedgerParty {
 enum LedgerKind {
   hammer
   premium
+  commission
   tax
   deposit
   payout
   refund
+}
+
+enum PayoutStatus {
+  pending
+  released
+  paid
+  failed
 }
 
 enum InvoiceStatus {
@@ -68,16 +76,20 @@ enum InvoiceStatus {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  role          UserRole       @default(buyer)
-  legalName     String?
-  phone         String?
-  createdAt     DateTime       @default(now())
-  bids          Bid[]
-  registrations Registration[]
-  invoices      Invoice[]
-  consignedLots Lot[]          @relation("ConsignorLots")
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  role                 UserRole       @default(buyer)
+  legalName            String?
+  phone                String?
+  createdAt            DateTime       @default(now())
+  bids                 Bid[]
+  registrations        Registration[]
+  invoices             Invoice[]
+  consignedLots        Lot[]          @relation("ConsignorLots")
+  payouts              Payout[]       @relation("ConsignorPayouts")
+  payoutBankCode       String?
+  payoutAccountNumber  String?
+  payoutAccountHolder  String?
 }
 
 model Sale {
@@ -119,6 +131,7 @@ model Lot {
   bids          Bid[]
   invoice       Invoice?
   ledgerEntries LedgerEntry[]
+  payout        Payout?
 
   @@unique([saleId, lotNumber])
   @@index([status, closesAt])
@@ -185,4 +198,21 @@ model LedgerEntry {
 
   @@index([lotId])
   @@index([invoiceId])
+}
+
+model Payout {
+  id                   String       @id @default(uuid())
+  lotId                String       @unique
+  lot                  Lot          @relation(fields: [lotId], references: [id])
+  consignorId          String
+  consignor            User         @relation("ConsignorPayouts", fields: [consignorId], references: [id])
+  amount               BigInt
+  status               PayoutStatus @default(pending)
+  xenditDisbursementId String?
+  createdAt            DateTime     @default(now())
+  releasedAt           DateTime?
+  paidAt               DateTime?
+
+  @@index([consignorId])
+  @@index([status])
 }
