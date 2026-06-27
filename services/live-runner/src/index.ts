@@ -36,23 +36,29 @@ function buildDeps(): TickDeps {
 }
 
 async function tick(deps: TickDeps): Promise<void> {
-  const now = new Date();
-  const sales = await listRunningLiveSales(prisma);
-  for (const sale of sales) {
-    try {
-      await tickSale(
-        {
-          id: sale.id,
-          status: sale.status,
-          startsAt: sale.startsAt,
-          liveLotSeconds: sale.liveLotSeconds,
-        },
-        deps,
-        now
-      );
-    } catch (err) {
-      console.error(`tick failed for sale ${sale.id}:`, err);
+  // Guard the whole tick (incl. listRunningLiveSales) so a transient DB error
+  // logs-and-continues instead of rejecting and crashing the loop process.
+  try {
+    const now = new Date();
+    const sales = await listRunningLiveSales(prisma);
+    for (const sale of sales) {
+      try {
+        await tickSale(
+          {
+            id: sale.id,
+            status: sale.status,
+            startsAt: sale.startsAt,
+            liveLotSeconds: sale.liveLotSeconds,
+          },
+          deps,
+          now
+        );
+      } catch (err) {
+        console.error(`tick failed for sale ${sale.id}:`, err);
+      }
     }
+  } catch (err) {
+    console.error("tick loop error:", err);
   }
 }
 
