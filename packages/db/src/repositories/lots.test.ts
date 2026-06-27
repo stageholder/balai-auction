@@ -146,6 +146,26 @@ describe("openQueuedLot", () => {
   });
 });
 
+describe("createLot status", () => {
+  it("defaults to live when no status is given", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    expect(lot.status).toBe("live");
+  });
+
+  it("creates a queued lot when status is queued", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(db, {
+      ...sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z")),
+      status: "queued",
+    });
+    expect(lot.status).toBe("queued");
+  });
+});
+
 describe("updateLot", () => {
   it("updates fields incl. money + images, leaving others unchanged", async () => {
     const sale = await makeSale();

@@ -19,6 +19,7 @@ export async function createLot(
       reserve: input.reserve == null ? null : toDbMoney(input.reserve),
       closesAt: input.closesAt,
       consignorId: input.consignorId ?? null,
+      ...(input.status ? { status: input.status } : {}),
     },
   });
   return lotRowToRecord(row);
