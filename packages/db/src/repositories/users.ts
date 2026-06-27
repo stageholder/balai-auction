@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { userRowToRecord } from "../mappers";
-import type { NewUser, UpsertUser, UserProfileUpdate, UserRecord } from "../types";
+import type { NewUser, UpsertUser, UserProfileUpdate, UserRecord, UserRole } from "../types";
 
 export async function createUser(
   db: PrismaClient,
@@ -55,5 +55,19 @@ export async function updateUserProfile(
       ...(input.phone !== undefined ? { phone: input.phone } : {}),
     },
   });
+  return userRowToRecord(row);
+}
+
+export async function listUsers(db: PrismaClient): Promise<UserRecord[]> {
+  const rows = await db.user.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map(userRowToRecord);
+}
+
+export async function setUserRole(
+  db: PrismaClient,
+  id: string,
+  role: UserRole
+): Promise<UserRecord> {
+  const row = await db.user.update({ where: { id }, data: { role } });
   return userRowToRecord(row);
 }
