@@ -71,3 +71,11 @@ export async function setUserRole(
   const row = await db.user.update({ where: { id }, data: { role } });
   return userRowToRecord(row);
 }
+
+export async function listConsignors(db: PrismaClient): Promise<UserRecord[]> {
+  const rows = await db.user.findMany({
+    where: { role: "consignor" },
+    orderBy: { email: "asc" },
+  });
+  return rows.map(userRowToRecord);
+}

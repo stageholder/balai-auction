@@ -198,6 +198,7 @@ export interface UpdateLot {
   startingPrice?: number;
   reserve?: number | null;
   closesAt?: Date;
+  consignorId?: string | null;
 }
 
 export interface SaleResultRow {

@@ -12,6 +12,7 @@ import {
   updateLot,
   openQueuedLot,
 } from "./lots";
+import { createUser } from "./users";
 
 const db = testDb();
 const incrementTable: IncrementTable = [{ upTo: null, step: 100_000 }];
@@ -212,6 +213,21 @@ describe("getLotsDueToClose excludes live-mode lots", () => {
 
     const due = await getLotsDueToClose(db, now);
     expect(due.map((l) => l.id)).toEqual([timedLot.id]);
+  });
+});
+
+describe("lot consignor", () => {
+  it("creates a lot with a consignor and clears it on update", async () => {
+    const sale = await makeSale();
+    const consignor = await createUser(db, { email: "consignor@example.com", role: "consignor" });
+    const lot = await createLot(db, {
+      ...sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z")),
+      consignorId: consignor.id,
+    });
+    expect(lot.consignorId).toBe(consignor.id);
+
+    const cleared = await updateLot(db, lot.id, { consignorId: null });
+    expect(cleared.consignorId).toBeNull();
   });
 });
 

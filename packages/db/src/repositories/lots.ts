@@ -110,6 +110,7 @@ export async function updateLot(
         ? { reserve: fields.reserve === null ? null : toDbMoney(fields.reserve) }
         : {}),
       ...(fields.closesAt !== undefined ? { closesAt: fields.closesAt } : {}),
+      ...(fields.consignorId !== undefined ? { consignorId: fields.consignorId } : {}),
     },
   });
   return lotRowToRecord(row);

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { testDb, resetDb } from "../test/testDb";
 import { createUser, getUser } from "./users";
-import { upsertUserById, updateUserProfile, listUsers, setUserRole } from "./users";
+import { upsertUserById, updateUserProfile, listUsers, setUserRole, listConsignors } from "./users";
 
 const db = testDb();
 
@@ -74,5 +74,15 @@ describe("listUsers / setUserRole", () => {
 
     const promoted = await setUserRole(db, a.id, "staff");
     expect(promoted.role).toBe("staff");
+  });
+});
+
+describe("listConsignors", () => {
+  it("returns only consignor-role users", async () => {
+    await createUser(db, { email: "buyer@example.com" }); // default role buyer
+    const c1 = await createUser(db, { email: "c1@example.com", role: "consignor" });
+    const c2 = await createUser(db, { email: "c2@example.com", role: "consignor" });
+    const ids = (await listConsignors(db)).map((u) => u.id).sort();
+    expect(ids).toEqual([c1.id, c2.id].sort());
   });
 });
