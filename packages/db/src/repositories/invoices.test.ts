@@ -190,3 +190,87 @@ describe("invoice payment repositories", () => {
     expect(list[0]?.status).toBe("pending");
   });
 });
+
+async function consignedSoldLotWithInvoice() {
+  const consignor = await createUser(db, {
+    email: "consignor@example.com",
+    role: "consignor",
+  });
+  const sale = await createSale(db, {
+    title: "Sale",
+    startsAt: new Date("2026-07-01T00:00:00.000Z"),
+    endsAt: new Date("2026-07-08T00:00:00.000Z"),
+    buyersPremiumPct: 20,
+    taxPct: 11,
+    sellerCommissionPct: 10,
+    incrementTable,
+  });
+  const lot = await createLot(db, {
+    saleId: sale.id,
+    lotNumber: 1,
+    title: "Lot 1",
+    estimateLow: 500_000,
+    estimateHigh: 2_000_000,
+    startingPrice: 500_000,
+    reserve: null,
+    closesAt: new Date("2026-07-08T00:00:00.000Z"),
+    consignorId: consignor.id,
+  });
+  const buyer = await createUser(db, { email: "buyer@example.com" });
+  await updateLotStatus(db, lot.id, "sold");
+  const invoice = await createInvoiceWithLedger(db, {
+    lotId: lot.id,
+    buyerId: buyer.id,
+    invoice: {
+      hammer: 1_000_000,
+      premium: 200_000,
+      tax: 22_000,
+      total: 1_222_000,
+      entries: [
+        { party: "buyer", kind: "hammer", amount: 1_000_000 },
+        { party: "buyer", kind: "premium", amount: 200_000 },
+        { party: "buyer", kind: "tax", amount: 22_000 },
+      ],
+    },
+  });
+  return { lot, consignor, buyer, invoice, sale };
+}
+
+describe("markInvoicePaid seller settlement", () => {
+  it("writes seller+house ledger entries and a pending payout for a consigned lot", async () => {
+    const { lot, invoice } = await consignedSoldLotWithInvoice();
+
+    const ok = await markInvoicePaid(db, invoice.id);
+    expect(ok).toBe(true);
+
+    const payout = await db.payout.findUnique({ where: { lotId: lot.id } });
+    expect(payout?.status).toBe("pending");
+    expect(Number(payout?.amount)).toBe(900_000); // hammer - 10%
+
+    const entries = await getLedgerEntriesForInvoice(db, invoice.id);
+    expect(
+      entries.some(
+        (e) => e.party === "seller" && e.kind === "hammer" && e.amount === 1_000_000
+      )
+    ).toBe(true);
+    expect(
+      entries.some(
+        (e) => e.party === "house" && e.kind === "commission" && e.amount === 100_000
+      )
+    ).toBe(true);
+  });
+
+  it("creates NO payout for a non-consigned lot", async () => {
+    const { lot, invoice } = await soldLotWithInvoice();
+    await markInvoicePaid(db, invoice.id);
+    expect(await db.payout.findUnique({ where: { lotId: lot.id } })).toBeNull();
+  });
+
+  it("is idempotent — a second markInvoicePaid does not double-settle", async () => {
+    const { lot, invoice } = await consignedSoldLotWithInvoice();
+    await markInvoicePaid(db, invoice.id);
+    const second = await markInvoicePaid(db, invoice.id);
+    expect(second).toBe(false);
+    expect(await db.payout.count({ where: { lotId: lot.id } })).toBe(1);
+  });
+});

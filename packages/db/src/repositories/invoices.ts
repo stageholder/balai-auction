@@ -1,6 +1,7 @@
 import type { Invoice } from "@auction/core";
+import { computeSellerSettlement } from "@auction/core";
 import type { PrismaClient } from "@prisma/client";
-import { invoiceRowToRecord, ledgerEntryRowToRecord, toDbMoney } from "../mappers";
+import { invoiceRowToRecord, ledgerEntryRowToRecord, toDbMoney, toMoney } from "../mappers";
 import type { InvoiceRecord, LedgerEntryRecord } from "../types";
 
 export async function createInvoiceWithLedger(
@@ -75,7 +76,10 @@ export async function setInvoiceXenditId(
 }
 
 /** Idempotently mark an invoice paid and flip its lot to paid, in one
- *  transaction. Returns true only if this call performed the transition. */
+ *  transaction. Returns true only if this call performed the transition.
+ *  For consigned lots, also writes seller+house ledger entries and creates
+ *  a pending Payout (idempotent — the pending→paid claim and Payout.lotId
+ *  @unique together ensure at-most-once settlement). */
 export async function markInvoicePaid(
   db: PrismaClient,
   id: string
@@ -92,6 +96,36 @@ export async function markInvoicePaid(
       where: { id: invoice.lotId },
       data: { status: "paid" },
     });
+
+    // Seller settlement — only for consigned lots.
+    const lot = await tx.lot.findUnique({ where: { id: invoice.lotId } });
+    if (lot?.consignorId) {
+      const sale = await tx.sale.findUnique({ where: { id: lot.saleId } });
+      if (sale) {
+        const settlement = computeSellerSettlement({
+          hammer: toMoney(invoice.hammer),
+          sellerCommissionPct: sale.sellerCommissionPct,
+        });
+        await tx.ledgerEntry.createMany({
+          data: settlement.entries.map((e) => ({
+            invoiceId: invoice.id,
+            lotId: lot.id,
+            party: e.party,
+            kind: e.kind,
+            amount: toDbMoney(e.amount),
+          })),
+        });
+        await tx.payout.create({
+          data: {
+            lotId: lot.id,
+            consignorId: lot.consignorId,
+            amount: toDbMoney(settlement.consignorNet),
+            status: "pending",
+          },
+        });
+      }
+    }
+
     return true;
   });
 }
