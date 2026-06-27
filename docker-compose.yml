@@ -16,5 +16,19 @@ services:
       timeout: 5s
       retries: 10
 
+  live-runner:
+    build:
+      context: .
+      dockerfile: services/live-runner/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://auction:auction@postgres:5432/auction"
+      NEXT_PUBLIC_SUPABASE_URL: "${NEXT_PUBLIC_SUPABASE_URL}"
+      SUPABASE_SERVICE_ROLE_KEY: "${SUPABASE_SERVICE_ROLE_KEY}"
+      RUNNER_TICK_MS: "1000"
+    restart: unless-stopped
+
 volumes:
   pgdata:
