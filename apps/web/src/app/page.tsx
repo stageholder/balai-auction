@@ -21,7 +21,10 @@ export default async function HomePage() {
     <div>
       {/* Hero — a quiet editorial masthead that sets the tone */}
       <section className="border-b border-line pb-14">
-        <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-muted">
+        <p className="font-serif text-lg tracking-[0.2em] text-ink">
+          {SITE.name}
+        </p>
+        <p className="mt-3 font-sans text-[11px] uppercase tracking-[0.32em] text-muted">
           {SITE.tagline}
         </p>
         <h1 className="mt-6 max-w-3xl font-serif text-6xl leading-[0.98] tracking-tight text-ink md:text-7xl">
@@ -130,12 +133,12 @@ export default async function HomePage() {
           {/* Browse by department — an elegant index of departments with sales */}
           {departments.length > 0 ? (
             <section aria-labelledby="departments-heading">
-              <p
+              <h2
                 id="departments-heading"
                 className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted"
               >
                 Browse by department
-              </p>
+              </h2>
               <ul className="mt-8 grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
                 {departments.map((dept) => (
                   <li key={dept.slug} className="border-b border-line">
