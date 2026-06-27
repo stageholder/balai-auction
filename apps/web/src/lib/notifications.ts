@@ -6,6 +6,17 @@ function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
+/** Escape a value before interpolating it into email HTML, so staff-entered
+ *  titles can't inject markup into emails sent to buyers. */
+function esc(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function wrap(heading: string, body: string): string {
   return `<div style="font-family:Georgia,serif;color:#1a1a1a;max-width:480px">
   <h1 style="font-size:20px;font-weight:500">${heading}</h1>
@@ -23,7 +34,7 @@ export function buildRegistrationDecisionEmail(
       subject: `You're approved to bid — ${saleTitle}`,
       html: wrap(
         "Registration approved",
-        `<p>You are now approved to bid in <strong>${saleTitle}</strong>. We wish you the best of luck.</p>`
+        `<p>You are now approved to bid in <strong>${esc(saleTitle)}</strong>. We wish you the best of luck.</p>`
       ),
     };
   }
@@ -31,7 +42,7 @@ export function buildRegistrationDecisionEmail(
     subject: `Registration not approved — ${saleTitle}`,
     html: wrap(
       "Registration not approved",
-      `<p>Unfortunately your registration for <strong>${saleTitle}</strong> was not approved. Please contact us if you have questions.</p>`
+      `<p>Unfortunately your registration for <strong>${esc(saleTitle)}</strong> was not approved. Please contact us if you have questions.</p>`
     ),
   };
 }
@@ -44,8 +55,8 @@ export function buildOutbidEmail(
     subject: `You've been outbid — ${lotTitle}`,
     html: wrap(
       "You've been outbid",
-      `<p>Another bidder has surpassed your maximum on <strong>${lotTitle}</strong>.</p>
-       <p><a href="${lotUrl}">View the lot and raise your bid →</a></p>`
+      `<p>Another bidder has surpassed your maximum on <strong>${esc(lotTitle)}</strong>.</p>
+       <p><a href="${esc(lotUrl)}">View the lot and raise your bid →</a></p>`
     ),
   };
 }
@@ -58,8 +69,8 @@ export function buildWonEmail(
     subject: `Congratulations — you won ${lotTitle}`,
     html: wrap(
       "Congratulations",
-      `<p>You are the winning bidder for <strong>${lotTitle}</strong>.</p>
-       <p><a href="${lotUrl}">View the lot →</a> An invoice is now available under <a href="${appUrl()}/invoices">Your invoices</a>.</p>`
+      `<p>You are the winning bidder for <strong>${esc(lotTitle)}</strong>.</p>
+       <p><a href="${esc(lotUrl)}">View the lot →</a> An invoice is now available under <a href="${appUrl()}/invoices">Your invoices</a>.</p>`
     ),
   };
 }
@@ -72,7 +83,7 @@ export function buildReceiptEmail(
     subject: `Payment received — ${lotTitle}`,
     html: wrap(
       "Payment received",
-      `<p>We have received your payment of <strong>${formatRupiah(total)}</strong> for <strong>${lotTitle}</strong>. Thank you.</p>`
+      `<p>We have received your payment of <strong>${formatRupiah(total)}</strong> for <strong>${esc(lotTitle)}</strong>. Thank you.</p>`
     ),
   };
 }
