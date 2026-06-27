@@ -1,4 +1,4 @@
-import { minIncrement } from "./increments";
+import { minIncrement, minNextBid } from "./increments";
 import type { BidEvent, BidResolution, IncrementTable, Money } from "./types";
 
 interface Standing {
@@ -58,4 +58,14 @@ export function resolveBids(
   price = Math.max(startingPrice, price);
 
   return { winnerId: winner.bidderId, currentPrice: price, contested: true };
+}
+
+/** The minimum acceptable `maxAmount` for the next bid on a lot. */
+export function nextBidFloor(
+  startingPrice: Money,
+  events: BidEvent[],
+  table: IncrementTable
+): Money {
+  const { winnerId, currentPrice } = resolveBids(startingPrice, events, table);
+  return winnerId === null ? startingPrice : minNextBid(currentPrice, table);
 }
