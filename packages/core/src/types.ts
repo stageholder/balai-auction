@@ -30,6 +30,7 @@ export type LedgerParty = "buyer" | "seller" | "house";
 export type LedgerKind =
   | "hammer"
   | "premium"
+  | "commission"
   | "tax"
   | "deposit"
   | "payout"
