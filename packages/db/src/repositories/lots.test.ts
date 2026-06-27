@@ -8,6 +8,7 @@ import {
   listLotsForSale,
   getLotsDueToClose,
   updateLotStatus,
+  updateLotClosesAt,
 } from "./lots";
 
 const db = testDb();
@@ -89,5 +90,18 @@ describe("lots repository", () => {
     );
     const updated = await updateLotStatus(db, lot.id, "sold");
     expect(updated.status).toBe("sold");
+  });
+});
+
+describe("updateLotClosesAt", () => {
+  it("extends a lot's close time", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    const newClose = new Date("2026-07-08T00:02:00.000Z");
+    const updated = await updateLotClosesAt(db, lot.id, newClose);
+    expect(updated.closesAt.getTime()).toBe(newClose.getTime());
   });
 });

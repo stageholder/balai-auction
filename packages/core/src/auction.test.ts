@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveBids } from "./auction";
+import { resolveBids, nextBidFloor } from "./auction";
 import type { BidEvent, IncrementTable } from "./types";
 
 const table: IncrementTable = [
@@ -104,5 +104,28 @@ describe("resolveBids", () => {
       currentPrice: START,
       contested: false,
     });
+  });
+});
+
+describe("nextBidFloor", () => {
+  it("is the starting price when there are no bids", () => {
+    expect(nextBidFloor(1_000_000, [], table)).toBe(1_000_000);
+  });
+
+  it("is current price + one increment for a lone bidder (price sits at start)", () => {
+    const events: BidEvent[] = [
+      { bidderId: "A", maxAmount: 5_000_000, createdAt: 1 },
+    ];
+    // lone bidder: resolved price = 1,000,000; increment there = 100,000
+    expect(nextBidFloor(1_000_000, events, table)).toBe(1_100_000);
+  });
+
+  it("is current price + one increment when contested", () => {
+    const events: BidEvent[] = [
+      { bidderId: "A", maxAmount: 5_000_000, createdAt: 1 },
+      { bidderId: "B", maxAmount: 3_000_000, createdAt: 2 },
+    ];
+    // resolved price = 3,100,000; increment there (<5,000,000) = 100,000
+    expect(nextBidFloor(1_000_000, events, table)).toBe(3_200_000);
   });
 });

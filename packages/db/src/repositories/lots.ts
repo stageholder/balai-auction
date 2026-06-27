@@ -62,3 +62,12 @@ export async function updateLotStatus(
   const row = await db.lot.update({ where: { id }, data: { status } });
   return lotRowToRecord(row);
 }
+
+export async function updateLotClosesAt(
+  db: PrismaClient,
+  id: string,
+  closesAt: Date
+): Promise<LotRecord> {
+  const row = await db.lot.update({ where: { id }, data: { closesAt } });
+  return lotRowToRecord(row);
+}
