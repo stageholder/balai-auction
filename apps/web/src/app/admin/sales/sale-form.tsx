@@ -40,7 +40,7 @@ export function SaleForm({
           <input id="endsAt" name="endsAt" type="datetime-local" required defaultValue={sale ? toLocalInput(sale.endsAt) : ""} className={FIELD} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label htmlFor="buyersPremiumPct" className={LABEL}>Buyer&apos;s premium %</label>
           <input id="buyersPremiumPct" name="buyersPremiumPct" type="number" min={0} required defaultValue={sale?.buyersPremiumPct ?? 20} className={FIELD} />
@@ -59,6 +59,7 @@ export function SaleForm({
             type="number"
             min={0}
             max={100}
+            required
             defaultValue={sale?.sellerCommissionPct ?? DEFAULT_SELLER_COMMISSION_PCT}
             className={FIELD}
           />
