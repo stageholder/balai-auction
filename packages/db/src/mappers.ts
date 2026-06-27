@@ -76,6 +76,7 @@ export function saleRowToRecord(row: {
   taxPct: number;
   mode: SaleRecord["mode"];
   liveLotSeconds: number;
+  category: string | null;
   incrementTable: unknown;
   status: SaleRecord["status"];
   createdAt: Date;
@@ -90,6 +91,7 @@ export function saleRowToRecord(row: {
     taxPct: row.taxPct,
     mode: row.mode,
     liveLotSeconds: row.liveLotSeconds,
+    category: row.category,
     incrementTable: toIncrementTable(row.incrementTable),
     status: row.status,
     createdAt: row.createdAt,

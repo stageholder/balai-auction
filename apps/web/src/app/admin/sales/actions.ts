@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { IncrementTable } from "@auction/core";
+import { isDepartmentSlug } from "@auction/core";
 import type { SaleStatus } from "@auction/db";
 import { prisma, createSale, updateSale, updateSaleStatus } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
@@ -32,6 +33,10 @@ function readForm(formData: FormData) {
     ),
     mode: formData.get("mode") === "live" ? ("live" as const) : ("timed" as const),
     liveLotSeconds: Number(formData.get("liveLotSeconds") ?? 45),
+    category: (() => {
+      const raw = String(formData.get("category") ?? "");
+      return isDepartmentSlug(raw) ? raw : null;
+    })(),
   };
 }
 

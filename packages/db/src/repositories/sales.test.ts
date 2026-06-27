@@ -185,3 +185,21 @@ describe("live sale fields", () => {
     expect(updated.liveLotSeconds).toBe(60);
   });
 });
+
+describe("sale category", () => {
+  it("defaults category to null", async () => {
+    const sale = await createSale(db, sampleSale("Uncategorised"));
+    expect(sale.category).toBeNull();
+  });
+
+  it("creates and updates a sale's category", async () => {
+    const sale = await createSale(db, {
+      ...sampleSale("Watch Sale"),
+      category: "watches",
+    });
+    expect(sale.category).toBe("watches");
+
+    const cleared = await updateSale(db, sale.id, { category: null });
+    expect(cleared.category).toBeNull();
+  });
+});

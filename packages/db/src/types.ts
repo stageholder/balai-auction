@@ -51,6 +51,7 @@ export interface SaleRecord {
   taxPct: number;
   mode: SaleMode;
   liveLotSeconds: number;
+  category: string | null;
   incrementTable: IncrementTable;
   status: SaleStatus;
   createdAt: Date;
@@ -66,6 +67,7 @@ export interface NewSale {
   status?: SaleStatus;
   mode?: SaleMode;
   liveLotSeconds?: number;
+  category?: string | null;
 }
 
 export interface LotRecord {
@@ -180,6 +182,7 @@ export interface UpdateSale {
   incrementTable?: import("@auction/core").IncrementTable;
   mode?: SaleMode;
   liveLotSeconds?: number;
+  category?: string | null;
 }
 
 export interface UpdateLot {

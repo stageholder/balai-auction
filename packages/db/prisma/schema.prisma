@@ -90,6 +90,7 @@ model Sale {
   taxPct           Int            @default(0)
   mode             SaleMode       @default(timed)
   liveLotSeconds   Int            @default(45)
+  category         String?
   incrementTable   Json
   status           SaleStatus     @default(draft)
   createdAt        DateTime       @default(now())
