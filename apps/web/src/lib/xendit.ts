@@ -1,4 +1,5 @@
 import "server-only";
+import { timingSafeEqual } from "node:crypto";
 
 const XENDIT_API = "https://api.xendit.co";
 
@@ -7,10 +8,15 @@ export function isPaidXenditStatus(status: string): boolean {
   return status === "PAID" || status === "SETTLED";
 }
 
-/** True when the webhook's x-callback-token matches our configured token. */
+/** True when the webhook's x-callback-token matches our configured token.
+ *  Uses a constant-time comparison to avoid leaking the token via timing. */
 export function verifyCallbackToken(header: string | null): boolean {
   const token = process.env.XENDIT_CALLBACK_TOKEN;
-  return !!token && header === token;
+  if (!token || !header) return false;
+  const a = Buffer.from(header);
+  const b = Buffer.from(token);
+  // Length comparison is not secret; timingSafeEqual requires equal lengths.
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 /** Create a Xendit hosted invoice and return its id + payment page URL. */
