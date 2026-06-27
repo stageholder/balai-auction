@@ -10,9 +10,11 @@ import {
   getBidEventsForLot,
   appendBid,
   updateLotClosesAt,
+  getUser,
 } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { broadcastLotPrice, SOFT_CLOSE_WINDOW_MS } from "@/lib/realtime";
+import { notifyOutbid } from "@/lib/notifications";
 
 export async function placeBid(
   lotId: string,
@@ -52,6 +54,12 @@ export async function placeBid(
     sale.incrementTable
   );
 
+  const priorLeaderId = resolveBids(
+    lot.startingPrice,
+    events,
+    sale.incrementTable
+  ).winnerId;
+
   await appendBid(prisma, {
     lotId,
     bidderId: user.id,
@@ -76,6 +84,15 @@ export async function placeBid(
     closesAt: closesAt.toISOString(),
     bidCount: events.length + 1,
   });
+
+  if (
+    priorLeaderId &&
+    priorLeaderId !== user.id &&
+    resolution.winnerId !== priorLeaderId
+  ) {
+    const outbid = await getUser(prisma, priorLeaderId);
+    if (outbid) await notifyOutbid(outbid.email, lot.title, lotId);
+  }
 
   revalidatePath(`/lots/${lotId}`);
   return {
