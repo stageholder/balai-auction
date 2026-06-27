@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { prisma, getLot, getSale, getBidEventsForLot, getRegistration } from "@/lib/db";
+import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration } from "@/lib/db";
 import { resolveBids, nextBidFloor } from "@auction/core";
 import { getCurrentUser } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
@@ -17,14 +17,18 @@ export default async function LotPage({
   const lot = await getLot(prisma, id);
   if (!lot) notFound();
 
-  const sale = await getSale(prisma, lot.saleId);
+  // Hide lots whose parent sale is not published (draft) — same guard as the
+  // sale page. getPublishedSale returns null for draft/missing sales.
+  const sale = await getPublishedSale(prisma, lot.saleId);
+  if (!sale) notFound();
+
   const events = await getBidEventsForLot(prisma, lot.id);
-  const currentPrice = sale
-    ? resolveBids(lot.startingPrice, events, sale.incrementTable).currentPrice
-    : lot.startingPrice;
-  const floor = sale
-    ? nextBidFloor(lot.startingPrice, events, sale.incrementTable)
-    : lot.startingPrice;
+  const currentPrice = resolveBids(
+    lot.startingPrice,
+    events,
+    sale.incrementTable
+  ).currentPrice;
+  const floor = nextBidFloor(lot.startingPrice, events, sale.incrementTable);
 
   const now = new Date();
   const user = await getCurrentUser();
