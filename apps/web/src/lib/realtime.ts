@@ -18,7 +18,7 @@ export async function broadcastLotPrice(
   payload: LotPricePayload
 ): Promise<void> {
   try {
-    await fetch(
+    const res = await fetch(
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/realtime/v1/api/broadcast`,
       {
         method: "POST",
@@ -31,9 +31,16 @@ export async function broadcastLotPrice(
         }),
       }
     );
+    // fetch only rejects on network errors; a bad key/URL returns a non-ok
+    // response. Surface that too so a misconfigured broadcast is visible.
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error(
+        `broadcastLotPrice for lot ${lotId}: ${res.status} ${detail}`
+      );
+    }
   } catch (err) {
     // Realtime is best-effort; clients also see the fresh price on next load.
-    // Log so a persistently failing broadcast (bad key/URL/outage) is visible.
     console.error(`broadcastLotPrice failed for lot ${lotId}:`, err);
   }
 }
