@@ -45,3 +45,14 @@ describe("buildReceiptEmail", () => {
     expect(html).toMatch(/Rp\s?3\.788\.200/);
   });
 });
+
+describe("HTML escaping (injection safety)", () => {
+  it("escapes markup in interpolated titles", () => {
+    const { html } = buildOutbidEmail(
+      '<script>alert(1)</script>',
+      "https://x/lots/1"
+    );
+    expect(html).not.toContain("<script>alert(1)</script>");
+    expect(html).toContain("&lt;script&gt;");
+  });
+});
