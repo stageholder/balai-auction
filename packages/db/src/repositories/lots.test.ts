@@ -107,6 +107,18 @@ describe("updateLotClosesAt", () => {
   });
 });
 
+describe("queued lot status", () => {
+  it("accepts the queued status via updateLotStatus", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(
+      db,
+      sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z"))
+    );
+    const updated = await updateLotStatus(db, lot.id, "queued");
+    expect(updated.status).toBe("queued");
+  });
+});
+
 describe("updateLot", () => {
   it("updates fields incl. money + images, leaving others unchanged", async () => {
     const sale = await makeSale();

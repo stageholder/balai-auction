@@ -137,3 +137,31 @@ describe("updateSale / updateSaleStatus", () => {
     expect(live.status).toBe("live");
   });
 });
+
+describe("live sale fields", () => {
+  it("defaults a new sale to timed mode with liveLotSeconds 45", async () => {
+    const sale = await createSale(db, sampleSale("Timed Sale"));
+    expect(sale.mode).toBe("timed");
+    expect(sale.liveLotSeconds).toBe(45);
+  });
+
+  it("creates a live-mode sale with a custom lot timer", async () => {
+    const sale = await createSale(db, {
+      ...sampleSale("Live Sale"),
+      mode: "live",
+      liveLotSeconds: 30,
+    });
+    expect(sale.mode).toBe("live");
+    expect(sale.liveLotSeconds).toBe(30);
+  });
+
+  it("updates a sale's mode and timer", async () => {
+    const sale = await createSale(db, sampleSale("To Convert"));
+    const updated = await updateSale(db, sale.id, {
+      mode: "live",
+      liveLotSeconds: 60,
+    });
+    expect(updated.mode).toBe("live");
+    expect(updated.liveLotSeconds).toBe(60);
+  });
+});

@@ -1,8 +1,8 @@
-import type { IncrementTable } from "@auction/core";
+import type { IncrementTable, SaleMode } from "@auction/core";
 
 export type UserRole = "buyer" | "staff" | "consignor";
 export type SaleStatus = "draft" | "scheduled" | "live" | "closed";
-export type LotStatus = "live" | "sold" | "unsold" | "paid" | "fulfilled";
+export type LotStatus = "queued" | "live" | "sold" | "unsold" | "paid" | "fulfilled";
 export type BidType = "bid" | "proxy_auto" | "reserve_check";
 export type KycStatus = "pending" | "approved" | "rejected";
 export type LedgerParty = "buyer" | "seller" | "house";
@@ -49,6 +49,8 @@ export interface SaleRecord {
   endsAt: Date;
   buyersPremiumPct: number;
   taxPct: number;
+  mode: SaleMode;
+  liveLotSeconds: number;
   incrementTable: IncrementTable;
   status: SaleStatus;
   createdAt: Date;
@@ -62,6 +64,8 @@ export interface NewSale {
   taxPct: number;
   incrementTable: IncrementTable;
   status?: SaleStatus;
+  mode?: SaleMode;
+  liveLotSeconds?: number;
 }
 
 export interface LotRecord {
@@ -173,6 +177,8 @@ export interface UpdateSale {
   buyersPremiumPct?: number;
   taxPct?: number;
   incrementTable?: import("@auction/core").IncrementTable;
+  mode?: SaleMode;
+  liveLotSeconds?: number;
 }
 
 export interface UpdateLot {

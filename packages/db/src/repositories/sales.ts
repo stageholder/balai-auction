@@ -22,6 +22,8 @@ export async function createSale(
       endsAt: input.endsAt,
       buyersPremiumPct: input.buyersPremiumPct,
       taxPct: input.taxPct,
+      ...(input.mode !== undefined ? { mode: input.mode } : {}),
+      ...(input.liveLotSeconds !== undefined ? { liveLotSeconds: input.liveLotSeconds } : {}),
       incrementTable: input.incrementTable as unknown as Prisma.InputJsonValue,
       ...(input.status !== undefined ? { status: input.status } : {}),
     },
@@ -75,6 +77,8 @@ export async function updateSale(
       ...(fields.incrementTable !== undefined
         ? { incrementTable: fields.incrementTable as unknown as Prisma.InputJsonValue }
         : {}),
+      ...(fields.mode !== undefined ? { mode: fields.mode } : {}),
+      ...(fields.liveLotSeconds !== undefined ? { liveLotSeconds: fields.liveLotSeconds } : {}),
     },
   });
   return saleRowToRecord(row);
