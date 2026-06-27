@@ -24,6 +24,12 @@ export async function AccountNav() {
           Staff
         </Link>
       ) : null}
+      <Link
+        href="/invoices"
+        className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+      >
+        Invoices
+      </Link>
       <span className="text-xs text-muted">{user.email}</span>
       <SignOutButton />
     </div>
