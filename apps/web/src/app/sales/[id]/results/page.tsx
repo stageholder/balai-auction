@@ -23,7 +23,10 @@ export default async function PublicSaleResultsPage({
 }) {
   const { id } = await params;
   const sale = await getPublishedSale(prisma, id);
-  if (!sale) notFound();
+  // Prices realized only make sense for a finished sale. Gating to "closed"
+  // (not just published) prevents direct-URL access mislabelling not-yet-sold
+  // lots of a scheduled/live sale as "Unsold".
+  if (!sale || sale.status !== "closed") notFound();
 
   const results = await getPublicSaleResults(prisma, id);
 
