@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma, closeDueLots } from "@/lib/db";
+import { prisma, closeDueLots, getUser, getLot } from "@/lib/db";
 import { broadcastLotPrice } from "@/lib/realtime";
+import { notifyWon } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,18 @@ export async function GET(request: NextRequest) {
           status: "sold",
         })
       )
+  );
+
+  await Promise.allSettled(
+    results
+      .filter((r) => r.outcome === "sold" && r.winnerId)
+      .map(async (r) => {
+        const [winner, lot] = await Promise.all([
+          getUser(prisma, r.winnerId as string),
+          getLot(prisma, r.lotId),
+        ]);
+        if (winner && lot) await notifyWon(winner.email, lot.title, lot.id);
+      })
   );
 
   return NextResponse.json({

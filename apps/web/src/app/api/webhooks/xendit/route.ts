@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma, markInvoicePaid } from "@/lib/db";
+import { prisma, markInvoicePaid, getInvoiceById, getUser, getLot } from "@/lib/db";
 import { verifyCallbackToken, isPaidXenditStatus } from "@/lib/xendit";
+import { notifyReceipt } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,18 @@ export async function POST(request: NextRequest) {
   // stops retrying; only paid statuses transition the invoice.
   if (isPaidXenditStatus(status)) {
     const transitioned = await markInvoicePaid(prisma, external_id);
+    if (transitioned) {
+      const invoice = await getInvoiceById(prisma, external_id);
+      if (invoice) {
+        const [buyer, lot] = await Promise.all([
+          getUser(prisma, invoice.buyerId),
+          getLot(prisma, invoice.lotId),
+        ]);
+        if (buyer && lot) {
+          await notifyReceipt(buyer.email, lot.title, invoice.total);
+        }
+      }
+    }
     return NextResponse.json({ ok: true, transitioned });
   }
   return NextResponse.json({ ok: true, ignored: status });
