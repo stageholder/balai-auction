@@ -22,6 +22,10 @@ export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
               Auctions
             </Link>
 
+            <Link href="/auctions?lifecycle=past" className={NAV_LINK}>
+              Results
+            </Link>
+
             {/* Departments: native disclosure — server-rendered, no JS, no deps */}
             <details className="group relative">
               <summary
