@@ -1,0 +1,14 @@
+# Keep build context small and never copy secrets/artifacts into images.
+**/node_modules
+node_modules
+.git
+**/.next
+.next
+**/dist
+dist
+**/.env
+.env
+**/.env.*
+.env.*
+.superpowers
+**/coverage
