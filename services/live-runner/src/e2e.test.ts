@@ -11,6 +11,7 @@ import {
   getLot,
   getInvoice,
   listLotsForSale,
+  listRunningLiveSales,
   openQueuedLot,
   closeLot,
   updateSaleStatus as finishSaleRepo,
@@ -81,12 +82,14 @@ describe("live-runner end-to-end", () => {
 
     const broadcast = vi.fn().mockResolvedValue(undefined);
     const deps = realDeps(broadcast);
-    const saleInput = {
-      id: sale.id,
-      status: "live",
-      startsAt: past,
-      liveLotSeconds: 30,
-    };
+
+    // Drive the sale exactly as index.ts's loop does: select it via
+    // listRunningLiveSales (mode:"live" AND status:"live"), then feed that
+    // record into tickSale — so this e2e covers the production sale-selection
+    // query + saleRowToRecord mapping, not just tickSale in isolation.
+    const running = await listRunningLiveSales(prisma);
+    expect(running.map((s) => s.id)).toEqual([sale.id]);
+    const saleInput = running[0]!;
 
     const t0 = new Date("2026-07-01T10:00:00.000Z");
 
