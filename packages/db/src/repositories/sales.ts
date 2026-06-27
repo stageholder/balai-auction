@@ -84,6 +84,16 @@ export async function updateSale(
   return saleRowToRecord(row);
 }
 
+export async function listRunningLiveSales(
+  db: PrismaClient
+): Promise<SaleRecord[]> {
+  const rows = await db.sale.findMany({
+    where: { mode: "live", status: "live" },
+    orderBy: { startsAt: "asc" },
+  });
+  return rows.map(saleRowToRecord);
+}
+
 export async function updateSaleStatus(
   db: PrismaClient,
   id: string,

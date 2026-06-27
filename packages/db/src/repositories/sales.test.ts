@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type { IncrementTable } from "@auction/core";
 import { testDb, resetDb } from "../test/testDb";
-import { createSale, getSale, listSales, listPublishedSales, isPublicSaleStatus, getPublishedSale, updateSale, updateSaleStatus } from "./sales";
+import { createSale, getSale, listSales, listPublishedSales, isPublicSaleStatus, getPublishedSale, updateSale, updateSaleStatus, listRunningLiveSales } from "./sales";
 
 const db = testDb();
 
@@ -135,6 +135,26 @@ describe("updateSale / updateSaleStatus", () => {
     expect(sale.status).toBe("draft");
     const live = await updateSaleStatus(db, sale.id, "live");
     expect(live.status).toBe("live");
+  });
+});
+
+describe("listRunningLiveSales", () => {
+  it("returns only live-mode sales with live status", async () => {
+    await createSale(db, sampleSale("Timed Live")); // timed, draft
+    const liveDraft = await createSale(db, {
+      ...sampleSale("Live Draft"),
+      mode: "live",
+    });
+    const running = await createSale(db, {
+      ...sampleSale("Live Running"),
+      mode: "live",
+    });
+    await updateSaleStatus(db, running.id, "live");
+    // liveDraft stays draft; should be excluded
+    void liveDraft;
+
+    const list = await listRunningLiveSales(db);
+    expect(list.map((s) => s.id)).toEqual([running.id]);
   });
 });
 
