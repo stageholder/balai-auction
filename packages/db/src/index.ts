@@ -9,3 +9,4 @@ export * from "./repositories/registrations";
 export * from "./repositories/invoices";
 export * from "./repositories/close";
 export * from "./repositories/results";
+export * from "./repositories/payouts";

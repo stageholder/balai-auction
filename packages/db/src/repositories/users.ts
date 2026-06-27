@@ -79,3 +79,19 @@ export async function listConsignors(db: PrismaClient): Promise<UserRecord[]> {
   });
   return rows.map(userRowToRecord);
 }
+
+export async function setConsignorPayoutAccount(
+  db: PrismaClient,
+  userId: string,
+  fields: { bankCode: string; accountNumber: string; accountHolder: string }
+): Promise<UserRecord> {
+  const row = await db.user.update({
+    where: { id: userId },
+    data: {
+      payoutBankCode: fields.bankCode,
+      payoutAccountNumber: fields.accountNumber,
+      payoutAccountHolder: fields.accountHolder,
+    },
+  });
+  return userRowToRecord(row);
+}

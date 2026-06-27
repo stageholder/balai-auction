@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { testDb, resetDb } from "../test/testDb";
 import { createUser, getUser } from "./users";
-import { upsertUserById, updateUserProfile, listUsers, setUserRole, listConsignors } from "./users";
+import { upsertUserById, updateUserProfile, listUsers, setUserRole, listConsignors, setConsignorPayoutAccount } from "./users";
 
 const db = testDb();
 
@@ -84,5 +84,24 @@ describe("listConsignors", () => {
     const c2 = await createUser(db, { email: "c2@example.com", role: "consignor" });
     const ids = (await listConsignors(db)).map((u) => u.id).sort();
     expect(ids).toEqual([c1.id, c2.id].sort());
+  });
+});
+
+describe("setConsignorPayoutAccount", () => {
+  it("sets the three payout fields and they round-trip via the user record", async () => {
+    const user = await createUser(db, { email: "seller@example.com", role: "consignor" });
+    const updated = await setConsignorPayoutAccount(db, user.id, {
+      bankCode: "BCA",
+      accountNumber: "1234567890",
+      accountHolder: "Budi Santoso",
+    });
+    expect(updated.payoutBankCode).toBe("BCA");
+    expect(updated.payoutAccountNumber).toBe("1234567890");
+    expect(updated.payoutAccountHolder).toBe("Budi Santoso");
+
+    const fetched = await getUser(db, user.id);
+    expect(fetched?.payoutBankCode).toBe("BCA");
+    expect(fetched?.payoutAccountNumber).toBe("1234567890");
+    expect(fetched?.payoutAccountHolder).toBe("Budi Santoso");
   });
 });
