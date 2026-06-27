@@ -88,8 +88,11 @@ describe("sales repository", () => {
     // must not contain the draft
     const titles = published.map((s) => s.title);
     expect(titles).not.toContain("Draft Sale");
-    // newest first: live was created after scheduled
-    expect(ids.indexOf(live.id)).toBeLessThan(ids.indexOf(scheduled.id));
+    // ordered newest-first by createdAt. Asserted on the returned timestamps
+    // (tolerant of equal createdAt for rows inserted in the same microsecond)
+    // rather than on creation order, which would flake on a timestamp collision.
+    const times = published.map((s) => s.createdAt.getTime());
+    expect(times).toEqual([...times].sort((a, b) => b - a));
     // exactly two results
     expect(published).toHaveLength(2);
   });

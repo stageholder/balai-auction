@@ -2,6 +2,9 @@ import "@testing-library/jest-dom/vitest";
 import React from "react";
 import { vi } from "vitest";
 
+// server-only throws in jsdom — stub it out so server helpers can be unit-tested.
+vi.mock("server-only", () => ({}));
+
 // next/image renders an <img> in tests; map it to a plain img so RTL queries work.
 vi.mock("next/image", () => ({
   default: ({ src, alt, fill, ...rest }: any) => {
