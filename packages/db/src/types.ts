@@ -206,3 +206,11 @@ export interface SaleResultRow {
   invoiceStatus: "pending" | "paid" | "refunded" | null;
   buyerEmail: string | null;
 }
+
+export interface PublicLotResult {
+  lotId: string;
+  lotNumber: number;
+  title: string;
+  status: LotStatus;
+  hammer: number | null;
+}
