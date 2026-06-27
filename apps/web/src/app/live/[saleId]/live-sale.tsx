@@ -130,7 +130,7 @@ export function LiveSale({
                       {activeLot.title}
                     </h2>
                     <p className="mt-1 tnum font-sans text-xs text-muted">
-                      Est. {formatRupiah(activeLot.startingPrice)}
+                      Opening {formatRupiah(activeLot.startingPrice)}
                     </p>
                   </div>
                 </div>

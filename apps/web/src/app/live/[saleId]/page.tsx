@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import {
   prisma,
-  getSale,
+  getPublishedSale,
   listLotsForSale,
   getBidEventsForLot,
   getRegistration,
@@ -23,7 +23,9 @@ export default async function LiveSalePage({
   params: Promise<{ saleId: string }>;
 }) {
   const { saleId } = await params;
-  const sale = await getSale(prisma, saleId);
+  // getPublishedSale (not getSale) so draft sales aren't reachable via /live —
+  // same visibility rule the catalog/sale page uses.
+  const sale = await getPublishedSale(prisma, saleId);
   if (!sale || sale.mode !== "live") notFound();
 
   const lots = await listLotsForSale(prisma, saleId);
