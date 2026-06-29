@@ -15,6 +15,7 @@ export default async function AdminLayout({
         <Link href="/admin" className="font-serif text-lg">Admin</Link>
         <Link href="/admin/sales" className="text-muted hover:text-ink">Sales</Link>
         <Link href="/admin/users" className="text-muted hover:text-ink">Users</Link>
+        <Link href="/admin/payouts" className="text-muted hover:text-ink">Payouts</Link>
         <Link href="/staff/registrations" className="text-muted hover:text-ink">Registrations</Link>
       </nav>
       <div>{children}</div>

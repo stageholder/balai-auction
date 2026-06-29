@@ -27,6 +27,7 @@ export function PayoutAccountForm({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
+  const [error, setError] = useState(false);
   const [values, setValues] = useState<Record<FieldKey, string>>({
     bankCode: bankCode ?? "",
     accountNumber: accountNumber ?? "",
@@ -45,14 +46,21 @@ export function PayoutAccountForm({
         e.preventDefault();
         if (!filled) return;
         setDone(false);
+        setError(false);
         startTransition(async () => {
-          await setConsignorPayoutAccountAction(userId, {
-            bankCode: values.bankCode.trim(),
-            accountNumber: values.accountNumber.trim(),
-            accountHolder: values.accountHolder.trim(),
-          });
-          setDone(true);
-          router.refresh();
+          try {
+            await setConsignorPayoutAccountAction(userId, {
+              bankCode: values.bankCode.trim(),
+              accountNumber: values.accountNumber.trim(),
+              accountHolder: values.accountHolder.trim(),
+            });
+            setDone(true);
+            router.refresh();
+          } catch {
+            // Surface the failure so staff don't believe a payout account was
+            // saved when it wasn't (a silent miss would break a later release).
+            setError(true);
+          }
         });
       }}
     >
@@ -70,6 +78,7 @@ export function PayoutAccountForm({
               disabled={pending}
               onChange={(e) => {
                 setDone(false);
+                setError(false);
                 setValues((v) => ({ ...v, [f.key]: e.target.value }));
               }}
               className="h-9 w-full border border-line bg-paper px-3 text-sm text-ink transition-colors placeholder:text-muted/60 hover:border-ink focus-visible:border-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink disabled:opacity-40"
@@ -91,6 +100,11 @@ export function PayoutAccountForm({
         {done && !pending ? (
           <span className="text-xs uppercase tracking-[0.12em] text-muted">
             Saved
+          </span>
+        ) : null}
+        {error && !pending ? (
+          <span className="text-xs uppercase tracking-[0.12em] text-accent">
+            Save failed — try again
           </span>
         ) : null}
       </div>
