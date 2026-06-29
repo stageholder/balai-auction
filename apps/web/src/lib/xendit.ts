@@ -88,8 +88,20 @@ export async function createDisbursement(params: {
   });
 
   if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Xendit disbursement failed: ${res.status} ${detail}`);
+    // Never surface the raw response body — a disbursement request carries the
+    // consignor's account number, and the error body can echo it. Keep only the
+    // status + Xendit's safe error_code enum (e.g. INSUFFICIENT_BALANCE), so
+    // neither the UI nor server logs leak bank PII.
+    let code = "";
+    try {
+      const body = (await res.json()) as { error_code?: string };
+      if (body?.error_code) code = body.error_code;
+    } catch {
+      // non-JSON error body — ignore
+    }
+    throw new Error(
+      `Xendit disbursement failed: ${res.status}${code ? ` ${code}` : ""}`
+    );
   }
   const json = (await res.json()) as { id: string; status: string };
   return { id: json.id, status: json.status };
