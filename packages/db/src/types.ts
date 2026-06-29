@@ -1,5 +1,6 @@
-import type { IncrementTable, SaleMode } from "@auction/core";
+import type { AmlStatus, IncrementTable, SaleMode } from "@auction/core";
 
+export type { AmlStatus } from "@auction/core";
 export type UserRole = "buyer" | "staff" | "consignor";
 export type SaleStatus = "draft" | "scheduled" | "live" | "closed";
 export type LotStatus = "queued" | "live" | "sold" | "unsold" | "paid" | "fulfilled";
@@ -27,6 +28,12 @@ export interface UserRecord {
   payoutBankCode: string | null;
   payoutAccountNumber: string | null;
   payoutAccountHolder: string | null;
+  consignorLegalName: string | null;
+  consignorIdType: string | null;
+  consignorIdNumber: string | null;
+  consignorKycStatus: KycStatus;
+  consignorAmlStatus: AmlStatus;
+  consignorAmlNote: string | null;
 }
 
 export interface PayoutRecord {

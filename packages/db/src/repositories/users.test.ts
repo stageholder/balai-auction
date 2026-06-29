@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { testDb, resetDb } from "../test/testDb";
 import { createUser, getUser } from "./users";
-import { upsertUserById, updateUserProfile, listUsers, setUserRole, listConsignors, setConsignorPayoutAccount } from "./users";
+import { upsertUserById, updateUserProfile, listUsers, setUserRole, listConsignors, setConsignorPayoutAccount, submitConsignorKyc, setConsignorKycStatus, setConsignorAml, listConsignorsForReview } from "./users";
 
 const db = testDb();
 
@@ -103,5 +103,30 @@ describe("setConsignorPayoutAccount", () => {
     expect(fetched?.payoutBankCode).toBe("BCA");
     expect(fetched?.payoutAccountNumber).toBe("1234567890");
     expect(fetched?.payoutAccountHolder).toBe("Budi Santoso");
+  });
+});
+
+describe("consignor KYC/AML", () => {
+  it("self-submit sets identity + bank details and pending KYC", async () => {
+    const u = await createUser(db, { email: "c@example.com", role: "consignor" });
+    const r = await submitConsignorKyc(db, u.id, {
+      legalName: "Jane Consignor", idType: "passport", idNumber: "X123",
+      bankCode: "BCA", accountNumber: "111", accountHolder: "Jane Consignor",
+    });
+    expect(r.consignorLegalName).toBe("Jane Consignor");
+    expect(r.consignorKycStatus).toBe("pending");
+    expect(r.payoutBankCode).toBe("BCA");
+  });
+  it("staff transitions KYC and AML", async () => {
+    const u = await createUser(db, { email: "c2@example.com", role: "consignor" });
+    expect((await setConsignorKycStatus(db, u.id, "approved")).consignorKycStatus).toBe("approved");
+    const amled = await setConsignorAml(db, u.id, { amlStatus: "cleared", amlNote: "ok" });
+    expect(amled.consignorAmlStatus).toBe("cleared");
+  });
+  it("listConsignorsForReview returns only consignor-role users", async () => {
+    await createUser(db, { email: "buyer@example.com" });
+    const c = await createUser(db, { email: "c3@example.com", role: "consignor" });
+    expect((await listConsignorsForReview(db)).map((x) => x.id)).toContain(c.id);
+    expect((await listConsignorsForReview(db)).every((x) => x.role === "consignor")).toBe(true);
   });
 });

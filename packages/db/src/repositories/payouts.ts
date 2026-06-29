@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
+import { consignorPayoutGate } from "@auction/core";
 import { payoutRowToRecord, toMoney, toDbMoney } from "../mappers";
-import type { PayoutRecord, PayoutStatus } from "../types";
+import type { KycStatus, AmlStatus, PayoutRecord, PayoutStatus } from "../types";
 
 export interface PayoutListItem {
   id: string;
@@ -16,6 +17,10 @@ export interface PayoutListItem {
   net: number;
   xenditDisbursementId: string | null;
   createdAt: Date;
+  consignorKycStatus: KycStatus;
+  consignorAmlStatus: AmlStatus;
+  releaseReady: boolean;
+  releaseBlockedReason: string | null;
 }
 
 export async function listPayouts(db: PrismaClient): Promise<PayoutListItem[]> {
@@ -33,6 +38,8 @@ export async function listPayouts(db: PrismaClient): Promise<PayoutListItem[]> {
           payoutBankCode: true,
           payoutAccountNumber: true,
           payoutAccountHolder: true,
+          consignorKycStatus: true,
+          consignorAmlStatus: true,
         },
       },
     },
@@ -42,12 +49,19 @@ export async function listPayouts(db: PrismaClient): Promise<PayoutListItem[]> {
     const net = toMoney(p.amount);
     const hammer = p.lot.invoice ? toMoney(p.lot.invoice.hammer) : 0;
     const commission = hammer - net;
-    const { payoutBankCode, payoutAccountNumber, payoutAccountHolder } = p.consignor;
+    const { payoutBankCode, payoutAccountNumber, payoutAccountHolder, consignorKycStatus, consignorAmlStatus } = p.consignor;
     const hasBankDetails = !!(
       payoutBankCode &&
       payoutAccountNumber &&
       payoutAccountHolder
     );
+    const gate = consignorPayoutGate({
+      kycStatus: consignorKycStatus,
+      amlStatus: consignorAmlStatus,
+      bankCode: payoutBankCode,
+      accountNumber: payoutAccountNumber,
+      accountHolder: payoutAccountHolder,
+    });
     return {
       id: p.id,
       status: p.status as PayoutStatus,
@@ -62,6 +76,10 @@ export async function listPayouts(db: PrismaClient): Promise<PayoutListItem[]> {
       net,
       xenditDisbursementId: p.xenditDisbursementId,
       createdAt: p.createdAt,
+      consignorKycStatus: consignorKycStatus as KycStatus,
+      consignorAmlStatus: consignorAmlStatus as AmlStatus,
+      releaseReady: gate.ok,
+      releaseBlockedReason: gate.ok ? null : gate.reason,
     };
   });
 }

@@ -95,3 +95,65 @@ export async function setConsignorPayoutAccount(
   });
   return userRowToRecord(row);
 }
+
+export async function submitConsignorKyc(
+  db: PrismaClient,
+  userId: string,
+  input: {
+    legalName: string;
+    idType: string;
+    idNumber: string;
+    bankCode: string;
+    accountNumber: string;
+    accountHolder: string;
+  }
+): Promise<UserRecord> {
+  const row = await db.user.update({
+    where: { id: userId },
+    data: {
+      consignorLegalName: input.legalName,
+      consignorIdType: input.idType,
+      consignorIdNumber: input.idNumber,
+      payoutBankCode: input.bankCode,
+      payoutAccountNumber: input.accountNumber,
+      payoutAccountHolder: input.accountHolder,
+      consignorKycStatus: "pending",
+    },
+  });
+  return userRowToRecord(row);
+}
+
+export async function setConsignorKycStatus(
+  db: PrismaClient,
+  userId: string,
+  status: "approved" | "rejected" | "pending"
+): Promise<UserRecord> {
+  const row = await db.user.update({
+    where: { id: userId },
+    data: { consignorKycStatus: status },
+  });
+  return userRowToRecord(row);
+}
+
+export async function setConsignorAml(
+  db: PrismaClient,
+  userId: string,
+  input: { amlStatus: "pending" | "cleared" | "flagged"; amlNote?: string | null }
+): Promise<UserRecord> {
+  const row = await db.user.update({
+    where: { id: userId },
+    data: {
+      consignorAmlStatus: input.amlStatus,
+      consignorAmlNote: input.amlNote ?? null,
+    },
+  });
+  return userRowToRecord(row);
+}
+
+export async function listConsignorsForReview(db: PrismaClient): Promise<UserRecord[]> {
+  const rows = await db.user.findMany({
+    where: { role: "consignor" },
+    orderBy: { email: "asc" },
+  });
+  return rows.map(userRowToRecord);
+}

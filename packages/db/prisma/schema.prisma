@@ -46,6 +46,12 @@ enum KycStatus {
   rejected
 }
 
+enum AmlStatus {
+  pending
+  cleared
+  flagged
+}
+
 enum LedgerParty {
   buyer
   seller
@@ -90,6 +96,12 @@ model User {
   payoutBankCode       String?
   payoutAccountNumber  String?
   payoutAccountHolder  String?
+  consignorLegalName   String?
+  consignorIdType      String?
+  consignorIdNumber    String?
+  consignorKycStatus   KycStatus  @default(pending)
+  consignorAmlStatus   AmlStatus  @default(pending)
+  consignorAmlNote     String?
 }
 
 model Sale {

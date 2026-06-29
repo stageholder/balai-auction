@@ -198,3 +198,13 @@ describe("rearmPayout", () => {
     expect(await rearmPayout(db, pendingPayout.id)).toBeNull();
   });
 });
+
+describe("listPayouts consignor compliance gate", () => {
+  it("listPayouts exposes the consignor compliance gate", async () => {
+    await consignedPaidSetup();
+    const [item] = await listPayouts(db);
+    expect(item!.consignorKycStatus).toBe("pending");   // not yet approved
+    expect(item!.releaseReady).toBe(false);
+    expect(item!.releaseBlockedReason).toMatch(/bank|kyc|aml/i);
+  });
+});

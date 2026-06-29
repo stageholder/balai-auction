@@ -1,4 +1,4 @@
-import type { BidEvent, IncrementTable } from "@auction/core";
+import type { AmlStatus, BidEvent, IncrementTable } from "@auction/core";
 import type {
   BidRecord,
   InvoiceRecord,
@@ -59,6 +59,12 @@ export function userRowToRecord(row: {
   payoutBankCode: string | null;
   payoutAccountNumber: string | null;
   payoutAccountHolder: string | null;
+  consignorLegalName: string | null;
+  consignorIdType: string | null;
+  consignorIdNumber: string | null;
+  consignorKycStatus: UserRecord["consignorKycStatus"];
+  consignorAmlStatus: AmlStatus;
+  consignorAmlNote: string | null;
 }): UserRecord {
   return {
     id: row.id,
@@ -70,6 +76,12 @@ export function userRowToRecord(row: {
     payoutBankCode: row.payoutBankCode,
     payoutAccountNumber: row.payoutAccountNumber,
     payoutAccountHolder: row.payoutAccountHolder,
+    consignorLegalName: row.consignorLegalName,
+    consignorIdType: row.consignorIdType,
+    consignorIdNumber: row.consignorIdNumber,
+    consignorKycStatus: row.consignorKycStatus,
+    consignorAmlStatus: row.consignorAmlStatus,
+    consignorAmlNote: row.consignorAmlNote,
   };
 }
 
