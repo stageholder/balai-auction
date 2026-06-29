@@ -24,6 +24,14 @@ export async function AccountNav() {
           Staff
         </Link>
       ) : null}
+      {user.role === "consignor" ? (
+        <Link
+          href="/account/verification"
+          className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+        >
+          Verification
+        </Link>
+      ) : null}
       <Link
         href="/invoices"
         className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
