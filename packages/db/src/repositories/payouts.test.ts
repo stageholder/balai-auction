@@ -11,6 +11,7 @@ import {
   releasePayout,
   markPayoutPaid,
   markPayoutFailed,
+  rearmPayout,
 } from "./payouts";
 
 const db = testDb();
@@ -166,5 +167,32 @@ describe("markPayoutFailed", () => {
 
   it("returns false for an unknown disbursement id", async () => {
     expect(await markPayoutFailed(db, "disb_unknown")).toBe(false);
+  });
+});
+
+describe("rearmPayout", () => {
+  it("returns a failed payout to pending and clears the disbursement id", async () => {
+    await consignedPaidSetup();
+    const raw = await db.payout.findFirst();
+    const payout = raw!;
+
+    // Release → failed transition
+    await releasePayout(db, payout.id, "disb_rearm");
+    await markPayoutFailed(db, "disb_rearm");
+
+    // Rearm back to pending
+    const rearmed = await rearmPayout(db, payout.id);
+    expect(rearmed?.status).toBe("pending");
+    expect(rearmed?.xenditDisbursementId).toBeNull();
+    expect(rearmed?.releasedAt).toBeNull();
+  });
+
+  it("returns null for a payout that is not failed", async () => {
+    const { lot } = await consignedPaidSetup();
+    const raw = await db.payout.findFirst();
+    const pendingPayout = raw!;
+
+    // Still pending, not failed
+    expect(await rearmPayout(db, pendingPayout.id)).toBeNull();
   });
 });

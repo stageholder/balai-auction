@@ -136,3 +136,19 @@ export async function markPayoutFailed(
   });
   return result.count > 0;
 }
+
+/** Guarded failed→pending transition. Clears xenditDisbursementId and releasedAt,
+ *  freeing the @unique disbursement id so the payout can be released again.
+ *  Returns the updated record, or null if the payout was not in failed state. */
+export async function rearmPayout(
+  db: PrismaClient,
+  payoutId: string
+): Promise<PayoutRecord | null> {
+  const claim = await db.payout.updateMany({
+    where: { id: payoutId, status: "failed" },
+    data: { status: "pending", xenditDisbursementId: null, releasedAt: null },
+  });
+  if (claim.count === 0) return null;
+  const row = await db.payout.findUnique({ where: { id: payoutId } });
+  return row ? payoutRowToRecord(row) : null;
+}
