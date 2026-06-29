@@ -39,7 +39,10 @@ export async function releasePayoutAction(
   let disb: { id: string; status: string };
   try {
     disb = await createDisbursement({
-      externalId: `payout-${payoutId}`,
+      // Per-attempt id: stable within one release (double-click → Xendit
+      // dedupes), fresh after a re-arm (releaseAttempt bumped) so a bounced
+      // payout can actually be re-disbursed rather than hitting the cached one.
+      externalId: `payout-${payoutId}-${payout.releaseAttempt}`,
       amount: payout.amount,
       bankCode,
       accountHolderName: accountHolder,

@@ -79,6 +79,7 @@ export function payoutRowToRecord(row: {
   consignorId: string;
   amount: bigint;
   status: PayoutRecord["status"];
+  releaseAttempt: number;
   xenditDisbursementId: string | null;
   createdAt: Date;
   releasedAt: Date | null;
@@ -90,6 +91,7 @@ export function payoutRowToRecord(row: {
     consignorId: row.consignorId,
     amount: toMoney(row.amount),
     status: row.status,
+    releaseAttempt: row.releaseAttempt,
     xenditDisbursementId: row.xenditDisbursementId,
     createdAt: row.createdAt,
     releasedAt: row.releasedAt,

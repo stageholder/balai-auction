@@ -185,6 +185,8 @@ describe("rearmPayout", () => {
     expect(rearmed?.status).toBe("pending");
     expect(rearmed?.xenditDisbursementId).toBeNull();
     expect(rearmed?.releasedAt).toBeNull();
+    // bumped so the next release uses a fresh idempotency key
+    expect(rearmed?.releaseAttempt).toBe(1);
   });
 
   it("returns null for a payout that is not failed", async () => {

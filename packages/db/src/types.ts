@@ -35,6 +35,7 @@ export interface PayoutRecord {
   consignorId: string;
   amount: number; // rupiah
   status: PayoutStatus;
+  releaseAttempt: number;
   xenditDisbursementId: string | null;
   createdAt: Date;
   releasedAt: Date | null;

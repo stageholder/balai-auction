@@ -146,7 +146,15 @@ export async function rearmPayout(
 ): Promise<PayoutRecord | null> {
   const claim = await db.payout.updateMany({
     where: { id: payoutId, status: "failed" },
-    data: { status: "pending", xenditDisbursementId: null, releasedAt: null },
+    // Bump releaseAttempt so the next release uses a fresh idempotency key
+    // (`payout-{id}-{attempt}`); reusing the prior key would make Xendit return
+    // the old FAILED disbursement instead of minting a new one.
+    data: {
+      status: "pending",
+      releaseAttempt: { increment: 1 },
+      xenditDisbursementId: null,
+      releasedAt: null,
+    },
   });
   if (claim.count === 0) return null;
   const row = await db.payout.findUnique({ where: { id: payoutId } });

@@ -36,8 +36,12 @@ a pending payout with missing bank details shows a disabled **Release** button
    (`failed → pending`, clears the disbursement id) so staff can release again.
 
 ## Idempotency / safety
-- `external_id = payout-{payoutId}` + `X-IDEMPOTENCY-KEY` → a duplicate/retry
-  release hits the same Xendit disbursement (no double-pay).
+- `external_id = payout-{payoutId}-{releaseAttempt}` + `X-IDEMPOTENCY-KEY` →
+  **within one release attempt** a double-click hits the same Xendit
+  disbursement (no double-pay). **Re-arm bumps `releaseAttempt`**, so a retry
+  after a bounced payout gets a *fresh* key and Xendit mints a new disbursement
+  (otherwise the reused key would return the original FAILED one and the
+  consignor could never be re-paid).
 - `Payout.xenditDisbursementId` is `@unique`; the webhook claims by it with a
   guarded `released → paid`/`failed` transition, so a duplicate callback is a
   safe no-op (returns 200, no second ledger entry).
