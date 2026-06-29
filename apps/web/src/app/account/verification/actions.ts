@@ -58,8 +58,11 @@ export async function submitConsignorKycAction(
     });
   } catch (err) {
     // Surface a typed error instead of an unhandled server-action crash (e.g. a
-    // DB hiccup or a session whose user row was since removed).
-    console.error(`consignor KYC submit failed for ${user.id}:`, err);
+    // DB hiccup or a session whose user row was since removed). Log only the
+    // error TYPE — a raw DB error can echo the submitted KYC PII (legal name /
+    // ID number) into logs.
+    const kind = err instanceof Error ? err.name : "unknown error";
+    console.error(`consignor KYC submit failed for ${user.id} (${kind})`);
     return { ok: false, error: "Submission failed. Please try again." };
   }
 
