@@ -22,7 +22,12 @@ export async function setConsignorKycStatusAction(
   if (!KYC_STATUSES.includes(status)) {
     return { ok: false, error: "Invalid KYC status" };
   }
-  await setConsignorKycStatus(prisma, userId, status);
+  try {
+    await setConsignorKycStatus(prisma, userId, status);
+  } catch (err) {
+    console.error(`set KYC status failed for ${userId} (${err instanceof Error ? err.name : "unknown"})`);
+    return { ok: false, error: "Could not save decision. Please try again." };
+  }
   revalidatePath("/staff/consignor-kyc");
   return { ok: true };
 }
@@ -37,10 +42,15 @@ export async function setConsignorAmlStatusAction(
     return { ok: false, error: "Invalid AML status" };
   }
   const trimmed = note?.trim();
-  await setConsignorAml(prisma, userId, {
-    amlStatus,
-    amlNote: trimmed ? trimmed : null,
-  });
+  try {
+    await setConsignorAml(prisma, userId, {
+      amlStatus,
+      amlNote: trimmed ? trimmed : null,
+    });
+  } catch (err) {
+    console.error(`set AML status failed for ${userId} (${err instanceof Error ? err.name : "unknown"})`);
+    return { ok: false, error: "Could not save decision. Please try again." };
+  }
   revalidatePath("/staff/consignor-kyc");
   return { ok: true };
 }
