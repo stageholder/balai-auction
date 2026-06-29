@@ -3,6 +3,7 @@ import type { PayoutStatus } from "@auction/db";
 import { prisma, listPayouts } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
+import { PayoutActions } from "./payout-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,7 @@ export default async function AdminPayoutsPage() {
                 <th className="py-2 text-right font-normal">Net</th>
                 <th className="py-2 font-normal">Bank details</th>
                 <th className="py-2 font-normal">Status</th>
+                <th className="py-2 text-right font-normal">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -111,6 +113,15 @@ export default async function AdminPayoutsPage() {
                       />
                       {STATUS_LABEL[p.status]}
                     </span>
+                  </td>
+                  <td className="py-3 pl-4">
+                    <div className="flex justify-end">
+                      <PayoutActions
+                        payoutId={p.id}
+                        status={p.status}
+                        hasBankDetails={p.hasBankDetails}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
