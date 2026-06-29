@@ -3,6 +3,7 @@ import {
   DEPARTMENTS,
   departmentLabel,
   isDepartmentSlug,
+  getDepartment,
 } from "./departments";
 
 describe("departments", () => {
@@ -26,5 +27,19 @@ describe("departments", () => {
     expect(departmentLabel("watches")).toBe("Watches");
     expect(departmentLabel("bogus")).toBeNull();
     expect(departmentLabel(null)).toBeNull();
+  });
+});
+
+describe("department editorial copy", () => {
+  it("every department has a non-empty blurb and description", () => {
+    for (const d of DEPARTMENTS) {
+      expect(d.blurb.trim().length).toBeGreaterThan(0);
+      expect(d.description.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it("getDepartment returns the entry for a known slug, else null", () => {
+    expect(getDepartment("watches")?.label).toBe("Watches");
+    expect(getDepartment("bogus")).toBeNull();
   });
 });
