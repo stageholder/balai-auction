@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma, listPublishedSales } from "@/lib/db";
@@ -6,6 +7,17 @@ import { partitionSalesByLifecycle } from "@/lib/lifecycle";
 import { getDepartment } from "@auction/core";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const department = getDepartment(slug);
+  if (!department) return { title: "Department" };
+  return { title: department.label, description: department.description };
+}
 
 export default async function DepartmentPage({
   params,
