@@ -47,10 +47,14 @@ export async function releasePayoutAction(
       description: `Consignor payout ${payoutId}`,
     });
   } catch (err) {
-    // A thrown Xendit error must not crash the action — surface it so staff can
-    // retry. The stable externalId keeps a later retry idempotent.
-    const detail = err instanceof Error ? err.message : "Disbursement failed.";
-    return { ok: false, error: detail };
+    // A thrown Xendit error must not crash the action — surface a generic
+    // message (the raw error can carry account-number fragments) and log the
+    // detail server-side. The stable externalId keeps a later retry idempotent.
+    console.error(`disbursement failed for payout ${payoutId}:`, err);
+    return {
+      ok: false,
+      error: "Disbursement failed — check the consignor's bank details and try again.",
+    };
   }
 
   await releasePayout(prisma, payoutId, disb.id);
@@ -64,7 +68,12 @@ export async function rearmPayoutAction(
   payoutId: string
 ): Promise<PayoutActionResult> {
   await requireStaff();
-  await rearmPayout(prisma, payoutId);
+  try {
+    await rearmPayout(prisma, payoutId);
+  } catch (err) {
+    console.error(`re-arm failed for payout ${payoutId}:`, err);
+    return { ok: false, error: "Could not re-arm the payout — try again." };
+  }
   revalidatePath("/admin/payouts");
   return { ok: true };
 }
