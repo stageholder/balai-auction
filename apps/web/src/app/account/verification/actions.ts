@@ -47,14 +47,21 @@ export async function submitConsignorKycAction(
     return { ok: false, error: "Please choose a valid identity document type." };
   }
 
-  await submitConsignorKyc(prisma, user.id, {
-    legalName,
-    idType,
-    idNumber,
-    bankCode,
-    accountNumber,
-    accountHolder,
-  });
+  try {
+    await submitConsignorKyc(prisma, user.id, {
+      legalName,
+      idType,
+      idNumber,
+      bankCode,
+      accountNumber,
+      accountHolder,
+    });
+  } catch (err) {
+    // Surface a typed error instead of an unhandled server-action crash (e.g. a
+    // DB hiccup or a session whose user row was since removed).
+    console.error(`consignor KYC submit failed for ${user.id}:`, err);
+    return { ok: false, error: "Submission failed. Please try again." };
+  }
 
   revalidatePath("/account/verification");
   return {
