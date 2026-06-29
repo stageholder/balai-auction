@@ -11,3 +11,4 @@ export * from "./live";
 export * from "./departments";
 export * from "./commission";
 export * from "./seller-settlement";
+export * from "./compliance";
