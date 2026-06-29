@@ -57,6 +57,54 @@ export async function createXenditInvoice(params: {
   return { id: data.id, invoiceUrl: data.invoice_url };
 }
 
+/** Create a Xendit disbursement (consignor payout) and return its id + status. */
+export async function createDisbursement(params: {
+  externalId: string;
+  amount: number;
+  bankCode: string;
+  accountHolderName: string;
+  accountNumber: string;
+  description: string;
+}): Promise<{ id: string; status: string }> {
+  const key = process.env.XENDIT_SECRET_KEY;
+  if (!key) throw new Error("XENDIT_SECRET_KEY is not set");
+
+  const auth = Buffer.from(`${key}:`).toString("base64");
+  const res = await fetch(`${XENDIT_API}/disbursements`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${auth}`,
+      "X-IDEMPOTENCY-KEY": params.externalId,
+    },
+    body: JSON.stringify({
+      external_id: params.externalId,
+      amount: params.amount,
+      bank_code: params.bankCode,
+      account_holder_name: params.accountHolderName,
+      account_number: params.accountNumber,
+      description: params.description,
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Xendit disbursement failed: ${res.status} ${detail}`);
+  }
+  const json = (await res.json()) as { id: string; status: string };
+  return { id: json.id, status: json.status };
+}
+
+/** True when a disbursement has been fully processed by Xendit. */
+export function isCompletedDisbursementStatus(status: string): boolean {
+  return status === "COMPLETED";
+}
+
+/** True when a disbursement has permanently failed. */
+export function isFailedDisbursementStatus(status: string): boolean {
+  return status === "FAILED";
+}
+
 /** Fetch an existing Xendit invoice (to reuse a still-pending one). Returns
  *  null if it cannot be retrieved. */
 export async function getXenditInvoice(
