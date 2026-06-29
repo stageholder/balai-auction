@@ -208,7 +208,7 @@ model Payout {
   consignor            User         @relation("ConsignorPayouts", fields: [consignorId], references: [id])
   amount               BigInt
   status               PayoutStatus @default(pending)
-  xenditDisbursementId String?
+  xenditDisbursementId String?      @unique
   createdAt            DateTime     @default(now())
   releasedAt           DateTime?
   paidAt               DateTime?
