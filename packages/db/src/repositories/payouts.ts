@@ -106,20 +106,21 @@ export async function markPayoutPaid(
     });
     if (claim.count === 0) return false;
 
-    const payout = await tx.payout.findFirst({
-      where: { xenditDisbursementId },
+    // The claim just set exactly this payout to "paid"; assert it (don't guard)
+    // so a missing row throws and rolls back rather than silently skipping the
+    // seller payout ledger entry — never lose a money record.
+    const payout = await tx.payout.findFirstOrThrow({
+      where: { xenditDisbursementId, status: "paid" },
     });
-    if (payout) {
-      const net = toMoney(payout.amount);
-      await tx.ledgerEntry.create({
-        data: {
-          lotId: payout.lotId,
-          party: "seller",
-          kind: "payout",
-          amount: toDbMoney(net),
-        },
-      });
-    }
+    const net = toMoney(payout.amount);
+    await tx.ledgerEntry.create({
+      data: {
+        lotId: payout.lotId,
+        party: "seller",
+        kind: "payout",
+        amount: toDbMoney(net),
+      },
+    });
     return true;
   });
 }
