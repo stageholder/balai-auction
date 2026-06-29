@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { consignorPayoutGate } from "@auction/core";
 import { prisma, getPayout, getUser, releasePayout, rearmPayout } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { createDisbursement } from "@/lib/xendit";
@@ -27,14 +28,19 @@ export async function releasePayoutAction(
     return { ok: false, error: "Payout is not pending — refresh to see its state." };
   }
 
-  // Consignor bank details live on the user (set on /admin/users).
+  // The single compliance gate (same source as listPayouts' display): a payout
+  // may only be released to a KYC-approved, AML-cleared consignor with bank
+  // details on file. Enforced server-side BEFORE any disbursement is created —
+  // no money moves to a non-compliant consignor regardless of the UI state.
   const consignor = await getUser(prisma, payout.consignorId);
-  const bankCode = consignor?.payoutBankCode?.trim();
-  const accountNumber = consignor?.payoutAccountNumber?.trim();
-  const accountHolder = consignor?.payoutAccountHolder?.trim();
-  if (!bankCode || !accountNumber || !accountHolder) {
-    return { ok: false, error: "Add payout bank details first." };
-  }
+  const gate = consignorPayoutGate({
+    kycStatus: consignor?.consignorKycStatus ?? "pending",
+    amlStatus: consignor?.consignorAmlStatus ?? "pending",
+    bankCode: consignor?.payoutBankCode ?? null,
+    accountNumber: consignor?.payoutAccountNumber ?? null,
+    accountHolder: consignor?.payoutAccountHolder ?? null,
+  });
+  if (!gate.ok) return { ok: false, error: gate.reason };
 
   let disb: { id: string; status: string };
   try {
@@ -44,9 +50,9 @@ export async function releasePayoutAction(
       // payout can actually be re-disbursed rather than hitting the cached one.
       externalId: `payout-${payoutId}-${payout.releaseAttempt}`,
       amount: payout.amount,
-      bankCode,
-      accountHolderName: accountHolder,
-      accountNumber,
+      bankCode: consignor!.payoutBankCode!,
+      accountHolderName: consignor!.payoutAccountHolder!,
+      accountNumber: consignor!.payoutAccountNumber!,
       description: `Consignor payout ${payoutId}`,
     });
   } catch (err) {

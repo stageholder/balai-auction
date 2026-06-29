@@ -27,11 +27,13 @@ const QUIET = "text-xs uppercase tracking-[0.12em] text-muted";
 export function PayoutActions({
   payoutId,
   status,
-  hasBankDetails,
+  releaseReady,
+  releaseBlockedReason,
 }: {
   payoutId: string;
   status: PayoutStatus;
-  hasBankDetails: boolean;
+  releaseReady: boolean;
+  releaseBlockedReason: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -80,18 +82,25 @@ export function PayoutActions({
     );
   }
 
-  // pending — Release only where it can succeed (bank details on file).
+  // pending — Release only where the compliance gate is satisfied (KYC approved,
+  // AML cleared, bank details on file). The server re-checks the same gate; this
+  // just keeps the live-money button from being pressed when it would only fail.
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex flex-col items-end gap-1">
       <button
         type="button"
-        disabled={pending || !hasBankDetails}
-        title={hasBankDetails ? undefined : "Add payout bank details first"}
+        disabled={pending || !releaseReady}
+        title={releaseReady ? undefined : releaseBlockedReason ?? undefined}
         onClick={() => run(() => releasePayoutAction(payoutId))}
         className={cn(BTN_PRIMARY, pending && "opacity-60")}
       >
         {pending ? "Releasing…" : "Release"}
       </button>
+      {!releaseReady && releaseBlockedReason ? (
+        <span className="max-w-[14rem] text-right text-[0.65rem] uppercase tracking-[0.1em] text-muted">
+          {releaseBlockedReason}
+        </span>
+      ) : null}
       {error ? (
         <span className="text-xs uppercase tracking-[0.12em] text-accent">
           {error}

@@ -23,6 +23,20 @@ const STATUS_DOT: Record<PayoutStatus, string> = {
   failed: "bg-accent",
 };
 
+/** One compliance check, read at a glance: the label stays quiet (muted) while
+ *  the mark carries the verdict — settled in ink (✓), unmet in accent (✗). */
+function ComplianceMark({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-muted">
+      <span aria-hidden="true" className={ok ? "text-ink" : "text-accent"}>
+        {ok ? "✓" : "✗"}
+      </span>
+      <span>{label}</span>
+      <span className="sr-only">{ok ? "cleared" : "not cleared"}</span>
+    </span>
+  );
+}
+
 export default async function AdminPayoutsPage() {
   await requireStaff();
   const payouts = await listPayouts(prisma);
@@ -68,7 +82,7 @@ export default async function AdminPayoutsPage() {
                 <th className="py-2 text-right font-normal">Hammer</th>
                 <th className="py-2 text-right font-normal">Commission</th>
                 <th className="py-2 text-right font-normal">Net</th>
-                <th className="py-2 font-normal">Bank details</th>
+                <th className="py-2 font-normal">Compliance</th>
                 <th className="py-2 font-normal">Status</th>
                 <th className="py-2 text-right font-normal">Action</th>
               </tr>
@@ -91,19 +105,27 @@ export default async function AdminPayoutsPage() {
                     {formatRupiah(p.net)}
                   </td>
                   <td className="py-3 pr-4">
-                    {p.hasBankDetails ? (
-                      <span className="text-ink">On file</span>
-                    ) : (
-                      <span className="text-muted">
-                        <span className="text-accent">Missing</span>{" "}
-                        <Link
-                          href="/admin/users"
-                          className="underline decoration-line underline-offset-2 hover:decoration-ink"
-                        >
-                          Add in Users
-                        </Link>
-                      </span>
-                    )}
+                    <div className="flex items-center gap-x-3 gap-y-1 text-[0.7rem] uppercase tracking-[0.1em]">
+                      <ComplianceMark
+                        label="KYC"
+                        ok={p.consignorKycStatus === "approved"}
+                      />
+                      <span aria-hidden="true" className="text-line">·</span>
+                      <ComplianceMark
+                        label="AML"
+                        ok={p.consignorAmlStatus === "cleared"}
+                      />
+                      <span aria-hidden="true" className="text-line">·</span>
+                      <ComplianceMark label="Bank" ok={p.hasBankDetails} />
+                    </div>
+                    {!p.hasBankDetails ? (
+                      <Link
+                        href="/admin/users"
+                        className="mt-1 inline-block text-[0.65rem] uppercase tracking-[0.1em] text-muted underline decoration-line underline-offset-2 hover:decoration-ink hover:text-ink"
+                      >
+                        Add bank in Users
+                      </Link>
+                    ) : null}
                   </td>
                   <td className="py-3">
                     <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-ink">
@@ -119,7 +141,8 @@ export default async function AdminPayoutsPage() {
                       <PayoutActions
                         payoutId={p.id}
                         status={p.status}
-                        hasBankDetails={p.hasBankDetails}
+                        releaseReady={p.releaseReady}
+                        releaseBlockedReason={p.releaseBlockedReason}
                       />
                     </div>
                   </td>
