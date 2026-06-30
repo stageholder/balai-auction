@@ -45,82 +45,93 @@ export function HomeHero({
   return (
     <section
       aria-label="Featured sale"
-      className="relative h-[78vh] min-h-[34rem] w-full overflow-hidden bg-ink"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      className="grid grid-cols-1 lg:grid-cols-2"
     >
-      {/* Slides — cross-fade, no layout shift */}
-      {slides.map((slide, i) => (
-        <div
-          key={slide.src + i}
-          aria-hidden={i !== active}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
-            i === active ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <Image
-            src={slide.src}
-            alt={i === active ? slide.alt : ""}
-            fill
-            priority={i === 0}
-            sizes="100vw"
-            className="object-cover"
-          />
-        </div>
-      ))}
-
-      {/* Legibility scrim — deep on the left where the copy sits */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-ink/20"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/25"
-      />
-
-      {/* Copy + CTAs */}
-      <div className="relative mx-auto flex h-full max-w-6xl flex-col justify-end px-6 pb-16">
-        <p className="font-sans text-[11px] uppercase tracking-[0.34em] text-paper/75">
-          {eyebrow}
-        </p>
-        <h1 className="mt-4 max-w-3xl font-serif text-5xl leading-[0.98] tracking-tight text-paper md:text-7xl">
-          Art and collections,
-          <br />
-          brought to the rostrum.
-        </h1>
-        {saleTitle ? (
-          <p className="mt-6 max-w-xl font-sans text-sm leading-relaxed text-paper/80">
-            Now on view — <span className="text-paper">{saleTitle}</span>. Live
-            sales, the upcoming calendar, and results from the room, open to
-            browse with no account required.
+      {/* LEFT — copy + CTAs on a solid ink panel, fully legible */}
+      <div className="order-2 flex flex-col justify-center bg-ink px-6 py-14 sm:px-10 lg:order-1 lg:min-h-[70vh] lg:px-16">
+        <div className="w-full max-w-xl lg:ml-auto lg:mr-0 lg:max-w-lg">
+          <p className="font-sans text-[11px] uppercase tracking-[0.34em] text-paper/70">
+            {eyebrow}
           </p>
-        ) : (
-          <p className="mt-6 max-w-xl font-sans text-sm leading-relaxed text-paper/80">
-            Live sales, the upcoming calendar, and results from the room — open
-            to browse, no account required.
-          </p>
-        )}
+          <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-paper md:text-6xl">
+            Art and collections,
+            <br />
+            brought to the rostrum.
+          </h1>
+          {saleTitle ? (
+            <p className="mt-6 max-w-md font-sans text-sm leading-relaxed text-paper/75">
+              Now on view —{" "}
+              <span className="text-paper">{saleTitle}</span>. Live sales, the
+              upcoming calendar, and results from the room, open to browse with
+              no account required.
+            </p>
+          ) : (
+            <p className="mt-6 max-w-md font-sans text-sm leading-relaxed text-paper/75">
+              Live sales, the upcoming calendar, and results from the room —
+              open to browse, no account required.
+            </p>
+          )}
 
-        <div className="mt-9 flex flex-wrap items-center gap-3">
-          {saleId ? (
-            <Button asChild size="lg" variant="accent">
-              <Link href={`/sales/${saleId}`}>Browse the sale</Link>
+          <div className="mt-9 flex flex-wrap items-center gap-3">
+            {saleId ? (
+              <Button asChild size="lg" variant="accent">
+                <Link href={`/sales/${saleId}`}>Browse the sale</Link>
+              </Button>
+            ) : null}
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-paper/40 bg-transparent text-paper hover:bg-paper/10 hover:text-paper"
+            >
+              <Link href="/auctions">View all auctions</Link>
             </Button>
-          ) : null}
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="border-paper/40 bg-transparent text-paper hover:bg-paper/10 hover:text-paper"
-          >
-            <Link href="/auctions">View all auctions</Link>
-          </Button>
+          </div>
         </div>
+      </div>
 
-        {/* Progress dots */}
+      {/* RIGHT — featured imagery; the slideshow lives here, contained */}
+      <div
+        className="relative order-1 min-h-[44vh] overflow-hidden bg-secondary lg:order-2 lg:min-h-[70vh]"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {slides.map((slide, i) => (
+          <div
+            key={slide.src + i}
+            aria-hidden={i !== active}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
+              i === active ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <Image
+              src={slide.src}
+              alt={i === active ? slide.alt : ""}
+              fill
+              priority={i === 0}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
+        ))}
+
+        {/* Soft edge so the image meets the ink panel without a hard seam */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-ink/25 to-transparent lg:block"
+        />
+
+        {/* Wordmark watermark, top-right of the image */}
+        <span
+          aria-hidden="true"
+          className="absolute right-5 top-5 font-serif text-sm tracking-[0.3em] text-paper drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)]"
+        >
+          {SITE.name}
+        </span>
+
+        {/* Slide indicators */}
         {slides.length > 1 ? (
-          <div className="mt-10 flex items-center gap-2">
+          <div className="absolute bottom-5 left-5 flex items-center gap-2">
             {slides.map((slide, i) => (
               <button
                 key={"dot-" + slide.src + i}
@@ -128,13 +139,13 @@ export function HomeHero({
                 aria-label={`Show slide ${i + 1}`}
                 aria-current={i === active}
                 onClick={() => setActive(i)}
-                className="group/dot h-3 py-1"
+                className="group/dot h-4 py-1.5"
               >
                 <span
-                  className={`block h-px w-10 transition-all duration-500 ${
+                  className={`block h-px w-9 transition-all duration-500 ${
                     i === active
                       ? "bg-paper"
-                      : "bg-paper/35 group-hover/dot:bg-paper/60"
+                      : "bg-paper/45 group-hover/dot:bg-paper/75"
                   }`}
                 />
               </button>
@@ -142,14 +153,6 @@ export function HomeHero({
           </div>
         ) : null}
       </div>
-
-      {/* Wordmark watermark, top-right */}
-      <span
-        aria-hidden="true"
-        className="absolute right-6 top-6 font-serif text-sm tracking-[0.3em] text-paper/70"
-      >
-        {SITE.name}
-      </span>
     </section>
   );
 }
