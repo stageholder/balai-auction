@@ -115,3 +115,26 @@ export async function updateLot(
   });
   return lotRowToRecord(row);
 }
+
+/**
+ * Cover image per sale (the first lot's first image), for image-forward sale
+ * cards. One query; sales with no lots/images map to null.
+ */
+export async function getSaleCoverImages(
+  db: PrismaClient,
+  saleIds: string[]
+): Promise<Record<string, string | null>> {
+  if (saleIds.length === 0) return {};
+  const lots = await db.lot.findMany({
+    where: { saleId: { in: saleIds } },
+    orderBy: [{ saleId: "asc" }, { lotNumber: "asc" }],
+    select: { saleId: true, images: true },
+  });
+  const covers: Record<string, string | null> = {};
+  for (const lot of lots) {
+    if (lot.saleId in covers) continue; // keep the lowest lotNumber per sale
+    const images = Array.isArray(lot.images) ? (lot.images as string[]) : [];
+    covers[lot.saleId] = images[0] ?? null;
+  }
+  return covers;
+}

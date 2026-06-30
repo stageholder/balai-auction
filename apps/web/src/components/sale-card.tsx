@@ -1,7 +1,28 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { SaleRecord } from "@auction/db";
+import { Badge } from "@/components/ui/badge";
+import { SITE } from "@/lib/site";
 
-export function SaleCard({ sale }: { sale: SaleRecord }) {
+const STATUS_LABEL: Record<string, string> = {
+  live: "Live now",
+  scheduled: "Upcoming",
+  closed: "Results",
+};
+
+function statusBadgeVariant(status: string): "default" | "outline" | "muted" {
+  if (status === "live") return "default";
+  if (status === "closed") return "muted";
+  return "outline";
+}
+
+export function SaleCard({
+  sale,
+  cover,
+}: {
+  sale: SaleRecord;
+  cover?: string | null;
+}) {
   const startDate = sale.startsAt.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
@@ -12,36 +33,59 @@ export function SaleCard({ sale }: { sale: SaleRecord }) {
     month: "long",
     year: "numeric",
   });
+  const label = STATUS_LABEL[sale.status] ?? sale.status;
 
   return (
     <Link href={`/sales/${sale.id}`} className="group block">
-      <article className="relative overflow-hidden border-b border-line py-8 transition-colors duration-300 hover:border-ink">
-        {/* Left accent rail — fades in on hover */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 h-full w-px bg-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        />
+      <article className="flex flex-col">
+        {/* Cover — image hero with a slow editorial zoom on hover */}
+        <div className="relative aspect-[3/2] overflow-hidden bg-secondary">
+          {cover ? (
+            <Image
+              src={cover}
+              alt={sale.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.05]"
+            />
+          ) : (
+            // Graceful fallback — a tasteful muted panel with the wordmark,
+            // never a broken image.
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-secondary">
+              <span className="font-serif text-3xl tracking-[0.18em] text-muted-foreground/70">
+                {SITE.name}
+              </span>
+              <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground/60">
+                {sale.category ?? "Catalogue"}
+              </span>
+            </div>
+          )}
 
-        <div className="pl-5">
-          {/* Status label */}
-          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            {sale.status}
-          </p>
+          {/* Status badge floats over the image */}
+          <div className="absolute left-3 top-3">
+            <Badge variant={statusBadgeVariant(sale.status)}>{label}</Badge>
+          </div>
 
-          {/* Sale title — primary hierarchy */}
-          <h2 className="font-serif mt-3 text-3xl leading-none tracking-tight text-ink">
+          {/* A hairline that ignites crimson on hover */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-500 group-hover:scale-x-100"
+          />
+        </div>
+
+        {/* Catalogue entry */}
+        <div className="pt-5">
+          <h2 className="font-serif text-2xl leading-tight tracking-tight text-ink transition-colors duration-300 group-hover:text-primary">
             {sale.title}
           </h2>
 
-          {/* Description */}
           {sale.description ? (
-            <p className="mt-3 font-sans text-sm leading-relaxed text-muted-foreground line-clamp-2">
+            <p className="mt-2 font-sans text-sm leading-relaxed text-muted-foreground line-clamp-2">
               {sale.description}
             </p>
           ) : null}
 
-          {/* Date range */}
-          <p className="tnum mt-5 font-sans text-[11px] text-muted-foreground">
+          <p className="tnum mt-4 font-sans text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
             {startDate} — {endDate}
           </p>
         </div>
