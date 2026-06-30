@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "../generated/client";
 import { registrationRowToRecord } from "../mappers";
 import type {
   KycStatus,

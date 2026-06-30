@@ -1,5 +1,5 @@
 import { computeInvoice, settleLot } from "@auction/core";
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "../generated/client";
 import { toDbMoney } from "../mappers";
 import { getLotsDueToClose, getLot } from "./lots";
 import { getSale } from "./sales";

@@ -10,5 +10,6 @@
     "types": ["node"],
     "outDir": "dist"
   },
-  "include": ["src", "prisma"]
+  "include": ["src", "prisma"],
+  "exclude": ["src/generated"]
 }

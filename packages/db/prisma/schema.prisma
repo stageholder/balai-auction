@@ -1,5 +1,8 @@
 generator client {
   provider      = "prisma-client-js"
+  // Custom output inside the package (not the pnpm store) so Next reliably
+  // traces the query engine into the serverless bundle — the monorepo fix.
+  output        = "../src/generated/client"
   // "native" for local; "rhel-openssl-3.0.x" is the Vercel (AWS Lambda) runtime.
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
