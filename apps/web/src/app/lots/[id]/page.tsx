@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration, getLotHammer, isWatched } from "@/lib/db";
-import { resolveBids, nextBidFloor } from "@auction/core";
+import { resolveBids, nextBidFloor, departmentLabel } from "@auction/core";
 import { getCurrentUser } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { LotLive } from "./lot-live";
 import { SaveButton } from "./save-button";
 
@@ -15,6 +17,16 @@ type BidGate =
   | { kind: "signin" }
   | { kind: "register"; saleId: string }
   | { kind: "closed" };
+
+function statusBadge(
+  status: string
+): { label: string; variant: "default" | "muted" | "outline" } {
+  if (status === "live") return { label: "● Live", variant: "default" };
+  if (status === "sold" || status === "paid" || status === "fulfilled")
+    return { label: "Sold", variant: "muted" };
+  if (status === "unsold") return { label: "Unsold", variant: "muted" };
+  return { label: status, variant: "outline" };
+}
 
 export default async function LotPage({
   params,
@@ -80,18 +92,31 @@ export default async function LotPage({
   }
 
   const cover = lot.images[0];
+  const department = departmentLabel(sale.category);
+  const badge = statusBadge(lot.status);
 
   return (
     <article className="pb-24">
       {/* ── breadcrumb-style lot designator ── */}
-      <div className="mb-10 flex items-center gap-3">
-        <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-          Catalogue
-        </span>
+      <div className="mb-10 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <Link
+          href={`/sales/${sale.id}`}
+          className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground underline-offset-4 transition-colors hover:text-ink hover:underline"
+        >
+          {sale.title}
+        </Link>
         <span aria-hidden="true" className="h-px w-8 bg-line" />
         <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           Lot {lot.lotNumber}
         </span>
+        <Badge variant={badge.variant} className="ml-1">
+          {badge.label}
+        </Badge>
+        {department ? (
+          <span className="ml-auto font-sans text-[10px] uppercase tracking-[0.28em] text-primary">
+            {department}
+          </span>
+        ) : null}
       </div>
 
       {/* ── two-column layout: image | details ── */}
@@ -157,7 +182,7 @@ export default async function LotPage({
           </div>
 
           {/* Hairline separator */}
-          <div aria-hidden="true" className="mt-4 mb-5 h-px bg-line" />
+          <Separator className="mt-4 mb-5 bg-line" />
 
           {/* Title — display serif, generous leading */}
           <h1 className="font-serif text-[2.6rem] leading-[1.15] tracking-tight text-ink">
@@ -165,7 +190,7 @@ export default async function LotPage({
           </h1>
 
           {/* Hairline separator */}
-          <div aria-hidden="true" className="mt-8 mb-7 h-px bg-line" />
+          <Separator className="mt-8 mb-7 bg-line" />
 
           {/* Price block — structured catalogue entry */}
           <div className="space-y-5">
@@ -193,7 +218,7 @@ export default async function LotPage({
           </div>
 
           {/* Hairline separator */}
-          <div aria-hidden="true" className="mt-7 mb-7 h-px bg-line" />
+          <Separator className="mt-7 mb-7 bg-line" />
 
           {/* Description — editorial prose */}
           {lot.description ? (
