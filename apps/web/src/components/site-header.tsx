@@ -4,34 +4,59 @@ import { SITE } from "@/lib/site";
 const NAV_LINK =
   "text-xs uppercase tracking-[0.15em] text-muted transition-colors hover:text-ink";
 
+const NAV_ITEMS = [
+  { href: "/auctions", label: "Auctions" },
+  { href: "/auctions?lifecycle=past", label: "Results" },
+  { href: "/departments", label: "Departments" },
+  { href: "/sell", label: "Sell" },
+] as const;
+
 export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
   return (
     <header className="border-b border-line">
       <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-10 gap-y-4 px-6 py-6">
-        <div className="flex items-baseline gap-8 md:gap-10">
+        <div className="flex items-baseline gap-6 md:gap-10">
           <Link href="/" className="font-serif text-2xl tracking-[0.2em]">
             {SITE.name}
           </Link>
 
+          {/* Mobile: primary nav collapses behind a native disclosure */}
+          <details className="group relative md:hidden">
+            <summary
+              className="flex cursor-pointer list-none items-baseline gap-1.5 text-xs uppercase tracking-[0.15em] text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden"
+              aria-label="Toggle navigation menu"
+            >
+              Menu
+              <span
+                aria-hidden="true"
+                className="text-[0.7rem] leading-none transition-transform duration-200 group-open:rotate-45"
+              >
+                +
+              </span>
+            </summary>
+
+            <nav
+              aria-label="Primary"
+              className="absolute left-0 top-full z-20 mt-4 flex w-48 flex-col gap-4 border border-line bg-paper px-5 py-5"
+            >
+              {NAV_ITEMS.map((item) => (
+                <Link key={item.href} href={item.href} className={NAV_LINK}>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </details>
+
+          {/* Desktop: primary nav inline */}
           <nav
             aria-label="Primary"
-            className="flex items-baseline gap-6 md:gap-8"
+            className="hidden items-baseline gap-6 md:flex md:gap-8"
           >
-            <Link href="/auctions" className={NAV_LINK}>
-              Auctions
-            </Link>
-
-            <Link href="/auctions?lifecycle=past" className={NAV_LINK}>
-              Results
-            </Link>
-
-            <Link href="/departments" className={NAV_LINK}>
-              Departments
-            </Link>
-
-            <Link href="/sell" className={NAV_LINK}>
-              Sell
-            </Link>
+            {NAV_ITEMS.map((item) => (
+              <Link key={item.href} href={item.href} className={NAV_LINK}>
+                {item.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
