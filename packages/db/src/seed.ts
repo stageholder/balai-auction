@@ -343,6 +343,34 @@ async function main(): Promise<void> {
     sellerEstimate: 30_000_000,
   });
 
+  // Give every lot a small multi-image gallery (its own image + two siblings
+  // from the same sale) so the lot page gallery + hover-zoom has thumbnails.
+  const allSales = await prisma.sale.findMany({ select: { id: true } });
+  for (const s of allSales) {
+    const lots = await prisma.lot.findMany({
+      where: { saleId: s.id },
+      orderBy: { lotNumber: "asc" },
+      select: { id: true, images: true },
+    });
+    const pool = lots
+      .map((l) => (Array.isArray(l.images) ? (l.images as string[])[0] : null))
+      .filter((x): x is string => !!x);
+    if (pool.length === 0) continue;
+    for (let i = 0; i < lots.length; i++) {
+      const gallery = [
+        pool[i],
+        pool[(i + 1) % pool.length],
+        pool[(i + 2) % pool.length],
+      ]
+        .filter((v): v is string => typeof v === "string")
+        .filter((v, idx, a) => a.indexOf(v) === idx);
+      const lotId = lots[i]?.id;
+      if (lotId) {
+        await prisma.lot.update({ where: { id: lotId }, data: { images: gallery } });
+      }
+    }
+  }
+
   console.log(
     `Seeded ${salesCount} sales / ${lotsCount} lots ` +
       `(1 live, 2 scheduled, 2 closed with realized prices), ` +

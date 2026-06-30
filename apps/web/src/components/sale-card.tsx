@@ -10,10 +10,12 @@ const STATUS_LABEL: Record<string, string> = {
   closed: "Results",
 };
 
-function statusBadgeVariant(status: string): "default" | "outline" | "muted" {
-  if (status === "live") return "default";
-  if (status === "closed") return "muted";
-  return "outline";
+/** Solid, legible-over-image badge colours per lifecycle (no transparent
+ *  outline). Live = crimson; Upcoming = ink; Results = soft ink. */
+function statusBadgeClass(status: string): string {
+  if (status === "live") return "bg-primary text-primary-foreground";
+  if (status === "closed") return "bg-ink/75 text-paper";
+  return "bg-ink text-paper"; // scheduled / upcoming
 }
 
 export function SaleCard({
@@ -63,7 +65,9 @@ export function SaleCard({
 
           {/* Status badge floats over the image */}
           <div className="absolute left-3 top-3">
-            <Badge variant={statusBadgeVariant(sale.status)}>{label}</Badge>
+            <Badge className={`border-transparent shadow-sm ${statusBadgeClass(sale.status)}`}>
+              {label}
+            </Badge>
           </div>
 
           {/* A hairline that ignites crimson on hover */}

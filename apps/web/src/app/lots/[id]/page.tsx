@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration, getLotHammer, isWatched, listBidsForLot } from "@/lib/db";
@@ -8,6 +7,7 @@ import { formatRupiah } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { BidActivity } from "@/components/bid-activity";
+import { LotGallery } from "./lot-gallery";
 import { LotLive } from "./lot-live";
 import { SaveButton } from "./save-button";
 
@@ -95,7 +95,6 @@ export default async function LotPage({
     live = { currentPrice, gate };
   }
 
-  const cover = lot.images[0];
   const department = departmentLabel(sale.category);
   const badge = statusBadge(lot.status);
 
@@ -131,25 +130,7 @@ export default async function LotPage({
           {/* Outer mount — warm cream, inset shadow */}
           <div className="relative bg-paper p-4 ring-1 ring-line">
             {/* Inner image frame */}
-            <div className="relative aspect-[4/5] overflow-hidden bg-line">
-              {cover ? (
-                <Image
-                  src={cover}
-                  alt={lot.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 55vw"
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                // Placeholder when no image — gallery-grey
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-sans text-xs uppercase tracking-widest text-muted-foreground opacity-40">
-                    Image unavailable
-                  </span>
-                </div>
-              )}
-            </div>
+            <LotGallery images={lot.images} alt={lot.title} />
 
             {/* Caption strip — lot number etched beneath the image */}
             <div className="mt-3 flex items-center justify-between">

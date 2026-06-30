@@ -35,16 +35,10 @@ export async function AccountNav() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Account menu"
-        className="group inline-flex items-center gap-2 rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="inline-flex items-center rounded-full outline-none transition-shadow hover:ring-2 hover:ring-primary/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-paper data-[state=open]:ring-2 data-[state=open]:ring-primary/30"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-serif text-sm leading-none text-primary-foreground">
           {initial}
-        </span>
-        <span
-          aria-hidden="true"
-          className="text-[0.6rem] text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180"
-        >
-          ▾
         </span>
       </DropdownMenuTrigger>
 
