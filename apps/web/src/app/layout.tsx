@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteChrome } from "@/components/site-chrome";
 import { AccountNav } from "@/components/account-nav";
 import { Toaster } from "@/components/ui/sonner";
 import { SITE } from "@/lib/site";
@@ -32,9 +31,7 @@ export default function RootLayout({
           showSpinner={false}
           shadow="0 0 8px rgba(155,27,48,0.6)"
         />
-        <SiteHeader accountSlot={<AccountNav />} />
-        <main className="mx-auto max-w-6xl px-6 py-12">{children}</main>
-        <SiteFooter />
+        <SiteChrome accountSlot={<AccountNav />}>{children}</SiteChrome>
         <Toaster position="top-center" />
       </body>
     </html>

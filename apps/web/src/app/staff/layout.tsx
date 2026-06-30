@@ -1,9 +1,9 @@
 import { requireStaff } from "@/lib/auth";
-import { ConsoleShell } from "./console-shell";
+import { ConsoleShell } from "../admin/console-shell";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLayout({
+export default async function StaffLayout({
   children,
 }: {
   children: React.ReactNode;

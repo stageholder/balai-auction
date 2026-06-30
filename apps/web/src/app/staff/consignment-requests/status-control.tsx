@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { ConsignmentRequestStatus } from "@auction/db";
 import { cn } from "@/lib/utils";
 import {
@@ -40,8 +41,10 @@ export function StatusControl({
         await setConsignmentRequestStatusAction(id, target);
       if (!result.ok) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success(`Marked ${target}`);
       router.refresh();
     });
   }

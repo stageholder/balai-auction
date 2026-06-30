@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { KycStatus, AmlStatus } from "@auction/db";
 import { cn } from "@/lib/utils";
 import {
@@ -39,14 +40,16 @@ export function ReviewControls({
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState(amlNote ?? "");
 
-  function run(action: () => Promise<ReviewActionResult>) {
+  function run(action: () => Promise<ReviewActionResult>, successMsg: string) {
     setError(null);
     startTransition(async () => {
       const result = await action();
       if (!result.ok) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success(successMsg);
       router.refresh();
     });
   }
@@ -58,7 +61,12 @@ export function ReviewControls({
         type="button"
         disabled={pending || active}
         aria-pressed={active}
-        onClick={() => run(() => setConsignorKycStatusAction(userId, target))}
+        onClick={() =>
+          run(
+            () => setConsignorKycStatusAction(userId, target),
+            `KYC ${target}`
+          )
+        }
         className={active ? BTN_ACTIVE : adverse ? BTN_ADVERSE : BTN_SOLID}
       >
         {active ? `${label} ✓` : label}
@@ -74,7 +82,10 @@ export function ReviewControls({
         disabled={pending || active}
         aria-pressed={active}
         onClick={() =>
-          run(() => setConsignorAmlStatusAction(userId, target, note))
+          run(
+            () => setConsignorAmlStatusAction(userId, target, note),
+            `AML ${target}`
+          )
         }
         className={active ? BTN_ACTIVE : adverse ? BTN_ADVERSE : BTN_SOLID}
       >

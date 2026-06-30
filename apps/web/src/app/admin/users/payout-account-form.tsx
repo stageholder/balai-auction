@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { setConsignorPayoutAccountAction } from "./actions";
 
@@ -55,11 +56,13 @@ export function PayoutAccountForm({
               accountHolder: values.accountHolder.trim(),
             });
             setDone(true);
+            toast.success("Payout account saved");
             router.refresh();
           } catch {
             // Surface the failure so staff don't believe a payout account was
             // saved when it wasn't (a silent miss would break a later release).
             setError(true);
+            toast.error("Could not save payout account");
           }
         });
       }}

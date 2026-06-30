@@ -1,7 +1,18 @@
+import { Check } from "lucide-react";
 import type { KycStatus, AmlStatus } from "@auction/db";
 import { prisma, listConsignorsForReview } from "@/lib/db";
 import { screenName } from "@auction/core";
 import { requireStaff } from "@/lib/auth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { ReviewControls } from "./review-controls";
 
 export const dynamic = "force-dynamic";
@@ -18,37 +29,27 @@ const AML_LABEL: Record<AmlStatus, string> = {
   flagged: "Flagged",
 };
 
-// Status marker colour, tokens only. Pending awaits a decision (muted);
-// the affirming outcome reads as settled (ink); the adverse outcome is the
-// one that needs eyes (accent).
-const KYC_DOT: Record<KycStatus, string> = {
-  pending: "bg-muted-foreground",
-  approved: "bg-ink",
-  rejected: "bg-primary",
+// Tokens only. Pending awaits a decision (muted); the affirming outcome reads as
+// settled (outline/secondary ink); the adverse outcome needs eyes (destructive).
+const KYC_VARIANT: Record<KycStatus, NonNullable<BadgeProps["variant"]>> = {
+  pending: "muted",
+  approved: "outline",
+  rejected: "destructive",
 };
 
-const AML_DOT: Record<AmlStatus, string> = {
-  pending: "bg-muted-foreground",
-  cleared: "bg-ink",
-  flagged: "bg-primary",
+const AML_VARIANT: Record<AmlStatus, NonNullable<BadgeProps["variant"]>> = {
+  pending: "muted",
+  cleared: "outline",
+  flagged: "destructive",
 };
-
-function StatusMarker({ dot, label }: { dot: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-ink">
-      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${dot}`} />
-      {label}
-    </span>
-  );
-}
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
+      <dt className="text-[0.55rem] uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-ink">{value}</dd>
+      <dd className="mt-0.5 text-sm text-ink">{value}</dd>
     </div>
   );
 }
@@ -63,157 +64,169 @@ export default async function StaffConsignorKycPage() {
   ).length;
 
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-2xl">Consignor KYC</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Identity, sanctions screening and AML decisions for consignors.
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="font-serif text-3xl text-ink">Consignor KYC</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Identity, sanctions screening and AML decisions for consignors.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {submitted.length > 0 ? (
-            <>
-              {" "}
+            <Badge variant="muted" className="tnum">
               {submitted.length} submitted
-              {flaggedCount > 0 ? (
-                <span className="text-primary">
-                  {" · "}
-                  {flaggedCount} with possible sanctions match
-                </span>
-              ) : null}
-              .
-            </>
+            </Badge>
           ) : null}
-        </p>
-      </header>
+          {flaggedCount > 0 ? (
+            <Badge variant="destructive" className="tnum">
+              {flaggedCount} possible sanctions match
+            </Badge>
+          ) : null}
+        </div>
+      </div>
 
       {consignors.length === 0 ? (
-        <p className="text-muted-foreground">No consignors on file.</p>
+        <Card>
+          <CardContent className="py-10 text-center text-muted-foreground">
+            No consignors on file.
+          </CardContent>
+        </Card>
       ) : (
-        <ul className="flex flex-col gap-px bg-line">
-          {consignors.map((c) => {
-            const legalName = c.consignorLegalName;
-            const hasSubmitted = Boolean(legalName);
-            const matches = screenName(legalName ?? "");
-            const hasBank = Boolean(
-              c.payoutBankCode && c.payoutAccountNumber && c.payoutAccountHolder
-            );
-            // Show the destination (masked) so a reviewer can see if the payout
-            // account changed since the last decision — not just "on file: yes".
-            const acct = c.payoutAccountNumber?.trim() ?? "";
-            const maskedAccount = acct
-              ? `····${acct.slice(-4)}`
-              : "";
-            const payoutDest = hasBank
-              ? `${c.payoutBankCode} ${maskedAccount} · ${c.payoutAccountHolder}`
-              : "Not provided";
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[18rem]">Consignor</TableHead>
+                  <TableHead>Identity &amp; screening</TableHead>
+                  <TableHead className="w-[20rem]">Decision</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {consignors.map((c) => {
+                  const legalName = c.consignorLegalName;
+                  const hasSubmitted = Boolean(legalName);
+                  const matches = screenName(legalName ?? "");
+                  const hasBank = Boolean(
+                    c.payoutBankCode &&
+                      c.payoutAccountNumber &&
+                      c.payoutAccountHolder
+                  );
+                  const acct = c.payoutAccountNumber?.trim() ?? "";
+                  const maskedAccount = acct ? `····${acct.slice(-4)}` : "";
+                  const payoutDest = hasBank
+                    ? `${c.payoutBankCode} ${maskedAccount} · ${c.payoutAccountHolder}`
+                    : "Not provided";
 
-            return (
-              <li
-                key={c.id}
-                className="grid gap-8 bg-paper px-6 py-7 lg:grid-cols-[1fr_minmax(15rem,18rem)]"
-              >
-                {/* Identity + screening */}
-                <div className="flex flex-col gap-5">
-                  <div>
-                    <p className="font-serif text-xl text-ink">
-                      {legalName ?? c.email}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">{c.email}</p>
-                  </div>
-
-                  {hasSubmitted ? (
-                    <dl className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
-                      <Field
-                        label="ID type"
-                        value={c.consignorIdType ?? "—"}
-                      />
-                      <Field
-                        label="ID number"
-                        value={c.consignorIdNumber ?? "—"}
-                      />
-                      <Field label="Payout account" value={payoutDest} />
-                    </dl>
-                  ) : (
-                    <p className="text-sm uppercase tracking-[0.12em] text-muted-foreground">
-                      Awaiting submission
-                    </p>
-                  )}
-
-                  {/* Sanctions screen — accent callout when matched */}
-                  {hasSubmitted ? (
-                    matches.length > 0 ? (
-                      <div className="border-l-2 border-primary bg-primary/[0.04] px-4 py-3">
-                        <p className="text-xs font-medium uppercase tracking-[0.12em] text-primary">
-                          ⚠ {matches.length} possible sanctions match
+                  return (
+                    <TableRow key={c.id} className="align-top">
+                      {/* Consignor + status */}
+                      <TableCell>
+                        <p className="font-serif text-lg text-ink">
+                          {legalName ?? c.email}
                         </p>
-                        <ul className="mt-2 flex flex-col gap-1">
-                          {matches.map((m) => (
-                            <li key={m.name} className="text-sm text-ink">
-                              <span className="text-ink">{m.name}</span>
-                              <span className="text-muted-foreground"> — {m.note}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 rounded-full bg-ink"
-                        />
-                        No sanctions matches
-                      </p>
-                    )
-                  ) : null}
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {c.email}
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-[0.55rem] uppercase tracking-[0.16em] text-muted-foreground">
+                              KYC
+                            </span>
+                            <Badge variant={KYC_VARIANT[c.consignorKycStatus]}>
+                              {KYC_LABEL[c.consignorKycStatus]}
+                            </Badge>
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-[0.55rem] uppercase tracking-[0.16em] text-muted-foreground">
+                              AML
+                            </span>
+                            <Badge variant={AML_VARIANT[c.consignorAmlStatus]}>
+                              {AML_LABEL[c.consignorAmlStatus]}
+                            </Badge>
+                          </span>
+                        </div>
+                        {c.consignorAmlNote ? (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            <span className="uppercase tracking-[0.12em]">
+                              AML note:
+                            </span>{" "}
+                            {c.consignorAmlNote}
+                          </p>
+                        ) : null}
+                      </TableCell>
 
-                  <div className="flex flex-wrap gap-x-8 gap-y-2 pt-1">
-                    <span className="flex items-center gap-2">
-                      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
-                        KYC
-                      </span>
-                      <StatusMarker
-                        dot={KYC_DOT[c.consignorKycStatus]}
-                        label={KYC_LABEL[c.consignorKycStatus]}
-                      />
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
-                        AML
-                      </span>
-                      <StatusMarker
-                        dot={AML_DOT[c.consignorAmlStatus]}
-                        label={AML_LABEL[c.consignorAmlStatus]}
-                      />
-                    </span>
-                  </div>
+                      {/* Identity + sanctions screen */}
+                      <TableCell>
+                        {hasSubmitted ? (
+                          <div className="flex flex-col gap-4">
+                            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+                              <Field
+                                label="ID type"
+                                value={c.consignorIdType ?? "—"}
+                              />
+                              <Field
+                                label="ID number"
+                                value={c.consignorIdNumber ?? "—"}
+                              />
+                              <Field label="Payout account" value={payoutDest} />
+                            </dl>
 
-                  {c.consignorAmlNote ? (
-                    <p className="text-sm text-muted-foreground">
-                      <span className="text-[0.6rem] uppercase tracking-[0.18em]">
-                        AML note:
-                      </span>{" "}
-                      {c.consignorAmlNote}
-                    </p>
-                  ) : null}
-                </div>
+                            {/* Sanctions screen — accent callout when matched */}
+                            {matches.length > 0 ? (
+                              <div className="border-l-2 border-primary bg-primary/[0.04] px-4 py-3">
+                                <p className="text-xs font-medium uppercase tracking-[0.12em] text-primary">
+                                  ⚠ {matches.length} possible sanctions match
+                                </p>
+                                <ul className="mt-2 flex flex-col gap-1">
+                                  {matches.map((m) => (
+                                    <li key={m.name} className="text-sm text-ink">
+                                      <span className="text-ink">{m.name}</span>
+                                      <span className="text-muted-foreground">
+                                        {" "}
+                                        — {m.note}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <p className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                                <Check className="h-3.5 w-3.5 text-ink" />
+                                No sanctions matches
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm uppercase tracking-[0.12em] text-muted-foreground">
+                            Awaiting submission
+                          </p>
+                        )}
+                      </TableCell>
 
-                {/* Decisions */}
-                <div className="lg:border-l lg:border-line lg:pl-8">
-                  {hasSubmitted ? (
-                    <ReviewControls
-                      userId={c.id}
-                      kycStatus={c.consignorKycStatus}
-                      amlStatus={c.consignorAmlStatus}
-                      amlNote={c.consignorAmlNote}
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No identity submitted yet — nothing to decide.
-                    </p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                      {/* Decisions */}
+                      <TableCell>
+                        {hasSubmitted ? (
+                          <ReviewControls
+                            userId={c.id}
+                            kycStatus={c.consignorKycStatus}
+                            amlStatus={c.consignorAmlStatus}
+                            amlNote={c.consignorAmlNote}
+                          />
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            No identity submitted yet — nothing to decide.
+                          </p>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

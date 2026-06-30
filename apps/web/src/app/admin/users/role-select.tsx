@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { UserRole } from "@auction/db";
 import { cn } from "@/lib/utils";
 import { setUserRole } from "./actions";
@@ -34,8 +35,13 @@ export function RoleSelect({
           const next = e.target.value as UserRole;
           if (next === role) return;
           startTransition(async () => {
-            await setUserRole(userId, next);
-            router.refresh();
+            try {
+              await setUserRole(userId, next);
+              toast.success(`Role updated to ${next}`);
+              router.refresh();
+            } catch {
+              toast.error("Could not update role");
+            }
           });
         }}
         className={cn(

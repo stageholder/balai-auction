@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { PayoutStatus } from "@auction/db";
 import { cn } from "@/lib/utils";
 import {
@@ -39,14 +40,16 @@ export function PayoutActions({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function run(action: () => Promise<PayoutActionResult>) {
+  function run(action: () => Promise<PayoutActionResult>, successMsg: string) {
     setError(null);
     startTransition(async () => {
       const result = await action();
       if (!result.ok) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success(successMsg);
       router.refresh();
     });
   }
@@ -68,7 +71,7 @@ export function PayoutActions({
         <button
           type="button"
           disabled={pending}
-          onClick={() => run(() => rearmPayoutAction(payoutId))}
+          onClick={() => run(() => rearmPayoutAction(payoutId), "Payout re-armed")}
           className={cn(BTN_OUTLINE, pending && "opacity-60")}
         >
           {pending ? "Re-arming…" : "Re-arm"}
@@ -91,7 +94,7 @@ export function PayoutActions({
         type="button"
         disabled={pending || !releaseReady}
         title={releaseReady ? undefined : releaseBlockedReason ?? undefined}
-        onClick={() => run(() => releasePayoutAction(payoutId))}
+        onClick={() => run(() => releasePayoutAction(payoutId), "Payout released")}
         className={cn(BTN_PRIMARY, pending && "opacity-60")}
       >
         {pending ? "Releasing…" : "Release"}
