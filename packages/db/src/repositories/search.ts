@@ -1,8 +1,9 @@
 import type { PrismaClient } from "@prisma/client";
 import { saleRowToRecord, toMoney } from "../mappers";
 import type { SaleRecord, SearchLotItem } from "../types";
+import { NON_PUBLIC_SALE_STATUSES } from "./sales";
 
-const PUBLISHED = { status: { notIn: ["draft"] as const } };
+const PUBLISHED = { status: { notIn: [...NON_PUBLIC_SALE_STATUSES] } };
 
 export async function searchSales(
   db: PrismaClient,
