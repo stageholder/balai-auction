@@ -8,6 +8,19 @@ export function isPaidXenditStatus(status: string): boolean {
   return status === "PAID" || status === "SETTLED";
 }
 
+/** True only when a real Xendit secret key is configured — i.e. present and not
+ *  the placeholder shipped in .env.local.example. Used to decide whether local
+ *  dev should simulate payment instead of calling the real API. */
+export function isXenditConfigured(): boolean {
+  const key = process.env.XENDIT_SECRET_KEY;
+  return (
+    !!key &&
+    key.startsWith("xnd_") &&
+    !key.includes("CHANGE_ME") &&
+    !key.endsWith("...")
+  );
+}
+
 /** True when the webhook's x-callback-token matches our configured token.
  *  Uses a constant-time comparison to avoid leaking the token via timing. */
 export function verifyCallbackToken(header: string | null): boolean {
