@@ -20,9 +20,16 @@ pnpm dev       # → http://localhost:3000
 ```
 
 `pnpm setup` brings up the Docker Postgres (port 5434), starts local Supabase
-(API 54321 · Studio 54323 · mail 54324), applies migrations, seeds a sample
-sale + lots, and creates the default logins below. Supabase's local keys are
+(API 54321 · Studio 54323 · mail 54324), applies migrations, seeds the demo
+dataset, and creates the default logins below. Supabase's local keys are
 already in `apps/web/.env.local`.
+
+The demo dataset (`pnpm db:seed`) builds a presentable catalogue: a **live**
+sale, two **scheduled** sales, and two **closed** sales whose realized prices
+come from the real bidding engine — across Paintings, Watches, Jewellery, Asian
+Art and Wine, each lot with a themed local image. It also seeds a consignor with
+settled **payouts** and a few **Sell-with-us** requests, so every queue has
+something to show. Re-running it resets the catalogue (your login users stay).
 
 For **live auctions** (so a Live-mode sale auto-advances lot-by-lot), run the
 runner in a second terminal:
@@ -57,7 +64,7 @@ Password for all: **`password123`**.
 | `pnpm setup` | one-shot local environment (idempotent) |
 | `pnpm dev` | run the web app |
 | `pnpm live` | run the live-auction runner |
-| `pnpm db:seed` | add sample sale + lots |
+| `pnpm db:seed` | (re)build the demo dataset — resets the catalogue |
 | `pnpm seed:admin` | (re)create the default users |
 | `pnpm db:studio` | open Prisma Studio (DB editor) |
 | `pnpm test` | run all test suites |
