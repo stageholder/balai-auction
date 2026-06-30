@@ -110,7 +110,10 @@ work without it.
 - Re-run `prisma migrate deploy` (direct URL) after every schema change.
 - Locally, `DIRECT_URL` = `DATABASE_URL` (the same Docker Postgres); only in prod do they differ.
 - **Prisma on Vercel** is already handled: the generator builds the
-  `rhel-openssl-3.0.x` engine (`binaryTargets` in `schema.prisma`) and
-  `next.config.ts` sets `outputFileTracingRoot` to the repo root so that engine
-  is traced into the serverless bundle (the pnpm-monorepo "Query Engine not
-  found" fix).
+  `rhel-openssl-3.0.x` engine (`binaryTargets` in `schema.prisma`), and
+  `next.config.ts` runs **`@prisma/nextjs-monorepo-workaround-plugin`**
+  (`PrismaPlugin`, server build only) which copies
+  `libquery_engine-rhel-openssl-3.0.x.so.node` into `.next/server/chunks`, where
+  the Lambda runtime looks — the canonical pnpm-monorepo "Query Engine not
+  found" fix. `prisma generate` runs in both the `postinstall` and the web build
+  so it's never skipped by Vercel's dependency cache.
