@@ -3,7 +3,6 @@ import Image from "next/image";
 import {
   prisma,
   listPublishedSales,
-  listLotsForSale,
   getSaleCoverImages,
 } from "@/lib/db";
 import { SaleCard } from "@/components/sale-card";
@@ -30,35 +29,41 @@ export default async function HomePage() {
   const visibleIds = [...liveFew, ...upcomingFew, ...resultsFew].map((s) => s.id);
   const covers = await getSaleCoverImages(prisma, visibleIds);
 
-  // Hero: feature the live sale if there is one, else the next upcoming, else
-  // the most recent result. Pull a handful of its lots for the slideshow.
-  const featured = liveNow[0] ?? upcoming[0] ?? past[0] ?? null;
-  let heroSlides: HeroSlide[] = [];
-  if (featured) {
-    const lots = await listLotsForSale(prisma, featured.id);
-    heroSlides = lots
-      .map((lot): HeroSlide | null =>
-        lot.images[0] ? { src: lot.images[0], alt: lot.title } : null
-      )
-      .filter((s): s is HeroSlide => s !== null)
-      .slice(0, 5);
-  }
-
-  const heroEyebrow = featured
-    ? `${SITE.name} · ${SITE.tagline}`
-    : SITE.name;
+  // Hero: the admin-curated featured sales (toggled in /admin/sales), else fall
+  // back to whatever is live or coming up. Each slide is a whole sale — image,
+  // title, blurb and CTA change together.
+  const featuredSales = sales.filter((s) => s.featured);
+  const heroSales = (
+    featuredSales.length > 0 ? featuredSales : [...liveNow, ...upcoming, ...past]
+  ).slice(0, 6);
+  const heroCovers = await getSaleCoverImages(
+    prisma,
+    heroSales.map((s) => s.id)
+  );
+  const STATUS_LABEL: Record<string, string> = {
+    live: "Live now",
+    scheduled: "Upcoming",
+    closed: "Results",
+    draft: "Preview",
+  };
+  const heroSlides: HeroSlide[] = heroSales.map((s) => ({
+    image: heroCovers[s.id] ?? null,
+    status: s.status,
+    statusLabel: STATUS_LABEL[s.status] ?? "Featured",
+    departmentLabel: departmentLabel(s.category),
+    title: s.title,
+    blurb:
+      s.description?.trim() ||
+      "A curated sale at Balai — view the catalogue and register to bid before the gavel falls.",
+    href: `/sales/${s.id}`,
+  }));
 
   return (
     <div>
-      {/* FULL-BLEED HERO — real lot imagery, auto-advancing, with CTAs */}
+      {/* FULL-BLEED HERO — featured sales, each a full slide (image + copy + CTA) */}
       {heroSlides.length > 0 ? (
         <FullBleed className="-mt-12 mb-20">
-          <HomeHero
-            slides={heroSlides}
-            saleId={featured?.id ?? null}
-            saleTitle={featured?.title ?? null}
-            eyebrow={heroEyebrow}
-          />
+          <HomeHero slides={heroSlides} />
         </FullBleed>
       ) : (
         // No imagery yet — keep a quiet editorial masthead so the page is never

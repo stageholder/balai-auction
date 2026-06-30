@@ -80,6 +80,7 @@ export interface SaleRecord {
   category: string | null;
   incrementTable: IncrementTable;
   status: SaleStatus;
+  featured: boolean;
   createdAt: Date;
 }
 export interface NewSale {

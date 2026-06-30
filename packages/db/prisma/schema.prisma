@@ -119,9 +119,12 @@ model Sale {
   category         String?
   incrementTable   Json
   status           SaleStatus     @default(draft)
+  featured         Boolean        @default(false)
   createdAt        DateTime       @default(now())
   lots             Lot[]
   registrations    Registration[]
+
+  @@index([featured])
 }
 
 model Lot {

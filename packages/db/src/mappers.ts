@@ -152,6 +152,7 @@ export function saleRowToRecord(row: {
   category: string | null;
   incrementTable: unknown;
   status: SaleRecord["status"];
+  featured: boolean;
   createdAt: Date;
 }): SaleRecord {
   return {
@@ -168,6 +169,7 @@ export function saleRowToRecord(row: {
     category: row.category,
     incrementTable: toIncrementTable(row.incrementTable),
     status: row.status,
+    featured: row.featured,
     createdAt: row.createdAt,
   };
 }

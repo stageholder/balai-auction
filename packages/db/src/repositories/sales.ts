@@ -106,3 +106,13 @@ export async function updateSaleStatus(
   const row = await db.sale.update({ where: { id }, data: { status } });
   return saleRowToRecord(row);
 }
+
+/** Toggle whether a sale appears in the homepage hero rotation. */
+export async function setSaleFeatured(
+  db: PrismaClient,
+  id: string,
+  featured: boolean
+): Promise<SaleRecord> {
+  const row = await db.sale.update({ where: { id }, data: { featured } });
+  return saleRowToRecord(row);
+}
