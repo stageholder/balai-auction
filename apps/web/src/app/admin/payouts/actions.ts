@@ -33,14 +33,23 @@ export async function releasePayoutAction(
   // details on file. Enforced server-side BEFORE any disbursement is created —
   // no money moves to a non-compliant consignor regardless of the UI state.
   const consignor = await getUser(prisma, payout.consignorId);
+  // Trim so a whitespace-only value is treated as missing (not sent to Xendit).
+  const bankCode = consignor?.payoutBankCode?.trim() || null;
+  const accountNumber = consignor?.payoutAccountNumber?.trim() || null;
+  const accountHolder = consignor?.payoutAccountHolder?.trim() || null;
   const gate = consignorPayoutGate({
     kycStatus: consignor?.consignorKycStatus ?? "pending",
     amlStatus: consignor?.consignorAmlStatus ?? "pending",
-    bankCode: consignor?.payoutBankCode ?? null,
-    accountNumber: consignor?.payoutAccountNumber ?? null,
-    accountHolder: consignor?.payoutAccountHolder ?? null,
+    bankCode,
+    accountNumber,
+    accountHolder,
   });
   if (!gate.ok) return { ok: false, error: gate.reason };
+  // gate.ok already guarantees these are present; an explicit guard narrows the
+  // types for createDisbursement (no load-bearing non-null assertions).
+  if (!bankCode || !accountNumber || !accountHolder) {
+    return { ok: false, error: "Payout bank details missing" };
+  }
 
   let disb: { id: string; status: string };
   try {
@@ -50,9 +59,9 @@ export async function releasePayoutAction(
       // payout can actually be re-disbursed rather than hitting the cached one.
       externalId: `payout-${payoutId}-${payout.releaseAttempt}`,
       amount: payout.amount,
-      bankCode: consignor!.payoutBankCode!,
-      accountHolderName: consignor!.payoutAccountHolder!,
-      accountNumber: consignor!.payoutAccountNumber!,
+      bankCode,
+      accountHolderName: accountHolder,
+      accountNumber,
       description: `Consignor payout ${payoutId}`,
     });
   } catch (err) {
