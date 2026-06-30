@@ -1,6 +1,12 @@
 import Link from "next/link";
-import { prisma, listPublishedSales } from "@/lib/db";
+import Image from "next/image";
+import {
+  prisma,
+  listPublishedSales,
+  getSaleCoverImages,
+} from "@/lib/db";
 import { SaleCard } from "@/components/sale-card";
+import { FullBleed } from "@/components/full-bleed";
 import { partitionSalesByLifecycle } from "@/lib/lifecycle";
 import { DEPARTMENTS, departmentLabel, isDepartmentSlug } from "@auction/core";
 
@@ -81,32 +87,95 @@ export default async function AuctionsPage({
     ? sections.filter((section) => section.value === activeLifecycle)
     : sections;
 
+  // One query for every cover shown on this page, plus the featured strip.
+  const visibleIds = visibleSections.flatMap((s) => s.sales.map((x) => x.id));
+  const covers = await getSaleCoverImages(prisma, visibleIds);
+
+  // Feature the most urgent sale on screen — live first, then the next
+  // upcoming, then the latest result — as a full-bleed editorial band.
+  const featured =
+    visibleSections.find((s) => s.value === "live")?.sales[0] ??
+    visibleSections.find((s) => s.value === "upcoming")?.sales[0] ??
+    visibleSections.find((s) => s.value === "past")?.sales[0] ??
+    null;
+  const featuredCover = featured ? covers[featured.id] : null;
+
   const activeLabel = activeDepartment
     ? departmentLabel(activeDepartment)
     : null;
 
   return (
     <div>
-      {/* Masthead */}
-      <section className="max-w-3xl">
-        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
-          The Auction Calendar
-        </p>
-        <h1 className="mt-4 font-serif text-6xl leading-[0.95] tracking-tight">
-          {activeLabel ?? "Auctions"}
-        </h1>
-        <p className="mt-5 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
-          {activeLabel
-            ? `Sales in ${activeLabel}, by where they sit in the season.`
-            : "A season of sales, grouped by where they stand — live on the rostrum, scheduled ahead, and the results behind us."}
-        </p>
-      </section>
+      {/* FULL-BLEED FEATURED BAND — a representative sale image with a scrim */}
+      {featured ? (
+        <FullBleed className="mb-16">
+          <div className="relative h-[58vh] min-h-[420px] w-full overflow-hidden bg-ink">
+            {featuredCover ? (
+              <Image
+                src={featuredCover}
+                alt={featured.title}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+              />
+            ) : null}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/20"
+            />
+            <div className="absolute inset-0 flex items-end">
+              <div className="mx-auto w-full max-w-6xl px-6 pb-14">
+                <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-paper/70">
+                  {activeLabel
+                    ? `${activeLabel} · The Calendar`
+                    : "The Auction Calendar"}
+                </p>
+                <h1 className="mt-5 max-w-3xl font-serif text-5xl leading-[0.95] tracking-tight text-paper md:text-7xl">
+                  {activeLabel ?? "Auctions"}
+                </h1>
+                <p className="mt-6 max-w-xl font-sans text-sm leading-relaxed text-paper/80">
+                  {activeLabel
+                    ? `Sales in ${activeLabel}, by where they sit in the season.`
+                    : "A season of sales — live on the rostrum, scheduled ahead, and the results behind us. Open to browse, no account required."}
+                </p>
+                <Link
+                  href={`/sales/${featured.id}`}
+                  className="group mt-8 inline-flex items-baseline gap-2 font-sans text-xs uppercase tracking-[0.22em] text-paper"
+                >
+                  <span className="border-b border-paper/40 pb-1 transition-colors group-hover:border-paper">
+                    View featured sale — {featured.title}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="transition-transform group-hover:translate-x-1"
+                  >
+                    &rarr;
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </FullBleed>
+      ) : (
+        // No sale to feature — keep a quiet editorial masthead.
+        <section className="mb-16 max-w-3xl">
+          <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+            The Auction Calendar
+          </p>
+          <h1 className="mt-4 font-serif text-6xl leading-[0.95] tracking-tight">
+            {activeLabel ?? "Auctions"}
+          </h1>
+          <p className="mt-5 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
+            {activeLabel
+              ? `Sales in ${activeLabel}, by where they sit in the season.`
+              : "A season of sales, grouped by where they stand — live on the rostrum, scheduled ahead, and the results behind us."}
+          </p>
+        </section>
+      )}
 
       {/* Department rail */}
-      <nav
-        aria-label="Filter by department"
-        className="mt-12 border-t border-line pt-6"
-      >
+      <nav aria-label="Filter by department" className="border-t border-line pt-6">
         <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           Departments
         </p>
@@ -157,8 +226,8 @@ export default async function AuctionsPage({
         })}
       </nav>
 
-      {/* Sections */}
-      <div className="mt-16 space-y-20">
+      {/* Sections — generous, image-forward grids */}
+      <div className="mt-16 space-y-24">
         {visibleSections.map((section) => (
           <section key={section.value}>
             <header
@@ -177,7 +246,7 @@ export default async function AuctionsPage({
                   </span>
                 ) : null}
                 <h2
-                  className={`font-serif text-4xl leading-none tracking-tight ${
+                  className={`font-serif text-4xl leading-none tracking-tight md:text-5xl ${
                     section.live ? "text-primary" : "text-ink"
                   }`}
                 >
@@ -199,9 +268,13 @@ export default async function AuctionsPage({
                 Nothing here yet.
               </p>
             ) : (
-              <div className="mt-6 grid gap-x-12 sm:grid-cols-2">
+              <div className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                 {section.sales.map((sale) => (
-                  <SaleCard key={sale.id} sale={sale} />
+                  <SaleCard
+                    key={sale.id}
+                    sale={sale}
+                    cover={covers[sale.id]}
+                  />
                 ))}
               </div>
             )}
