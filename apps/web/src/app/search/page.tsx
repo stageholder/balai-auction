@@ -1,6 +1,13 @@
-import { prisma, searchSales, searchLots } from "@/lib/db";
+import {
+  prisma,
+  searchSales,
+  searchLots,
+  getSaleCoverImages,
+} from "@/lib/db";
+import Link from "next/link";
 import { SaleCard } from "@/components/sale-card";
 import { LotResultCard } from "@/components/lot-result-card";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -18,13 +25,25 @@ export default async function SearchPage({
         <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
           The Catalogue
         </p>
-        <h1 className="mt-5 font-serif text-5xl leading-[0.95] tracking-tight">
+        <span
+          aria-hidden
+          className="mx-auto mt-6 block h-px w-12 bg-primary"
+        />
+        <h1 className="mt-6 font-serif text-5xl leading-[0.95] tracking-tight">
           Search the catalogue
         </h1>
         <p className="mt-6 font-sans text-sm leading-relaxed text-muted-foreground">
           Look across every sale and lot — by maker, medium, or title. Begin
           from the search field above to find what is coming under the hammer.
         </p>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/auctions">Browse all auctions</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/results">Past results</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -33,6 +52,13 @@ export default async function SearchPage({
     searchSales(prisma, q),
     searchLots(prisma, q),
   ]);
+
+  // Cover image per sale hit — one query — so the Sales section reads
+  // image-forward like the home catalogue.
+  const covers = await getSaleCoverImages(
+    prisma,
+    sales.map((s) => s.id)
+  );
 
   const nothing = sales.length === 0 && lots.length === 0;
 
@@ -49,9 +75,20 @@ export default async function SearchPage({
       </section>
 
       {nothing ? (
-        <p className="mt-16 font-serif text-2xl italic text-muted-foreground">
-          No results for “{q}”.
-        </p>
+        <div className="mt-16 border-t border-line pt-12">
+          <p className="font-serif text-3xl italic leading-snug text-muted-foreground">
+            No results for “{q}”.
+          </p>
+          <p className="mt-4 max-w-md font-sans text-sm leading-relaxed text-muted-foreground">
+            Try a maker, a medium, or a sale title — or browse the full calendar
+            of auctions.
+          </p>
+          <div className="mt-7">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/auctions">Browse all auctions</Link>
+            </Button>
+          </div>
+        </div>
       ) : (
         <div className="mt-16 space-y-20">
           {/* Sales */}
@@ -65,9 +102,9 @@ export default async function SearchPage({
                   {sales.length} {sales.length === 1 ? "sale" : "sales"}
                 </span>
               </header>
-              <div className="mt-6 grid gap-x-12 sm:grid-cols-2">
+              <div className="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                 {sales.map((sale) => (
-                  <SaleCard key={sale.id} sale={sale} />
+                  <SaleCard key={sale.id} sale={sale} cover={covers[sale.id]} />
                 ))}
               </div>
             </section>

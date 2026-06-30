@@ -1,4 +1,14 @@
+import Image from "next/image";
 import { SellForm } from "./sell-form";
+import { FullBleed } from "@/components/full-bleed";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { SITE } from "@/lib/site";
 
 export const metadata = {
   title: "Sell with us",
@@ -26,47 +36,76 @@ const STEPS = [
 
 export default function SellPage() {
   return (
-    <div className="mx-auto max-w-3xl">
-      {/* ── Editorial intro ── */}
-      <section className="max-w-2xl">
-        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
-          Consign with the house
-        </p>
-        <h1 className="mt-4 font-serif text-6xl font-light leading-[0.95] tracking-tight text-ink">
-          Sell with us
-        </h1>
-        <p className="mt-6 max-w-xl font-sans text-base leading-relaxed text-muted-foreground">
-          A single inherited piece or a collection built over a lifetime — the
-          first step is the same. Tell our specialists what you have, and we'll
-          come back to you with an honest appraisal and a likely estimate.
-          There's no fee to enquire, and no obligation to sell.
-        </p>
-      </section>
-
-      {/* ── How it works ── */}
-      <section
-        aria-label="How consigning works"
-        className="mt-14 grid gap-px border border-line bg-line sm:grid-cols-3"
-      >
-        {STEPS.map((step) => (
-          <div key={step.n} className="bg-paper px-6 py-7">
-            <p className="tnum font-sans text-[11px] tracking-[0.22em] text-primary">
-              {step.n}
-            </p>
-            <h2 className="mt-3 font-serif text-2xl font-light leading-none text-ink">
-              {step.title}
-            </h2>
-            <p className="mt-3 font-sans text-sm leading-relaxed text-muted-foreground">
-              {step.body}
-            </p>
+    <div>
+      {/* ── Full-bleed editorial band ── */}
+      <FullBleed className="mb-16">
+        <div className="relative h-[clamp(20rem,42vh,30rem)] overflow-hidden bg-ink">
+          <Image
+            src="/seed/jewellery-3.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-90"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/45 to-ink/30"
+          />
+          <div className="absolute inset-0 flex items-end">
+            <div className="mx-auto w-full max-w-6xl px-6 pb-12">
+              <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-paper/75">
+                {SITE.name} · Consign with the house
+              </p>
+              <h1 className="mt-4 max-w-2xl font-serif text-5xl font-light leading-[0.96] tracking-tight text-paper md:text-6xl">
+                Sell with us
+              </h1>
+            </div>
           </div>
-        ))}
-      </section>
+        </div>
+      </FullBleed>
 
-      {/* ── The form ── */}
-      <section className="mt-16 border-t border-line pt-12">
-        <SellForm />
-      </section>
+      <div className="mx-auto max-w-3xl">
+        {/* ── Editorial intro ── */}
+        <section className="max-w-2xl">
+          <span aria-hidden className="block h-px w-12 bg-primary" />
+          <p className="mt-6 font-sans text-base leading-relaxed text-muted-foreground">
+            A single inherited piece or a collection built over a lifetime — the
+            first step is the same. Tell our specialists what you have, and we'll
+            come back to you with an honest appraisal and a likely estimate.
+            There's no fee to enquire, and no obligation to sell.
+          </p>
+        </section>
+
+        {/* ── How it works ── */}
+        <section
+          aria-label="How consigning works"
+          className="mt-14 grid gap-5 sm:grid-cols-3"
+        >
+          {STEPS.map((step) => (
+            <Card key={step.n} className="shadow-sm">
+              <CardHeader>
+                <p className="tnum font-sans text-[11px] tracking-[0.22em] text-primary">
+                  {step.n}
+                </p>
+                <CardTitle className="mt-2 text-2xl font-light leading-none">
+                  {step.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <CardDescription className="leading-relaxed">
+                  {step.body}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+
+        {/* ── The form ── */}
+        <section className="mt-16 border-t border-line pt-12">
+          <SellForm />
+        </section>
+      </div>
     </div>
   );
 }

@@ -4,20 +4,34 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { DEPARTMENTS } from "@auction/core";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   submitConsignmentRequestAction,
   type ConsignmentActionResult,
 } from "./actions";
 
-const FIELD =
-  "mt-2 w-full border border-line bg-paper px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted-foreground/60 focus:border-ink focus:outline-none";
-const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted-foreground";
-const OPTIONAL = "ml-2 text-[10px] tracking-[0.1em] text-muted-foreground/70";
+const OPTIONAL =
+  "ml-2 text-[10px] font-normal normal-case tracking-[0.1em] text-muted-foreground/70";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+    <Button
+      type="submit"
+      variant="accent"
+      size="lg"
+      disabled={pending}
+      className="w-full sm:w-auto"
+    >
       {pending ? "Sending…" : "Submit for appraisal"}
     </Button>
   );
@@ -26,11 +40,8 @@ function SubmitButton() {
 /** Warm confirmation shown in place of the form once a request is accepted. */
 function Confirmation() {
   return (
-    <div className="border border-line bg-paper px-8 py-14 text-center">
-      <span
-        aria-hidden
-        className="mx-auto block h-px w-12 bg-primary"
-      />
+    <div className="border border-line bg-card px-8 py-14 text-center shadow-sm">
+      <span aria-hidden className="mx-auto block h-px w-12 bg-primary" />
       <h2 className="mt-6 font-serif text-4xl font-light leading-tight text-ink">
         Thank you — it's with our specialists.
       </h2>
@@ -64,27 +75,22 @@ export function SellForm() {
           So a specialist can write back with our thoughts.
         </p>
 
-        <div>
-          <label htmlFor="name" className={LABEL}>
-            Your name
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="name">Your name</Label>
+          <Input
             id="name"
             name="name"
             required
             maxLength={120}
             autoComplete="name"
             placeholder="First and last name"
-            className={FIELD}
           />
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="email" className={LABEL}>
-              Email
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
               id="email"
               name="email"
               type="email"
@@ -92,21 +98,19 @@ export function SellForm() {
               maxLength={200}
               autoComplete="email"
               placeholder="you@example.com"
-              className={FIELD}
             />
           </div>
-          <div>
-            <label htmlFor="phone" className={LABEL}>
+          <div className="space-y-2">
+            <Label htmlFor="phone">
               Phone<span className={OPTIONAL}>Optional</span>
-            </label>
-            <input
+            </Label>
+            <Input
               id="phone"
               name="phone"
               type="tel"
               maxLength={40}
               autoComplete="tel"
               placeholder="For time-sensitive lots"
-              className={FIELD}
             />
           </div>
         </div>
@@ -124,59 +128,55 @@ export function SellForm() {
         </p>
 
         <div className="grid gap-5 sm:grid-cols-[1fr_minmax(0,14rem)]">
-          <div>
-            <label htmlFor="itemTitle" className={LABEL}>
-              Item title
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="itemTitle">Item title</Label>
+            <Input
               id="itemTitle"
               name="itemTitle"
               required
               maxLength={200}
               placeholder="e.g. Rolex Submariner, ref. 1680"
-              className={FIELD}
             />
           </div>
-          <div>
-            <label htmlFor="category" className={LABEL}>
+          <div className="space-y-2">
+            <Label htmlFor="category">
               Department<span className={OPTIONAL}>Optional</span>
-            </label>
-            <select
-              id="category"
-              name="category"
-              defaultValue=""
-              className={FIELD}
-            >
-              <option value="">— Not sure —</option>
-              {DEPARTMENTS.map((d) => (
-                <option key={d.slug} value={d.slug}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
+            </Label>
+            {/* Radix Select posts `category` via a hidden field; no selection
+                submits empty, which the server maps to null — behaviour kept. */}
+            <Select name="category">
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Not sure — we'll route it" />
+              </SelectTrigger>
+              <SelectContent>
+                {DEPARTMENTS.map((d) => (
+                  <SelectItem key={d.slug} value={d.slug}>
+                    {d.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        <div>
-          <label htmlFor="itemDescription" className={LABEL}>
-            Description
-          </label>
-          <textarea
+        <div className="space-y-2">
+          <Label htmlFor="itemDescription">Description</Label>
+          <Textarea
             id="itemDescription"
             name="itemDescription"
             required
             maxLength={4000}
             rows={6}
             placeholder="Maker, date, dimensions, condition, and how it came to you — provenance helps."
-            className={`${FIELD} resize-y leading-relaxed`}
+            className="resize-y leading-relaxed"
           />
         </div>
 
-        <div className="sm:max-w-xs">
-          <label htmlFor="sellerEstimate" className={LABEL}>
+        <div className="space-y-2 sm:max-w-xs">
+          <Label htmlFor="sellerEstimate">
             Your estimate<span className={OPTIONAL}>Optional, IDR</span>
-          </label>
-          <input
+          </Label>
+          <Input
             id="sellerEstimate"
             name="sellerEstimate"
             type="number"
@@ -184,7 +184,7 @@ export function SellForm() {
             step={1}
             inputMode="numeric"
             placeholder="What you hope it's worth"
-            className={`${FIELD} tnum`}
+            className="tnum"
           />
         </div>
       </fieldset>
