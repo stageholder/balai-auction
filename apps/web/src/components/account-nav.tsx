@@ -33,6 +33,12 @@ export async function AccountNav() {
         </Link>
       ) : null}
       <Link
+        href="/account/saved"
+        className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+      >
+        Saved
+      </Link>
+      <Link
         href="/invoices"
         className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
       >

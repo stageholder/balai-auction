@@ -1,9 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
 import { prisma, searchSales, searchLots } from "@/lib/db";
 import { SaleCard } from "@/components/sale-card";
-import { formatRupiah } from "@/lib/format";
-import type { SearchLotItem } from "@auction/db";
+import { LotResultCard } from "@/components/lot-result-card";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +86,7 @@ export default async function SearchPage({
               </header>
               <div className="mt-2">
                 {lots.map((lot) => (
-                  <LotResult key={lot.id} lot={lot} />
+                  <LotResultCard key={lot.id} lot={lot} />
                 ))}
               </div>
             </section>
@@ -97,46 +94,5 @@ export default async function SearchPage({
         </div>
       )}
     </div>
-  );
-}
-
-/** Compact catalogue-row for a lot hit — thumbnail, entry, estimate. */
-function LotResult({ lot }: { lot: SearchLotItem }) {
-  return (
-    <Link href={`/lots/${lot.id}`} className="group block">
-      <article className="flex items-center gap-6 border-b border-line py-5 transition-colors duration-300 hover:border-ink">
-        {/* Thumbnail — sealed chamber */}
-        <div className="relative aspect-square w-20 shrink-0 overflow-hidden bg-line">
-          {lot.image ? (
-            <Image
-              src={lot.image}
-              alt={lot.title}
-              fill
-              sizes="80px"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-            />
-          ) : null}
-        </div>
-
-        {/* Catalogue entry */}
-        <div className="min-w-0 flex-1">
-          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
-            Lot {lot.lotNumber}
-            <span aria-hidden="true" className="mx-2 text-line">
-              /
-            </span>
-            {lot.saleTitle}
-          </p>
-          <h3 className="font-serif mt-1.5 truncate text-2xl leading-snug text-ink transition-colors duration-200 group-hover:text-accent">
-            {lot.title}
-          </h3>
-        </div>
-
-        {/* Estimate — tabular, right-aligned */}
-        <p className="tnum hidden shrink-0 text-right font-sans text-[11px] text-muted sm:block">
-          Est. {formatRupiah(lot.estimateLow)} – {formatRupiah(lot.estimateHigh)}
-        </p>
-      </article>
-    </Link>
   );
 }
