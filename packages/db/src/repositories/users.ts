@@ -117,7 +117,11 @@ export async function submitConsignorKyc(
       payoutBankCode: input.bankCode,
       payoutAccountNumber: input.accountNumber,
       payoutAccountHolder: input.accountHolder,
+      // Any re-submission re-enters BOTH queues: a changed identity or payout
+      // destination invalidates the prior AML clearance, not just KYC.
       consignorKycStatus: "pending",
+      consignorAmlStatus: "pending",
+      consignorAmlNote: null,
     },
   });
   return userRowToRecord(row);

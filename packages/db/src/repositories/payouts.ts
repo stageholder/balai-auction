@@ -49,18 +49,19 @@ export async function listPayouts(db: PrismaClient): Promise<PayoutListItem[]> {
     const net = toMoney(p.amount);
     const hammer = p.lot.invoice ? toMoney(p.lot.invoice.hammer) : 0;
     const commission = hammer - net;
-    const { payoutBankCode, payoutAccountNumber, payoutAccountHolder, consignorKycStatus, consignorAmlStatus } = p.consignor;
-    const hasBankDetails = !!(
-      payoutBankCode &&
-      payoutAccountNumber &&
-      payoutAccountHolder
-    );
+    const { consignorKycStatus, consignorAmlStatus } = p.consignor;
+    // Trim so a whitespace-only value is treated as missing here too — keeps the
+    // display gate identical to releasePayoutAction's enforcement gate.
+    const bankCode = p.consignor.payoutBankCode?.trim() || null;
+    const accountNumber = p.consignor.payoutAccountNumber?.trim() || null;
+    const accountHolder = p.consignor.payoutAccountHolder?.trim() || null;
+    const hasBankDetails = !!(bankCode && accountNumber && accountHolder);
     const gate = consignorPayoutGate({
       kycStatus: consignorKycStatus,
       amlStatus: consignorAmlStatus,
-      bankCode: payoutBankCode,
-      accountNumber: payoutAccountNumber,
-      accountHolder: payoutAccountHolder,
+      bankCode,
+      accountNumber,
+      accountHolder,
     });
     return {
       id: p.id,

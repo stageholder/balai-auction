@@ -13,11 +13,11 @@ export type PayoutActionResult = { ok: true } | { ok: false; error: string };
 /** Release a pending payout: create the Xendit disbursement, then make the
  *  guarded pending→released transition. Staff-only.
  *
- *  Safety / idempotency: the disbursement uses a stable externalId
- *  (`payout-${id}` → Xendit X-IDEMPOTENCY-KEY), and `releasePayout` only flips a
- *  row that is still "pending". So a double-click cannot double-disburse:
- *  Xendit dedupes the second create, and the guard makes the second release a
- *  no-op. Do NOT add a pre-claim that bypasses this guard. */
+ *  Safety / idempotency: the disbursement uses a per-attempt externalId
+ *  (`payout-${id}-${releaseAttempt}` → Xendit X-IDEMPOTENCY-KEY), and
+ *  `releasePayout` only flips a row that is still "pending". So a double-click
+ *  cannot double-disburse: Xendit dedupes the second create, and the guard makes
+ *  the second release a no-op. Do NOT add a pre-claim that bypasses this guard. */
 export async function releasePayoutAction(
   payoutId: string
 ): Promise<PayoutActionResult> {

@@ -123,6 +123,18 @@ describe("consignor KYC/AML", () => {
     const amled = await setConsignorAml(db, u.id, { amlStatus: "cleared", amlNote: "ok" });
     expect(amled.consignorAmlStatus).toBe("cleared");
   });
+  it("re-submission re-pends BOTH KYC and AML (a changed identity invalidates prior clearance)", async () => {
+    const u = await createUser(db, { email: "c-resub@example.com", role: "consignor" });
+    await setConsignorKycStatus(db, u.id, "approved");
+    await setConsignorAml(db, u.id, { amlStatus: "cleared", amlNote: "ok" });
+    const r = await submitConsignorKyc(db, u.id, {
+      legalName: "Changed Name", idType: "passport", idNumber: "Y999",
+      bankCode: "BNI", accountNumber: "222", accountHolder: "Changed Name",
+    });
+    expect(r.consignorKycStatus).toBe("pending");
+    expect(r.consignorAmlStatus).toBe("pending");
+    expect(r.consignorAmlNote).toBeNull();
+  });
   it("listConsignorsForReview returns only consignor-role users", async () => {
     await createUser(db, { email: "buyer@example.com" });
     const c = await createUser(db, { email: "c3@example.com", role: "consignor" });

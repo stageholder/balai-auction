@@ -95,6 +95,15 @@ export default async function StaffConsignorKycPage() {
             const hasBank = Boolean(
               c.payoutBankCode && c.payoutAccountNumber && c.payoutAccountHolder
             );
+            // Show the destination (masked) so a reviewer can see if the payout
+            // account changed since the last decision — not just "on file: yes".
+            const acct = c.payoutAccountNumber?.trim() ?? "";
+            const maskedAccount = acct
+              ? `····${acct.slice(-4)}`
+              : "";
+            const payoutDest = hasBank
+              ? `${c.payoutBankCode} ${maskedAccount} · ${c.payoutAccountHolder}`
+              : "Not provided";
 
             return (
               <li
@@ -120,10 +129,7 @@ export default async function StaffConsignorKycPage() {
                         label="ID number"
                         value={c.consignorIdNumber ?? "—"}
                       />
-                      <Field
-                        label="Bank on file"
-                        value={hasBank ? "Yes" : "No"}
-                      />
+                      <Field label="Payout account" value={payoutDest} />
                     </dl>
                   ) : (
                     <p className="text-sm uppercase tracking-[0.12em] text-muted">
