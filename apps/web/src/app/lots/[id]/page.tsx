@@ -1,10 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration, getLotHammer } from "@/lib/db";
+import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration, getLotHammer, isWatched } from "@/lib/db";
 import { resolveBids, nextBidFloor } from "@auction/core";
 import { getCurrentUser } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
 import { LotLive } from "./lot-live";
+import { SaveButton } from "./save-button";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,13 @@ export default async function LotPage({
   // sale page. getPublishedSale returns null for draft/missing sales.
   const sale = await getPublishedSale(prisma, lot.saleId);
   if (!sale) notFound();
+
+  // Save affordance state, computed for all lifecycle stages (a collector may
+  // keep a lot whether it is live, sold, or unsold). The session user is read
+  // once here; getCurrentUser is request-memoized, so the live-gate block below
+  // reuses the same call. The watched flag is only meaningful when signed in.
+  const viewer = await getCurrentUser();
+  const watched = viewer ? await isWatched(prisma, viewer.id, lot.id) : false;
 
   const now = new Date();
 
@@ -129,10 +138,23 @@ export default async function LotPage({
         {/* ── Catalogue details panel ── */}
         <div className="flex flex-col lg:pt-2">
 
-          {/* Lot number label — ultra-spaced caps */}
-          <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
-            Lot {lot.lotNumber}
-          </p>
+          {/* Lot number label + quiet save affordance — kept on one baseline
+              so the bookmark reads as a catalogue mark, not a social button. */}
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
+              Lot {lot.lotNumber}
+            </p>
+            {viewer ? (
+              <SaveButton lotId={lot.id} initialWatched={watched} />
+            ) : (
+              <Link
+                href="/sign-in"
+                className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted underline decoration-line underline-offset-4 transition-colors hover:text-ink hover:decoration-ink"
+              >
+                Sign in to save
+              </Link>
+            )}
+          </div>
 
           {/* Hairline separator */}
           <div aria-hidden="true" className="mt-4 mb-5 h-px bg-line" />
