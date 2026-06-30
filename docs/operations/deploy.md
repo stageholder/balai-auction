@@ -76,10 +76,13 @@ pnpm seed:admin   # admin@balai.test etc. in cloud Supabase Auth
 
 ## 5. Cron + Xendit webhook
 
-- **Close-lots cron** is wired in `vercel.json` → `/api/cron/close-lots`,
-  authenticated by `CRON_SECRET` (Vercel injects it as a Bearer token). The
-  schedule is **hourly** (`0 * * * *`) so it works on the Hobby plan; on **Pro**
-  you can raise it (e.g. `* * * * *` every minute) for tighter closing.
+- **Close-lots cron is disabled** (`vercel.json` has `"crons": []`). Timed lots
+  won't auto-close; close them on demand via the operator console (a lot's
+  **Actions → Close now**), or hit `/api/cron/close-lots` with the
+  `Authorization: Bearer <CRON_SECRET>` header from your own scheduler.
+  To re-enable a Vercel cron, add an entry back, e.g.
+  `"crons": [{ "path": "/api/cron/close-lots", "schedule": "0 * * * *" }]`
+  (hourly works on Hobby; `* * * * *` every minute needs Pro).
 - **Xendit webhook**: Xendit Dashboard → Webhooks → URL
   `https://<your-app>.vercel.app/api/webhooks/xendit`, verification token →
   `XENDIT_CALLBACK_TOKEN`. (The success-redirect confirm route also finalises
