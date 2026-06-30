@@ -28,6 +28,10 @@ export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
             <Link href="/departments" className={NAV_LINK}>
               Departments
             </Link>
+
+            <Link href="/sell" className={NAV_LINK}>
+              Sell
+            </Link>
           </nav>
         </div>
 
