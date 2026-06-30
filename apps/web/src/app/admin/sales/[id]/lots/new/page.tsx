@@ -1,22 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { prisma, getLot, listConsignors } from "@/lib/db";
+import { prisma, getSale, listConsignors } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { LotForm } from "../lot-form";
-import { updateLotAction } from "../actions";
+import { createLotAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditLotPage({
+export default async function NewLotPage({
   params,
 }: {
-  params: Promise<{ id: string; lotId: string }>;
+  params: Promise<{ id: string }>;
 }) {
   await requireStaff();
-  const { id, lotId } = await params;
-  const lot = await getLot(prisma, lotId);
-  if (!lot || lot.saleId !== id) notFound();
+  const { id } = await params;
+  const sale = await getSale(prisma, id);
+  if (!sale) notFound();
   const consignors = await listConsignors(prisma);
 
   return (
@@ -30,16 +30,15 @@ export default async function EditLotPage({
           Back to lots
         </Link>
         <h2 className="mt-3 font-serif text-3xl text-ink">
-          Lot {lot.lotNumber} — {lot.title}
+          Add lot — {sale.title}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Edit the catalogue entry, valuation, and consignment details.
+          Catalogue a new lot. It joins the sale as soon as you save.
         </p>
       </div>
       <LotForm
-        lot={lot}
         consignors={consignors}
-        action={updateLotAction.bind(null, id, lot.id)}
+        action={createLotAction.bind(null, id)}
       />
     </div>
   );

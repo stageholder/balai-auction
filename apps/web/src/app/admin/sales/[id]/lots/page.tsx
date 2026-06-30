@@ -1,19 +1,42 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma, getSale, listLotsForSale, listConsignors } from "@/lib/db";
+import { ArrowLeft, ExternalLink, Plus, Boxes, ImageOff } from "lucide-react";
+import {
+  prisma,
+  getSale,
+  listLotsForSale,
+  listConsignors,
+  getBidEventsForLot,
+} from "@/lib/db";
+import { resolveBids } from "@auction/core";
+import type { LotStatus } from "@auction/db";
 import { formatRupiah } from "@/lib/format";
-import { LotForm } from "./lot-form";
-import { createLotAction } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { LotRowActions } from "./lot-row-actions";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_STYLES: Record<string, string> = {
-  live:       "text-primary border-primary",
-  sold:       "text-ink border-ink",
-  unsold:     "text-muted-foreground border-muted-foreground",
-  paid:       "text-muted-foreground border-muted-foreground",
-  fulfilled:  "text-muted-foreground border-muted-foreground",
+const STATUS_VARIANT: Record<
+  LotStatus,
+  "default" | "secondary" | "muted" | "outline"
+> = {
+  queued: "outline",
+  live: "default",
+  sold: "secondary",
+  unsold: "muted",
+  paid: "secondary",
+  fulfilled: "secondary",
 };
 
 export default async function AdminLotsPage({
@@ -24,143 +47,172 @@ export default async function AdminLotsPage({
   const { id } = await params;
   const sale = await getSale(prisma, id);
   if (!sale) notFound();
+
   const lots = await listLotsForSale(prisma, id);
   const consignors = await listConsignors(prisma);
   const consignorEmail = new Map(consignors.map((c) => [c.id, c.email]));
 
+  // Monitoring: resolve the current bid for every lot from its bid ledger.
+  const bidEvents = await Promise.all(
+    lots.map((lot) => getBidEventsForLot(prisma, lot.id))
+  );
+  const currentBids = lots.map((lot, i) => {
+    const events = bidEvents[i];
+    const { currentPrice } = resolveBids(
+      lot.startingPrice,
+      events,
+      sale.incrementTable
+    );
+    return { currentPrice, count: events.length };
+  });
+
   return (
-    <div className="space-y-16">
-
-      {/* ── Page header ── */}
-      <header className="border-b-2 border-ink pb-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">
-          Sale catalogue
-        </p>
-        <h1 className="font-serif text-3xl text-ink">{sale.title}</h1>
-      </header>
-
-      {/* ── Catalogue worksheet ── */}
-      <section>
-        {/* Column headers — ledger style */}
-        <div
-          className="grid items-center gap-4 border-b border-ink pb-2 text-xs uppercase tracking-[0.15em] text-muted-foreground"
-          style={{ gridTemplateColumns: "3rem 3rem 1fr auto 6rem" }}
+    <div className="flex flex-col gap-6">
+      {/* Page header */}
+      <div className="flex flex-col gap-4">
+        <Link
+          href={`/admin/sales/${id}`}
+          className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-ink"
         >
-          <span>Lot</span>
-          <span aria-hidden="true" />          {/* thumbnail column */}
-          <span>Title</span>
-          <span className="tnum text-right">Estimate</span>
-          <span className="text-right">Status</span>
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to sale
+        </Link>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Sale catalogue
+            </p>
+            <h2 className="mt-1 font-serif text-3xl text-ink">{sale.title}</h2>
+            <Link
+              href={`/sales/${id}`}
+              target="_blank"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-ink"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View sale on site
+            </Link>
+          </div>
+          <Button asChild variant="accent">
+            <Link href={`/admin/sales/${id}/lots/new`}>
+              <Plus className="h-4 w-4" />
+              Add lot
+            </Link>
+          </Button>
         </div>
+      </div>
 
-        {/* Rows */}
-        {lots.length === 0 ? (
-          <p className="py-8 text-sm text-muted-foreground">
-            No lots yet — add the first below.
-          </p>
-        ) : (
-          <ul className="divide-y divide-line">
-            {lots.map((lot) => {
-              const isLive = lot.status === "live";
-              return (
-                <li key={lot.id}>
-                 <Link
-                  href={`/admin/sales/${id}/lots/${lot.id}`}
-                  className="grid items-center gap-4 py-4 transition-colors hover:bg-line/40"
-                  style={{ gridTemplateColumns: "3rem 3rem 1fr auto 6rem" }}
-                 >
-                  {/* Lot number — catalogue plate numeral */}
-                  <span
-                    className={`font-serif text-xl leading-none tnum ${
-                      isLive ? "text-primary" : "text-ink"
-                    }`}
-                  >
-                    {String(lot.lotNumber).padStart(3, "0")}
-                  </span>
-
-                  {/* Thumbnail — portrait plate slot */}
-                  <div className="relative h-14 w-12 shrink-0 overflow-hidden border border-line bg-line">
-                    {lot.images[0] ? (
-                      <Image
-                        src={lot.images[0]}
-                        alt={lot.title}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      /* placeholder hairline cross */
-                      <svg
-                        className="absolute inset-0 h-full w-full text-line"
-                        viewBox="0 0 48 56"
-                        aria-hidden="true"
-                      >
-                        <line x1="0" y1="0" x2="48" y2="56" stroke="currentColor" strokeWidth="1" />
-                        <line x1="48" y1="0" x2="0" y2="56" stroke="currentColor" strokeWidth="1" />
-                      </svg>
-                    )}
-                  </div>
-
-                  {/* Title + description snippet + consignment */}
-                  <div className="min-w-0">
-                    <p className="truncate font-serif text-sm text-ink">
-                      {lot.title}
-                    </p>
-                    {lot.description && (
-                      <p className="truncate text-xs text-muted-foreground mt-0.5">
-                        {lot.description}
-                      </p>
-                    )}
-                    {/* Consignment — ledger provenance line */}
-                    <p className="truncate text-xs text-muted-foreground mt-0.5">
-                      <span className="uppercase tracking-[0.12em] text-[0.65rem]">
-                        Consignor
-                      </span>
-                      <span className="mx-1.5 text-line">·</span>
-                      {(lot.consignorId && consignorEmail.get(lot.consignorId)) || "—"}
-                    </p>
-                  </div>
-
-                  {/* Estimate — tabular, right-aligned */}
-                  <p className="tnum text-right text-xs text-muted-foreground whitespace-nowrap">
-                    {formatRupiah(lot.estimateLow)}
-                    <span className="mx-1 text-line">–</span>
-                    {formatRupiah(lot.estimateHigh)}
-                  </p>
-
-                  {/* Status badge — small caps stamp */}
-                  <span
-                    className={`tnum block border px-2 py-0.5 text-right text-xs uppercase tracking-[0.12em] ${
-                      STATUS_STYLES[lot.status] ?? "text-muted-foreground border-muted-foreground"
-                    }`}
-                  >
-                    {lot.status}
-                  </span>
-                 </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {/* Foot rule */}
-        {lots.length > 0 && (
-          <div className="mt-0 border-t-2 border-ink" />
-        )}
-      </section>
-
-      {/* ── Add lot ── */}
-      <section>
-        {/* Section divider with accent rule */}
-        <div className="mb-6 flex items-center gap-4">
-          <div className="h-px flex-1 bg-line" />
-          <h2 className="font-serif text-xl text-ink">Add lot</h2>
-          <div className="h-px flex-1 bg-line" />
-        </div>
-
-        <LotForm consignors={consignors} action={createLotAction.bind(null, id)} />
-      </section>
-
+      <Card>
+        <CardContent className="p-0">
+          {lots.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+              <Boxes className="h-8 w-8 text-muted-foreground" />
+              <div>
+                <p className="font-medium text-ink">No lots yet</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Add the first lot to start building this catalogue.
+                </p>
+              </div>
+              <Button asChild variant="accent" size="sm">
+                <Link href={`/admin/sales/${id}/lots/new`}>
+                  <Plus className="h-4 w-4" />
+                  Add lot
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">Lot</TableHead>
+                  <TableHead className="w-14" />
+                  <TableHead>Title</TableHead>
+                  <TableHead>Estimate</TableHead>
+                  <TableHead>Reserve</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Current bid</TableHead>
+                  <TableHead>Consignor</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lots.map((lot, i) => {
+                  const bid = currentBids[i];
+                  const isLive = lot.status === "live";
+                  return (
+                    <TableRow key={lot.id}>
+                      <TableCell className="font-serif text-lg tnum text-ink">
+                        {String(lot.lotNumber).padStart(3, "0")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="relative h-12 w-10 overflow-hidden rounded-sm border border-line bg-line/40">
+                          {lot.images[0] ? (
+                            <Image
+                              src={lot.images[0]}
+                              alt={lot.title}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <ImageOff className="absolute inset-0 m-auto h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[16rem]">
+                        <Link
+                          href={`/admin/sales/${id}/lots/${lot.id}`}
+                          className="block truncate font-medium text-ink hover:underline"
+                        >
+                          {lot.title}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs tnum text-muted-foreground">
+                        {formatRupiah(lot.estimateLow)}
+                        <span className="mx-1 text-line">–</span>
+                        {formatRupiah(lot.estimateHigh)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs tnum text-muted-foreground">
+                        {lot.reserve != null ? formatRupiah(lot.reserve) : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={STATUS_VARIANT[lot.status] ?? "muted"}>
+                          {lot.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap tnum">
+                        {bid.count === 0 ? (
+                          <span className="text-xs text-muted-foreground">
+                            No bids
+                          </span>
+                        ) : (
+                          <span className="text-sm text-ink">
+                            {formatRupiah(bid.currentPrice)}
+                            <span className="ml-1.5 text-xs text-muted-foreground">
+                              · {bid.count} bid{bid.count === 1 ? "" : "s"}
+                            </span>
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-[12rem] truncate text-xs text-muted-foreground">
+                        {(lot.consignorId &&
+                          consignorEmail.get(lot.consignorId)) ||
+                          "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <LotRowActions
+                          saleId={id}
+                          lotId={lot.id}
+                          isLive={isLive}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -2,7 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { prisma, createLot, updateLot, getLot, getSale, listConsignors } from "@/lib/db";
+import {
+  prisma,
+  createLot,
+  updateLot,
+  getLot,
+  getSale,
+  listConsignors,
+  updateLotClosesAt,
+  closeLot,
+} from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { uploadLotImage } from "@/lib/storage";
 
@@ -78,4 +87,28 @@ export async function updateLotAction(
   await updateLot(prisma, lotId, { ...readFields(formData), consignorId, images });
   revalidatePath(`/admin/sales/${saleId}/lots`);
   redirect(`/admin/sales/${saleId}/lots`);
+}
+
+export type CloseLotNowResult =
+  | { ok: true; outcome: string; hammerPrice: number }
+  | { ok: false; error: string };
+
+/** Operator override: force-close a live lot now to test the hammer→invoice
+ *  flow. Intentionally closes even when `closesAt` is in the future. Sold lots
+ *  get an Invoice, viewable on /admin/sales/[id]/results. */
+export async function closeLotNowAction(
+  saleId: string,
+  lotId: string
+): Promise<CloseLotNowResult> {
+  await requireStaff();
+  const lot = await getLot(prisma, lotId);
+  if (!lot || lot.status !== "live") {
+    return { ok: false, error: "Only a live lot can be closed." };
+  }
+  // Force the close even if closesAt is in the future (early hammer override).
+  await updateLotClosesAt(prisma, lotId, new Date(Date.now() - 1000));
+  const result = await closeLot(prisma, lotId, new Date());
+  revalidatePath(`/admin/sales/${saleId}/lots`);
+  revalidatePath(`/admin/sales/${saleId}/results`);
+  return { ok: true, outcome: result.outcome, hammerPrice: result.hammerPrice };
 }

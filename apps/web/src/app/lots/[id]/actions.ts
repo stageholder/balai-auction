@@ -19,7 +19,13 @@ import { notifyOutbid } from "@/lib/notifications";
 export async function placeBid(
   lotId: string,
   maxAmount: number
-): Promise<{ ok: boolean; error?: string; currentPrice?: number; closesAt?: string }> {
+): Promise<{
+  ok: boolean;
+  error?: string;
+  currentPrice?: number;
+  closesAt?: string;
+  leading?: boolean;
+}> {
   const user = await requireUser();
 
   if (!Number.isInteger(maxAmount) || maxAmount <= 0) {
@@ -99,5 +105,6 @@ export async function placeBid(
     ok: true,
     currentPrice: resolution.currentPrice,
     closesAt: closesAt.toISOString(),
+    leading: resolution.winnerId === user.id,
   };
 }

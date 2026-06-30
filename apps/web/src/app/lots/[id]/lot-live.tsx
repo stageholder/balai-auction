@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { formatRupiah } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ export function LotLive({
   const [closesAt, setClosesAt] = useState(initialClosesAt);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [youStatus, setYouStatus] = useState<"leading" | "outbid" | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Subscribe to the public lot channel for live price updates.
@@ -97,6 +99,17 @@ export function LotLive({
       if (typeof result.currentPrice === "number") setPrice(result.currentPrice);
       if (result.closesAt) setClosesAt(result.closesAt);
       if (inputRef.current) inputRef.current.value = "";
+      const leading = result.leading === true;
+      setYouStatus(leading ? "leading" : "outbid");
+      if (leading) {
+        toast.success(
+          `You're the highest bidder at ${formatRupiah(
+            result.currentPrice ?? price
+          )}.`
+        );
+      } else {
+        toast("Bid placed — but you've been outbid. Raise your maximum to lead.");
+      }
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -131,6 +144,16 @@ export function LotLive({
           <p className="tnum font-serif text-[2.2rem] leading-none tracking-tight text-ink">
             {formatRupiah(price)}
           </p>
+          {youStatus === "leading" ? (
+            <p className="mt-2.5 inline-flex items-center gap-1.5 font-sans text-xs font-medium text-primary">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+              You are the highest bidder
+            </p>
+          ) : youStatus === "outbid" ? (
+            <p className="mt-2.5 font-sans text-xs text-muted-foreground">
+              You&rsquo;ve been outbid — raise your maximum to lead.
+            </p>
+          ) : null}
         </div>
 
         {/* ── Hairline ── */}
