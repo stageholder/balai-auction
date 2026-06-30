@@ -65,7 +65,7 @@ export default async function SalePage({
   return (
     <div>
       {/* ── FULL-BLEED MASTHEAD — cover image with an ink scrim ───────── */}
-      <FullBleed className="mb-16">
+      <FullBleed className="-mt-12 mb-16">
         <div className="relative min-h-[460px] w-full overflow-hidden bg-ink lg:min-h-[540px]">
           {cover ? (
             <Image

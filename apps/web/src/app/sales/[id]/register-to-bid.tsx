@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { registerToBid } from "./actions";
 
 export function RegisterToBidForm({ saleId }: { saleId: string }) {
@@ -20,6 +23,7 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
         setError(result.error ?? "Registration failed.");
         return;
       }
+      toast.success("Registration submitted — we'll review it shortly.");
       router.refresh();
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -29,33 +33,25 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="max-w-sm space-y-4">
-      <div>
-        <label htmlFor="legalName" className="block text-xs uppercase tracking-[0.15em] text-muted-foreground">
-          Legal name
-        </label>
-        <input
-          id="legalName"
-          name="legalName"
-          required
-          className="mt-1 w-full border border-line bg-paper px-3 py-2 focus:border-ink focus:outline-none"
-        />
+    <form onSubmit={onSubmit} className="space-y-5">
+      <div className="space-y-1.5">
+        <Label htmlFor="legalName">Legal name</Label>
+        <Input id="legalName" name="legalName" required autoComplete="name" />
       </div>
-      <div>
-        <label htmlFor="phone" className="block text-xs uppercase tracking-[0.15em] text-muted-foreground">
-          Phone
-        </label>
-        <input
+      <div className="space-y-1.5">
+        <Label htmlFor="phone">Phone</Label>
+        <Input
           id="phone"
           name="phone"
           type="tel"
           required
-          className="mt-1 w-full border border-line bg-paper px-3 py-2 focus:border-ink focus:outline-none"
+          autoComplete="tel"
+          placeholder="+62 …"
         />
       </div>
-      {error ? <p className="text-sm text-primary">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <Button type="submit" variant="accent" disabled={pending}>
-        Register to bid
+        {pending ? "Submitting…" : "Register to bid"}
       </Button>
     </form>
   );

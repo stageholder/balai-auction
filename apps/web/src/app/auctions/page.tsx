@@ -108,7 +108,7 @@ export default async function AuctionsPage({
     <div>
       {/* FULL-BLEED FEATURED BAND — a representative sale image with a scrim */}
       {featured ? (
-        <FullBleed className="mb-16">
+        <FullBleed className="-mt-12 mb-16">
           <div className="relative h-[58vh] min-h-[420px] w-full overflow-hidden bg-ink">
             {featuredCover ? (
               <Image

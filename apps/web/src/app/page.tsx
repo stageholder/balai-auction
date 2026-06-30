@@ -52,7 +52,7 @@ export default async function HomePage() {
     <div>
       {/* FULL-BLEED HERO — real lot imagery, auto-advancing, with CTAs */}
       {heroSlides.length > 0 ? (
-        <FullBleed className="mb-20">
+        <FullBleed className="-mt-12 mb-20">
           <HomeHero
             slides={heroSlides}
             saleId={featured?.id ?? null}

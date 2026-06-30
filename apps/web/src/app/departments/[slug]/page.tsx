@@ -78,7 +78,7 @@ export default async function DepartmentPage({
   return (
     <div>
       {/* FULL-BLEED EDITORIAL HERO — representative imagery with a scrim */}
-      <FullBleed className="mb-16">
+      <FullBleed className="-mt-12 mb-16">
         <div className="relative h-[60vh] min-h-[440px] w-full overflow-hidden bg-ink">
           {heroImage ? (
             <Image
