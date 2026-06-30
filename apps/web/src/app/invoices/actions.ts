@@ -1,11 +1,6 @@
 "use server";
 
-import {
-  prisma,
-  getInvoiceById,
-  setInvoiceXenditId,
-  markInvoicePaid,
-} from "@/lib/db";
+import { prisma, getInvoiceById, setInvoiceXenditId } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { createXenditInvoice, getXenditInvoice } from "@/lib/xendit";
 
@@ -23,16 +18,6 @@ export async function startInvoicePayment(
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-  // Local dev only: with no Xendit key, simulate a successful payment so the
-  // whole flow (invoice → paid → consignor settlement & payout) is testable.
-  // markInvoicePaid is exactly what the real Xendit webhook calls. Gated to
-  // NODE_ENV === "development" (true only under `next dev`), so a deployed
-  // build NEVER bypasses payment regardless of env-var state.
-  if (!process.env.XENDIT_SECRET_KEY && process.env.NODE_ENV === "development") {
-    await markInvoicePaid(prisma, invoice.id);
-    return { ok: true, url: `${appUrl}/invoices?paid=1` };
-  }
 
   try {
     // Reuse an already-open Xendit invoice instead of minting a new one, so a
@@ -53,7 +38,7 @@ export async function startInvoicePayment(
       amount: invoice.total,
       payerEmail: user.email,
       description: `Payment for lot ${invoice.lotId}`,
-      successRedirectUrl: `${appUrl}/invoices?paid=1`,
+      successRedirectUrl: `${appUrl}/api/invoices/confirm?id=${invoice.id}`,
       failureRedirectUrl: `${appUrl}/invoices?failed=1`,
     });
     await setInvoiceXenditId(prisma, invoice.id, xendit.id);
