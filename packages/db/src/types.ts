@@ -297,3 +297,12 @@ export interface NewConsignmentRequest {
   itemDescription: string;
   sellerEstimate?: number | null;
 }
+
+export interface BidHistoryItem {
+  id: string;
+  amount: number;
+  maxAmount: number;
+  bidderId: string;
+  bidderEmail: string;
+  createdAt: Date;
+}

@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration, getLotHammer, isWatched } from "@/lib/db";
+import { prisma, getLot, getPublishedSale, getBidEventsForLot, getRegistration, getLotHammer, isWatched, listBidsForLot } from "@/lib/db";
 import { resolveBids, nextBidFloor, departmentLabel } from "@auction/core";
 import { getCurrentUser } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { BidActivity } from "@/components/bid-activity";
 import { LotLive } from "./lot-live";
 import { SaveButton } from "./save-button";
 
@@ -48,6 +49,9 @@ export default async function LotPage({
   // reuses the same call. The watched flag is only meaningful when signed in.
   const viewer = await getCurrentUser();
   const watched = viewer ? await isWatched(prisma, viewer.id, lot.id) : false;
+
+  // Bid history (price chart + list). Bidders are masked on the public page.
+  const bids = await listBidsForLot(prisma, lot.id);
 
   const now = new Date();
 
@@ -311,6 +315,21 @@ export default async function LotPage({
           </div>
         </div>
       </div>
+
+      {/* ── Bid history — price chart + chronological list (bidders masked) ── */}
+      {bids.length > 0 || lot.status === "live" ? (
+        <section className="mt-20" aria-labelledby="bid-history-heading">
+          <h2
+            id="bid-history-heading"
+            className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground"
+          >
+            Bid history
+          </h2>
+          <div className="mt-6 max-w-2xl">
+            <BidActivity bids={bids} startingPrice={lot.startingPrice} />
+          </div>
+        </section>
+      ) : null}
 
       {/* ── Provenance footer rule ── */}
       <div aria-hidden="true" className="mt-20 h-px bg-line" />
