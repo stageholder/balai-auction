@@ -3,7 +3,15 @@
   "private": true,
   "engines": { "node": ">=20" },
   "scripts": {
-    "test": "pnpm -r test"
+    "setup": "docker compose up -d postgres && supabase start && pnpm db:migrate && pnpm db:seed && pnpm seed:admin",
+    "dev": "pnpm --filter @auction/web dev",
+    "live": "pnpm --filter @auction/live-runner dev",
+    "build": "pnpm --filter @auction/web build",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @auction/db db:deploy",
+    "db:seed": "pnpm --filter @auction/db db:seed",
+    "db:studio": "pnpm --filter @auction/db exec prisma studio",
+    "seed:admin": "pnpm --filter @auction/web db:bootstrap"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma"]
