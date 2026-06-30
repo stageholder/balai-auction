@@ -14,7 +14,7 @@ const STATUS_LABEL: Record<string, string> = {
  *  outline). Live = crimson; Upcoming = ink; Results = soft ink. */
 function statusBadgeClass(status: string): string {
   if (status === "live") return "bg-primary text-primary-foreground";
-  if (status === "closed") return "bg-ink/75 text-paper";
+  if (status === "closed") return "bg-muted-foreground text-paper"; // solid gray
   return "bg-ink text-paper"; // scheduled / upcoming
 }
 
