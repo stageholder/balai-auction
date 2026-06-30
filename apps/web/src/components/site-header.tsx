@@ -31,11 +31,45 @@ export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
           </nav>
         </div>
 
-        {accountSlot ?? (
-          <span className="font-sans text-xs uppercase tracking-[0.15em] text-muted">
-            {SITE.tagline}
-          </span>
-        )}
+        <div className="flex items-baseline gap-6 md:gap-8">
+          <form
+            action="/search"
+            method="get"
+            role="search"
+            className="flex items-baseline gap-2 border-b border-line transition-colors focus-within:border-ink"
+          >
+            <input
+              type="search"
+              name="q"
+              aria-label="Search the catalogue"
+              placeholder="Search artists, makers, lots"
+              className="w-40 bg-transparent pb-1 font-sans text-xs tracking-[0.05em] text-ink placeholder:uppercase placeholder:tracking-[0.15em] placeholder:text-muted focus:outline-none md:w-56"
+            />
+            <button
+              type="submit"
+              aria-label="Search"
+              className="pb-1 text-muted transition-colors hover:text-ink"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                className="h-3.5 w-3.5"
+              >
+                <circle cx="7" cy="7" r="5" />
+                <path d="M11 11l4 4" strokeLinecap="round" />
+              </svg>
+            </button>
+          </form>
+
+          {accountSlot ?? (
+            <span className="font-sans text-xs uppercase tracking-[0.15em] text-muted">
+              {SITE.tagline}
+            </span>
+          )}
+        </div>
       </div>
     </header>
   );
