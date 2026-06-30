@@ -12,3 +12,4 @@ export * from "./repositories/results";
 export * from "./repositories/payouts";
 export * from "./repositories/search";
 export * from "./repositories/watchlist";
+export * from "./repositories/consignment-requests";

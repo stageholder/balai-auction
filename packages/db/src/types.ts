@@ -267,3 +267,32 @@ export interface WatchlistItem {
   estimateLow: number;
   estimateHigh: number;
 }
+
+export type ConsignmentRequestStatus =
+  | "pending"
+  | "reviewing"
+  | "accepted"
+  | "declined";
+
+export interface ConsignmentRequestRecord {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  category: string | null;
+  itemTitle: string;
+  itemDescription: string;
+  sellerEstimate: number | null;
+  status: ConsignmentRequestStatus;
+  createdAt: Date;
+}
+
+export interface NewConsignmentRequest {
+  name: string;
+  email: string;
+  phone?: string | null;
+  category?: string | null;
+  itemTitle: string;
+  itemDescription: string;
+  sellerEstimate?: number | null;
+}

@@ -243,3 +243,25 @@ model Watchlist {
   @@unique([userId, lotId])
   @@index([userId])
 }
+
+enum ConsignmentRequestStatus {
+  pending
+  reviewing
+  accepted
+  declined
+}
+
+model ConsignmentRequest {
+  id              String                   @id @default(uuid())
+  name            String
+  email           String
+  phone           String?
+  category        String?
+  itemTitle       String
+  itemDescription String
+  sellerEstimate  BigInt?
+  status          ConsignmentRequestStatus @default(pending)
+  createdAt       DateTime                 @default(now())
+
+  @@index([status])
+}

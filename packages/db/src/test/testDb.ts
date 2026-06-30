@@ -17,6 +17,6 @@ export function testDb(): PrismaClient {
 /** Truncate every table so each test starts from an empty database. */
 export async function resetDb(db: PrismaClient): Promise<void> {
   await db.$executeRawUnsafe(
-    'TRUNCATE TABLE "LedgerEntry","Invoice","Bid","Registration","Lot","Sale","User" RESTART IDENTITY CASCADE'
+    'TRUNCATE TABLE "LedgerEntry","Invoice","Bid","Registration","Lot","Sale","User","ConsignmentRequest" RESTART IDENTITY CASCADE'
   );
 }

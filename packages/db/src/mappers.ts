@@ -1,6 +1,7 @@
 import type { AmlStatus, BidEvent, IncrementTable } from "@auction/core";
 import type {
   BidRecord,
+  ConsignmentRequestRecord,
   InvoiceRecord,
   LedgerEntryRecord,
   LotRecord,
@@ -9,6 +10,32 @@ import type {
   SaleRecord,
   UserRecord,
 } from "./types";
+
+export function consignmentRequestRowToRecord(row: {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  category: string | null;
+  itemTitle: string;
+  itemDescription: string;
+  sellerEstimate: bigint | null;
+  status: ConsignmentRequestRecord["status"];
+  createdAt: Date;
+}): ConsignmentRequestRecord {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    category: row.category,
+    itemTitle: row.itemTitle,
+    itemDescription: row.itemDescription,
+    sellerEstimate: row.sellerEstimate === null ? null : toMoney(row.sellerEstimate),
+    status: row.status,
+    createdAt: row.createdAt,
+  };
+}
 
 export function toMoney(v: bigint): number {
   const n = Number(v);
