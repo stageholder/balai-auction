@@ -54,7 +54,7 @@ export function RoleSelect({
         viewBox="0 0 12 8"
         fill="none"
         strokeWidth={1.5}
-        className="pointer-events-none absolute right-3 h-2 w-3 stroke-muted"
+        className="pointer-events-none absolute right-3 h-2 w-3 stroke-muted-foreground"
       >
         <path d="M1 1.5 6 6.5 11 1.5" strokeLinecap="square" />
       </svg>

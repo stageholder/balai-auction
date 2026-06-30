@@ -2,9 +2,9 @@ import Link from "next/link";
 import { SITE } from "@/lib/site";
 
 const COL_HEADING =
-  "font-sans text-[0.625rem] uppercase tracking-[0.2em] text-muted";
+  "font-sans text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground";
 const COL_LINK =
-  "font-sans text-sm tracking-[0.02em] text-ink/80 transition-colors hover:text-accent";
+  "font-sans text-sm tracking-[0.02em] text-ink/80 transition-colors hover:text-primary";
 
 type FooterColumn = {
   heading: string;
@@ -45,7 +45,7 @@ export function SiteFooter() {
             >
               {SITE.name}
             </Link>
-            <p className="mt-3 max-w-xs font-serif text-base italic text-muted">
+            <p className="mt-3 max-w-xs font-serif text-base italic text-muted-foreground">
               {SITE.tagline}
             </p>
           </div>
@@ -66,7 +66,7 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col gap-2 border-t border-line pt-6 text-xs tracking-[0.04em] text-muted sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-2 border-t border-line pt-6 text-xs tracking-[0.04em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {SITE.name} — {SITE.tagline}
           </p>

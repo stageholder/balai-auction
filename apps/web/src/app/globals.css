@@ -2,19 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Balai identity, expressed as shadcn/ui tokens.
+ * Kept hex aliases (--paper/--ink/--line) back the paper/ink/line Tailwind tokens
+ * that existing code uses; the HSL tokens drive every shadcn component so the
+ * whole UI shares one themed system. Colours: cream paper, near-black ink,
+ * crimson primary.
+ */
 :root {
+  /* identity hex aliases (kept) */
   --paper: #faf8f4;
   --ink: #1a1a1a;
-  --muted: #6f6a60;
   --line: #e4ded3;
-  --accent: #9b1b30;
+
+  /* shadcn semantic tokens (HSL triplets) — themed to the identity */
+  --background: 40 33% 97%; /* paper */
+  --foreground: 0 0% 10%; /* ink */
+  --card: 42 45% 99%;
+  --card-foreground: 0 0% 10%;
+  --popover: 42 45% 99%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 350 70% 36%; /* crimson */
+  --primary-foreground: 40 33% 97%;
+  --secondary: 39 26% 92%;
+  --secondary-foreground: 0 0% 12%;
+  --muted: 39 26% 92%;
+  --muted-foreground: 40 7% 43%; /* ~#6f6a60 */
+  --accent: 39 30% 90%;
+  --accent-foreground: 0 0% 12%;
+  --destructive: 0 70% 42%;
+  --destructive-foreground: 40 33% 97%;
+  --border: 39 25% 85%; /* line */
+  --input: 39 25% 85%;
+  --ring: 350 70% 36%; /* crimson focus */
+  --radius: 0.25rem;
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
   body {
     @apply bg-paper text-ink font-sans antialiased;
   }
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     @apply font-serif;
   }
 }

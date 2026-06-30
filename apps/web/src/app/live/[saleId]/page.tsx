@@ -70,7 +70,7 @@ export default async function LiveSalePage({
   return (
     <div>
       <header className="mb-10">
-        <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted">
+        <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Live auction
         </p>
         <h1 className="mt-2 text-4xl leading-tight">{sale.title}</h1>

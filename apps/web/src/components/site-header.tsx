@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SITE } from "@/lib/site";
 
 const NAV_LINK =
-  "text-xs uppercase tracking-[0.15em] text-muted transition-colors hover:text-ink";
+  "text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-ink";
 
 const NAV_ITEMS = [
   { href: "/auctions", label: "Auctions" },
@@ -23,7 +23,7 @@ export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
           {/* Mobile: primary nav collapses behind a native disclosure */}
           <details className="group relative md:hidden">
             <summary
-              className="flex cursor-pointer list-none items-baseline gap-1.5 text-xs uppercase tracking-[0.15em] text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden"
+              className="flex cursor-pointer list-none items-baseline gap-1.5 text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-ink [&::-webkit-details-marker]:hidden"
               aria-label="Toggle navigation menu"
             >
               Menu
@@ -72,12 +72,12 @@ export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
               name="q"
               aria-label="Search the catalogue"
               placeholder="Search artists, makers, lots"
-              className="w-40 bg-transparent pb-1 font-sans text-xs tracking-[0.05em] text-ink placeholder:uppercase placeholder:tracking-[0.15em] placeholder:text-muted focus:outline-none md:w-56"
+              className="w-40 bg-transparent pb-1 font-sans text-xs tracking-[0.05em] text-ink placeholder:uppercase placeholder:tracking-[0.15em] placeholder:text-muted-foreground focus:outline-none md:w-56"
             />
             <button
               type="submit"
               aria-label="Search"
-              className="pb-1 text-muted transition-colors hover:text-ink"
+              className="pb-1 text-muted-foreground transition-colors hover:text-ink"
             >
               <svg
                 aria-hidden="true"
@@ -94,7 +94,7 @@ export function SiteHeader({ accountSlot }: { accountSlot?: React.ReactNode }) {
           </form>
 
           {accountSlot ?? (
-            <span className="font-sans text-xs uppercase tracking-[0.15em] text-muted">
+            <span className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground">
               {SITE.tagline}
             </span>
           )}

@@ -19,12 +19,12 @@ export function SaleCard({ sale }: { sale: SaleRecord }) {
         {/* Left accent rail — fades in on hover */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 h-full w-px bg-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          className="pointer-events-none absolute left-0 top-0 h-full w-px bg-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         />
 
         <div className="pl-5">
           {/* Status label */}
-          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {sale.status}
           </p>
 
@@ -35,13 +35,13 @@ export function SaleCard({ sale }: { sale: SaleRecord }) {
 
           {/* Description */}
           {sale.description ? (
-            <p className="mt-3 font-sans text-sm leading-relaxed text-muted line-clamp-2">
+            <p className="mt-3 font-sans text-sm leading-relaxed text-muted-foreground line-clamp-2">
               {sale.description}
             </p>
           ) : null}
 
           {/* Date range */}
-          <p className="tnum mt-5 font-sans text-[11px] text-muted">
+          <p className="tnum mt-5 font-sans text-[11px] text-muted-foreground">
             {startDate} — {endDate}
           </p>
         </div>

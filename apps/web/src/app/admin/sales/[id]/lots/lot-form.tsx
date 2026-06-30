@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const FIELD =
   "mt-1 w-full border border-line bg-paper px-3 py-2 focus:border-ink focus:outline-none";
-const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted";
+const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted-foreground";
 
 function toLocalInput(d: Date): string {
   return new Date(d).toISOString().slice(0, 16);

@@ -17,18 +17,18 @@ const STATUS_LABEL: Record<PayoutStatus, string> = {
 // Status marker colour, tokens only. Pending awaits action (muted),
 // released/paid are settled (ink), failed needs attention (accent).
 const STATUS_DOT: Record<PayoutStatus, string> = {
-  pending: "bg-muted",
+  pending: "bg-muted-foreground",
   released: "bg-ink",
   paid: "bg-ink",
-  failed: "bg-accent",
+  failed: "bg-primary",
 };
 
 /** One compliance check, read at a glance: the label stays quiet (muted) while
  *  the mark carries the verdict — settled in ink (✓), unmet in accent (✗). */
 function ComplianceMark({ label, ok }: { label: string; ok: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1 text-muted">
-      <span aria-hidden="true" className={ok ? "text-ink" : "text-accent"}>
+    <span className="inline-flex items-center gap-1 text-muted-foreground">
+      <span aria-hidden="true" className={ok ? "text-ink" : "text-primary"}>
         {ok ? "✓" : "✗"}
       </span>
       <span>{label}</span>
@@ -48,24 +48,24 @@ export default async function AdminPayoutsPage() {
     <div>
       <header className="mb-8">
         <h1 className="text-2xl">Payouts</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-muted-foreground">
           Settlement ledger — net due to consignors after commission.
         </p>
       </header>
 
       {payouts.length === 0 ? (
-        <p className="text-muted">No payouts yet.</p>
+        <p className="text-muted-foreground">No payouts yet.</p>
       ) : (
         <>
           <dl className="mb-8 flex flex-wrap gap-x-12 gap-y-4 border-y border-line py-4">
             <div>
-              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted">
+              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
                 Pending
               </dt>
               <dd className="tnum mt-1 text-xl text-ink">{pending.length}</dd>
             </div>
             <div>
-              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted">
+              <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
                 Net pending
               </dt>
               <dd className="tnum mt-1 text-xl text-ink">
@@ -76,7 +76,7 @@ export default async function AdminPayoutsPage() {
 
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-line text-left text-xs uppercase tracking-[0.15em] text-muted">
+              <tr className="border-b border-line text-left text-xs uppercase tracking-[0.15em] text-muted-foreground">
                 <th className="py-2 font-normal">Lot</th>
                 <th className="py-2 font-normal">Consignor</th>
                 <th className="py-2 text-right font-normal">Hammer</th>
@@ -91,14 +91,14 @@ export default async function AdminPayoutsPage() {
               {payouts.map((p) => (
                 <tr key={p.id} className="border-b border-line align-top">
                   <td className="py-3 pr-4">
-                    <span className="tnum text-muted">{p.lotNumber}</span>{" "}
+                    <span className="tnum text-muted-foreground">{p.lotNumber}</span>{" "}
                     <span className="text-ink">{p.lotTitle}</span>
                   </td>
-                  <td className="py-3 pr-4 text-muted">{p.consignorEmail}</td>
-                  <td className="tnum py-3 pl-4 text-right text-muted">
+                  <td className="py-3 pr-4 text-muted-foreground">{p.consignorEmail}</td>
+                  <td className="tnum py-3 pl-4 text-right text-muted-foreground">
                     {formatRupiah(p.hammer)}
                   </td>
-                  <td className="tnum py-3 pl-4 text-right text-muted">
+                  <td className="tnum py-3 pl-4 text-right text-muted-foreground">
                     {formatRupiah(p.commission)}
                   </td>
                   <td className="tnum py-3 pl-4 text-right text-ink">
@@ -121,7 +121,7 @@ export default async function AdminPayoutsPage() {
                     {!p.hasBankDetails ? (
                       <Link
                         href="/admin/users"
-                        className="mt-1 inline-block text-[0.65rem] uppercase tracking-[0.1em] text-muted underline decoration-line underline-offset-2 hover:decoration-ink hover:text-ink"
+                        className="mt-1 inline-block text-[0.65rem] uppercase tracking-[0.1em] text-muted-foreground underline decoration-line underline-offset-2 hover:decoration-ink hover:text-ink"
                       >
                         Add bank in Users
                       </Link>

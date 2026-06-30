@@ -28,7 +28,7 @@ export default async function EditSalePage({
       </div>
 
       <section>
-        <h2 className="mb-3 text-sm uppercase tracking-[0.15em] text-muted">Status: {sale.status}</h2>
+        <h2 className="mb-3 text-sm uppercase tracking-[0.15em] text-muted-foreground">Status: {sale.status}</h2>
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((status) => (
             <form key={status} action={setSaleStatusAction.bind(null, id, status)}>

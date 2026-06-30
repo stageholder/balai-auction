@@ -10,9 +10,9 @@ import {
 } from "./actions";
 
 const FIELD =
-  "mt-2 w-full border border-line bg-paper px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted/60 focus:border-ink focus:outline-none";
-const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted";
-const OPTIONAL = "ml-2 text-[10px] tracking-[0.1em] text-muted/70";
+  "mt-2 w-full border border-line bg-paper px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted-foreground/60 focus:border-ink focus:outline-none";
+const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted-foreground";
+const OPTIONAL = "ml-2 text-[10px] tracking-[0.1em] text-muted-foreground/70";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -29,12 +29,12 @@ function Confirmation() {
     <div className="border border-line bg-paper px-8 py-14 text-center">
       <span
         aria-hidden
-        className="mx-auto block h-px w-12 bg-accent"
+        className="mx-auto block h-px w-12 bg-primary"
       />
       <h2 className="mt-6 font-serif text-4xl font-light leading-tight text-ink">
         Thank you — it's with our specialists.
       </h2>
-      <p className="mx-auto mt-4 max-w-md font-sans text-sm leading-relaxed text-muted">
+      <p className="mx-auto mt-4 max-w-md font-sans text-sm leading-relaxed text-muted-foreground">
         We've received the details of your piece. A specialist from the relevant
         department will review it and write back with our thoughts and a likely
         estimate. No obligation, and nothing to pay.
@@ -60,7 +60,7 @@ export function SellForm() {
         <legend className="mb-1 font-serif text-2xl font-light text-ink">
           About you
         </legend>
-        <p className="-mt-1 text-sm text-muted">
+        <p className="-mt-1 text-sm text-muted-foreground">
           So a specialist can write back with our thoughts.
         </p>
 
@@ -119,7 +119,7 @@ export function SellForm() {
         <legend className="mb-1 font-serif text-2xl font-light text-ink">
           Your item
         </legend>
-        <p className="-mt-1 text-sm text-muted">
+        <p className="-mt-1 text-sm text-muted-foreground">
           Tell us what you have. The more you share, the sharper our estimate.
         </p>
 
@@ -193,11 +193,11 @@ export function SellForm() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <SubmitButton />
         {result && !result.ok ? (
-          <p role="alert" className="text-sm text-accent">
+          <p role="alert" className="text-sm text-primary">
             {result.error}
           </p>
         ) : (
-          <p className="text-xs text-muted">
+          <p className="text-xs text-muted-foreground">
             No fees to enquire. We reply to every submission.
           </p>
         )}

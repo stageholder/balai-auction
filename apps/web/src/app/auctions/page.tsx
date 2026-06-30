@@ -89,13 +89,13 @@ export default async function AuctionsPage({
     <div>
       {/* Masthead */}
       <section className="max-w-3xl">
-        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted">
+        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
           The Auction Calendar
         </p>
         <h1 className="mt-4 font-serif text-6xl leading-[0.95] tracking-tight">
           {activeLabel ?? "Auctions"}
         </h1>
-        <p className="mt-5 max-w-xl font-sans text-sm leading-relaxed text-muted">
+        <p className="mt-5 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
           {activeLabel
             ? `Sales in ${activeLabel}, by where they sit in the season.`
             : "A season of sales, grouped by where they stand — live on the rostrum, scheduled ahead, and the results behind us."}
@@ -107,7 +107,7 @@ export default async function AuctionsPage({
         aria-label="Filter by department"
         className="mt-12 border-t border-line pt-6"
       >
-        <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
+        <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           Departments
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -147,8 +147,8 @@ export default async function AuctionsPage({
               aria-current={active ? "page" : undefined}
               className={`-mb-px border-b-2 pb-3 font-sans text-xs uppercase tracking-[0.2em] transition-colors ${
                 active
-                  ? "border-accent text-ink"
-                  : "border-transparent text-muted hover:text-ink"
+                  ? "border-primary text-ink"
+                  : "border-transparent text-muted-foreground hover:text-ink"
               }`}
             >
               {tab.label}
@@ -163,7 +163,7 @@ export default async function AuctionsPage({
           <section key={section.value}>
             <header
               className={`flex items-baseline justify-between gap-4 border-b pb-4 ${
-                section.live ? "border-accent" : "border-line"
+                section.live ? "border-primary" : "border-line"
               }`}
             >
               <div className="flex items-baseline gap-3">
@@ -172,30 +172,30 @@ export default async function AuctionsPage({
                     aria-hidden="true"
                     className="relative inline-flex h-2 w-2 self-center"
                   >
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                   </span>
                 ) : null}
                 <h2
                   className={`font-serif text-4xl leading-none tracking-tight ${
-                    section.live ? "text-accent" : "text-ink"
+                    section.live ? "text-primary" : "text-ink"
                   }`}
                 >
                   {section.heading}
                 </h2>
               </div>
-              <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted">
+              <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                 {section.sales.length}{" "}
                 {section.sales.length === 1 ? "sale" : "sales"}
               </span>
             </header>
 
-            <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted">
+            <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
               {section.blurb}
             </p>
 
             {section.sales.length === 0 ? (
-              <p className="mt-10 font-serif text-2xl italic text-muted">
+              <p className="mt-10 font-serif text-2xl italic text-muted-foreground">
                 Nothing here yet.
               </p>
             ) : (
@@ -228,7 +228,7 @@ function DepartmentChip({
       className={`rounded-full border px-4 py-2 font-sans text-[11px] uppercase tracking-[0.16em] transition-colors ${
         active
           ? "border-ink bg-ink text-paper"
-          : "border-line text-muted hover:border-ink hover:text-ink"
+          : "border-line text-muted-foreground hover:border-ink hover:text-ink"
       }`}
     >
       {label}

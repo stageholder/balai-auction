@@ -27,20 +27,20 @@ export function LotResultCard({ lot }: { lot: LotCardItem }) {
 
         {/* Catalogue entry */}
         <div className="min-w-0 flex-1">
-          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             Lot {lot.lotNumber}
             <span aria-hidden="true" className="mx-2 text-line">
               /
             </span>
             {lot.saleTitle}
           </p>
-          <h3 className="font-serif mt-1.5 truncate text-2xl leading-snug text-ink transition-colors duration-200 group-hover:text-accent">
+          <h3 className="font-serif mt-1.5 truncate text-2xl leading-snug text-ink transition-colors duration-200 group-hover:text-primary">
             {lot.title}
           </h3>
         </div>
 
         {/* Estimate — tabular, right-aligned */}
-        <p className="tnum hidden shrink-0 text-right font-sans text-[11px] text-muted sm:block">
+        <p className="tnum hidden shrink-0 text-right font-sans text-[11px] text-muted-foreground sm:block">
           Est. {formatRupiah(lot.estimateLow)} – {formatRupiah(lot.estimateHigh)}
         </p>
       </article>

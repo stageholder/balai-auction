@@ -85,11 +85,11 @@ export default async function LotPage({
     <article className="pb-24">
       {/* ── breadcrumb-style lot designator ── */}
       <div className="mb-10 flex items-center gap-3">
-        <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
+        <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           Catalogue
         </span>
         <span aria-hidden="true" className="h-px w-8 bg-line" />
-        <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
+        <span className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           Lot {lot.lotNumber}
         </span>
       </div>
@@ -115,7 +115,7 @@ export default async function LotPage({
               ) : (
                 // Placeholder when no image — gallery-grey
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-sans text-xs uppercase tracking-widest text-muted opacity-40">
+                  <span className="font-sans text-xs uppercase tracking-widest text-muted-foreground opacity-40">
                     Image unavailable
                   </span>
                 </div>
@@ -124,11 +124,11 @@ export default async function LotPage({
 
             {/* Caption strip — lot number etched beneath the image */}
             <div className="mt-3 flex items-center justify-between">
-              <span className="font-sans text-[9px] uppercase tracking-[0.3em] text-muted opacity-60">
+              <span className="font-sans text-[9px] uppercase tracking-[0.3em] text-muted-foreground opacity-60">
                 Lot {lot.lotNumber}
               </span>
               <span aria-hidden="true" className="h-px flex-1 mx-4 bg-line" />
-              <span className="font-sans text-[9px] uppercase tracking-[0.3em] text-muted opacity-60">
+              <span className="font-sans text-[9px] uppercase tracking-[0.3em] text-muted-foreground opacity-60">
                 Detail
               </span>
             </div>
@@ -141,7 +141,7 @@ export default async function LotPage({
           {/* Lot number label + quiet save affordance — kept on one baseline
               so the bookmark reads as a catalogue mark, not a social button. */}
           <div className="flex items-center justify-between gap-4">
-            <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
+            <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
               Lot {lot.lotNumber}
             </p>
             {viewer ? (
@@ -149,7 +149,7 @@ export default async function LotPage({
             ) : (
               <Link
                 href="/sign-in"
-                className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted underline decoration-line underline-offset-4 transition-colors hover:text-ink hover:decoration-ink"
+                className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground underline decoration-line underline-offset-4 transition-colors hover:text-ink hover:decoration-ink"
               >
                 Sign in to save
               </Link>
@@ -171,19 +171,19 @@ export default async function LotPage({
           <div className="space-y-5">
             {/* Estimate */}
             <div className="flex items-baseline justify-between gap-4">
-              <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+              <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Estimate
               </span>
               <span className="tnum font-sans text-base text-ink">
                 {formatRupiah(lot.estimateLow)}
-                <span className="mx-2 text-muted opacity-50">–</span>
+                <span className="mx-2 text-muted-foreground opacity-50">–</span>
                 {formatRupiah(lot.estimateHigh)}
               </span>
             </div>
 
             {/* Starting bid */}
             <div className="flex items-baseline justify-between gap-4">
-              <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+              <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Starting bid
               </span>
               <span className="tnum font-sans text-base text-ink">
@@ -197,7 +197,7 @@ export default async function LotPage({
 
           {/* Description — editorial prose */}
           {lot.description ? (
-            <p className="max-w-prose font-sans text-sm leading-[1.85] text-muted">
+            <p className="max-w-prose font-sans text-sm leading-[1.85] text-muted-foreground">
               {lot.description}
             </p>
           ) : null}
@@ -211,13 +211,13 @@ export default async function LotPage({
                 {/* Solid ink band signals a closed, resolved transaction */}
                 <div aria-hidden="true" className="h-[3px] w-full bg-ink" />
                 <div className="px-6 pb-7 pt-5">
-                  <p className="mb-5 font-sans text-[9px] uppercase tracking-[0.32em] text-muted">
+                  <p className="mb-5 font-sans text-[9px] uppercase tracking-[0.32em] text-muted-foreground">
                     Result
                   </p>
 
                   {hammer !== null ? (
                     <>
-                      <p className="mb-1 font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+                      <p className="mb-1 font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                         Sold for
                       </p>
                       <p className="tnum font-serif text-[2.2rem] leading-none tracking-tight text-ink">
@@ -235,12 +235,12 @@ export default async function LotPage({
 
                   {/* Estimate carried beneath for context */}
                   <div className="flex items-baseline justify-between gap-4">
-                    <span className="font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+                    <span className="font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                       Estimate
                     </span>
                     <span className="tnum font-sans text-sm text-ink">
                       {formatRupiah(lot.estimateLow)}
-                      <span className="mx-2 text-muted opacity-50">–</span>
+                      <span className="mx-2 text-muted-foreground opacity-50">–</span>
                       {formatRupiah(lot.estimateHigh)}
                     </span>
                   </div>
@@ -252,10 +252,10 @@ export default async function LotPage({
                 {/* Quiet line band — nothing resolved here */}
                 <div aria-hidden="true" className="h-[3px] w-full bg-line" />
                 <div className="px-6 pb-7 pt-5">
-                  <p className="mb-5 font-sans text-[9px] uppercase tracking-[0.32em] text-muted">
+                  <p className="mb-5 font-sans text-[9px] uppercase tracking-[0.32em] text-muted-foreground">
                     Result
                   </p>
-                  <p className="font-serif text-[2.2rem] leading-none tracking-tight text-muted">
+                  <p className="font-serif text-[2.2rem] leading-none tracking-tight text-muted-foreground">
                     Unsold
                   </p>
 
@@ -264,12 +264,12 @@ export default async function LotPage({
 
                   {/* Estimate carried beneath for context */}
                   <div className="flex items-baseline justify-between gap-4">
-                    <span className="font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+                    <span className="font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                       Estimate
                     </span>
                     <span className="tnum font-sans text-sm text-ink">
                       {formatRupiah(lot.estimateLow)}
-                      <span className="mx-2 text-muted opacity-50">–</span>
+                      <span className="mx-2 text-muted-foreground opacity-50">–</span>
                       {formatRupiah(lot.estimateHigh)}
                     </span>
                   </div>
@@ -289,7 +289,7 @@ export default async function LotPage({
 
       {/* ── Provenance footer rule ── */}
       <div aria-hidden="true" className="mt-20 h-px bg-line" />
-      <p className="mt-4 font-sans text-[9px] uppercase tracking-[0.25em] text-muted opacity-40">
+      <p className="mt-4 font-sans text-[9px] uppercase tracking-[0.25em] text-muted-foreground opacity-40">
         All estimates are subject to change. Final hammer price may vary.
       </p>
     </article>

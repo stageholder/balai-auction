@@ -95,13 +95,13 @@ export function LiveSale({
       <div className="mb-8 flex items-center gap-3">
         <span
           aria-label="Live"
-          className="inline-block h-2.5 w-2.5 rounded-full bg-accent animate-pulse"
+          className="inline-block h-2.5 w-2.5 rounded-full bg-primary animate-pulse"
         />
-        <span className="font-sans text-[10px] uppercase tracking-[0.35em] text-accent">
+        <span className="font-sans text-[10px] uppercase tracking-[0.35em] text-primary">
           Live now
         </span>
         <div aria-hidden="true" className="flex-1 border-t border-line" />
-        <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-muted">
+        <span className="font-sans text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
           {lots.length} lot{lots.length !== 1 ? "s" : ""} · {soldIds.length} sold
         </span>
       </div>
@@ -119,17 +119,17 @@ export function LiveSale({
               {/* Lot index + title above the live panel */}
               {activeLot && (
                 <div className="mb-6 flex items-baseline gap-4">
-                  <span className="tnum font-serif text-5xl leading-none text-muted">
+                  <span className="tnum font-serif text-5xl leading-none text-muted-foreground">
                     {String(activeLot.lotNumber).padStart(2, "0")}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-muted">
+                    <p className="font-sans text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
                       On the block
                     </p>
                     <h2 className="mt-1 font-serif text-xl leading-snug text-ink">
                       {activeLot.title}
                     </h2>
-                    <p className="mt-1 tnum font-sans text-xs text-muted">
+                    <p className="mt-1 tnum font-sans text-xs text-muted-foreground">
                       Opening {formatRupiah(activeLot.startingPrice)}
                     </p>
                   </div>
@@ -147,19 +147,19 @@ export function LiveSale({
             </>
           ) : ended ? (
             <div className="py-20 text-center">
-              <p className="font-serif text-2xl italic text-muted">
+              <p className="font-serif text-2xl italic text-muted-foreground">
                 The sale has concluded.
               </p>
-              <p className="mt-3 font-sans text-xs uppercase tracking-[0.2em] text-muted opacity-60">
+              <p className="mt-3 font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground opacity-60">
                 Thank you for participating
               </p>
             </div>
           ) : (
             <div className="py-20 text-center">
-              <p className="font-serif text-2xl italic text-muted">
+              <p className="font-serif text-2xl italic text-muted-foreground">
                 Awaiting the next lot…
               </p>
-              <p className="mt-3 font-sans text-xs uppercase tracking-[0.2em] text-muted opacity-60">
+              <p className="mt-3 font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground opacity-60">
                 Stand by
               </p>
             </div>
@@ -171,11 +171,11 @@ export function LiveSale({
 
           {/* Up Next rail */}
           <div>
-            <h2 className="mb-4 font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+            <h2 className="mb-4 font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
               Up next
             </h2>
             {upNext.length === 0 ? (
-              <p className="font-sans text-xs italic text-muted">—</p>
+              <p className="font-sans text-xs italic text-muted-foreground">—</p>
             ) : (
               <ul className="space-y-3">
                 {upNext.map((l, i) => (
@@ -184,7 +184,7 @@ export function LiveSale({
                     className="flex items-start gap-3 border-l-2 border-line pl-3"
                     style={{ opacity: Math.max(0.35, 1 - i * 0.18) }}
                   >
-                    <span className="tnum mt-0.5 font-sans text-xs text-muted">
+                    <span className="tnum mt-0.5 font-sans text-xs text-muted-foreground">
                       {String(l.lotNumber).padStart(2, "0")}
                     </span>
                     <span className="font-sans text-sm leading-snug text-ink">
@@ -201,11 +201,11 @@ export function LiveSale({
 
           {/* Just Sold ticker */}
           <div>
-            <h2 className="mb-4 font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+            <h2 className="mb-4 font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
               Just sold
             </h2>
             {justSold.length === 0 ? (
-              <p className="font-sans text-xs italic text-muted">—</p>
+              <p className="font-sans text-xs italic text-muted-foreground">—</p>
             ) : (
               <ul className="space-y-3">
                 {justSold.map((l) => (
@@ -213,10 +213,10 @@ export function LiveSale({
                     key={l.id}
                     className="flex items-start gap-3 border-l-2 border-line pl-3 opacity-40"
                   >
-                    <span className="tnum mt-0.5 font-sans text-xs text-muted line-through">
+                    <span className="tnum mt-0.5 font-sans text-xs text-muted-foreground line-through">
                       {String(l.lotNumber).padStart(2, "0")}
                     </span>
-                    <span className="font-sans text-sm leading-snug text-muted line-through">
+                    <span className="font-sans text-sm leading-snug text-muted-foreground line-through">
                       {l.title}
                     </span>
                   </li>

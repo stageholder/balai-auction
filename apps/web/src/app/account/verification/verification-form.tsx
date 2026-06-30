@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { submitConsignorKycAction, type KycActionResult } from "./actions";
 
 const FIELD =
-  "mt-2 w-full border border-line bg-paper px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted/60 focus:border-ink focus:outline-none";
-const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted";
+  "mt-2 w-full border border-line bg-paper px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted-foreground/60 focus:border-ink focus:outline-none";
+const LABEL = "block text-xs uppercase tracking-[0.15em] text-muted-foreground";
 
 const ID_TYPE_OPTIONS = [
   { value: "passport", label: "Passport" },
@@ -56,7 +56,7 @@ export function VerificationForm({
         <legend className="mb-1 font-serif text-2xl font-light text-ink">
           Your identity
         </legend>
-        <p className="-mt-1 text-sm text-muted">
+        <p className="-mt-1 text-sm text-muted-foreground">
           Enter your details exactly as they appear on your identity document.
         </p>
 
@@ -120,7 +120,7 @@ export function VerificationForm({
         <legend className="mb-1 font-serif text-2xl font-light text-ink">
           Payout account
         </legend>
-        <p className="-mt-1 text-sm text-muted">
+        <p className="-mt-1 text-sm text-muted-foreground">
           Where we send the proceeds once your lots are sold and cleared.
         </p>
 
@@ -179,12 +179,12 @@ export function VerificationForm({
               {result.message}
             </p>
           ) : (
-            <p role="alert" className="text-sm text-accent">
+            <p role="alert" className="text-sm text-primary">
               {result.error}
             </p>
           )
         ) : (
-          <p className="text-xs text-muted">
+          <p className="text-xs text-muted-foreground">
             Your details are used only for compliance and payout.
           </p>
         )}

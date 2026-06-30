@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AccountNav } from "@/components/account-nav";
+import { Toaster } from "@/components/ui/sonner";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -24,9 +26,16 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${serif.variable} ${sans.variable}`}>
       <body className="min-h-screen">
+        <NextTopLoader
+          color="#9b1b30"
+          height={2}
+          showSpinner={false}
+          shadow="0 0 8px rgba(155,27,48,0.6)"
+        />
         <SiteHeader accountSlot={<AccountNav />} />
         <main className="mx-auto max-w-6xl px-6 py-12">{children}</main>
         <SiteFooter />
+        <Toaster position="top-center" />
       </body>
     </html>
   );

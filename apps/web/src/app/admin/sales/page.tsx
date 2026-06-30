@@ -17,10 +17,10 @@ export default async function AdminSalesPage() {
               <Link href={`/admin/sales/${s.id}`} className="text-ink hover:underline">
                 {s.title}
               </Link>
-              <span className="text-xs uppercase tracking-[0.15em] text-muted">{s.status}</span>
+              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground">{s.status}</span>
             </li>
           ))}
-          {sales.length === 0 ? <li className="py-3 text-muted">No sales yet.</li> : null}
+          {sales.length === 0 ? <li className="py-3 text-muted-foreground">No sales yet.</li> : null}
         </ul>
       </section>
       <section>

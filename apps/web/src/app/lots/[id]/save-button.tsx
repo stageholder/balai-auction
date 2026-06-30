@@ -48,7 +48,7 @@ export function SaveButton({
         "disabled:cursor-not-allowed",
         watched
           ? "border-ink bg-paper text-ink"
-          : "border-line bg-paper text-muted hover:border-ink hover:text-ink",
+          : "border-line bg-paper text-muted-foreground hover:border-ink hover:text-ink",
         pending && "opacity-60"
       )}
     >

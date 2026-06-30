@@ -20,7 +20,7 @@ const BTN_PRIMARY = cn(
 // Re-arm is a quieter recovery action — outline, not filled.
 const BTN_OUTLINE = cn(BTN_BASE, "border border-line bg-paper text-ink hover:border-ink");
 
-const QUIET = "text-xs uppercase tracking-[0.12em] text-muted";
+const QUIET = "text-xs uppercase tracking-[0.12em] text-muted-foreground";
 
 /** Status-aware payout controls. Server actions guard every transition; this
  *  only governs presentation + loading/error feedback. */
@@ -74,7 +74,7 @@ export function PayoutActions({
           {pending ? "Re-arming…" : "Re-arm"}
         </button>
         {error ? (
-          <span className="text-xs uppercase tracking-[0.12em] text-accent">
+          <span className="text-xs uppercase tracking-[0.12em] text-primary">
             {error}
           </span>
         ) : null}
@@ -97,12 +97,12 @@ export function PayoutActions({
         {pending ? "Releasing…" : "Release"}
       </button>
       {!releaseReady && releaseBlockedReason ? (
-        <span className="max-w-[14rem] text-right text-[0.65rem] uppercase tracking-[0.1em] text-muted">
+        <span className="max-w-[14rem] text-right text-[0.65rem] uppercase tracking-[0.1em] text-muted-foreground">
           {releaseBlockedReason}
         </span>
       ) : null}
       {error ? (
-        <span className="text-xs uppercase tracking-[0.12em] text-accent">
+        <span className="text-xs uppercase tracking-[0.12em] text-primary">
           {error}
         </span>
       ) : null}

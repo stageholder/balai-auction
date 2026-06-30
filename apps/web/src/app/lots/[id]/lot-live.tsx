@@ -116,16 +116,16 @@ export function LotLive({
         <div className="mb-5 flex items-center gap-2">
           <span
             aria-label="Live"
-            className="inline-block h-2 w-2 rounded-full bg-accent animate-pulse"
+            className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse"
           />
-          <span className="font-sans text-[9px] uppercase tracking-[0.32em] text-muted">
+          <span className="font-sans text-[9px] uppercase tracking-[0.32em] text-muted-foreground">
             Live bidding
           </span>
         </div>
 
         {/* ── Current bid ── */}
         <div className="mb-6">
-          <p className="mb-1 font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+          <p className="mb-1 font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
             Current bid
           </p>
           <p className="tnum font-serif text-[2.2rem] leading-none tracking-tight text-ink">
@@ -138,13 +138,13 @@ export function LotLive({
 
         {/* ── Countdown ── */}
         <div className="mb-7 flex items-baseline justify-between">
-          <span className="font-sans text-[9px] uppercase tracking-[0.28em] text-muted">
+          <span className="font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
             Hammer falls in
           </span>
           <span
             className={[
               "tnum font-sans text-sm tabular-nums transition-colors",
-              urgent ? "text-accent font-semibold" : "text-ink",
+              urgent ? "text-primary font-semibold" : "text-ink",
             ].join(" ")}
           >
             {countdown}
@@ -160,11 +160,11 @@ export function LotLive({
             <div>
               <label
                 htmlFor="maxAmount"
-                className="mb-2 block font-sans text-[9px] uppercase tracking-[0.28em] text-muted"
+                className="mb-2 block font-sans text-[9px] uppercase tracking-[0.28em] text-muted-foreground"
               >
                 Your maximum bid
               </label>
-              <p className="mb-2 tnum font-sans text-xs text-muted">
+              <p className="mb-2 tnum font-sans text-xs text-muted-foreground">
                 Minimum&ensp;
                 <span className="text-ink">{formatRupiah(gate.floor)}</span>
               </p>
@@ -177,12 +177,12 @@ export function LotLive({
                 step={1}
                 required
                 placeholder={String(gate.floor)}
-                className="tnum w-full border border-line bg-paper px-4 py-3 font-sans text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
+                className="tnum w-full border border-line bg-paper px-4 py-3 font-sans text-sm text-ink placeholder:text-muted-foreground focus:border-ink focus:outline-none"
               />
             </div>
 
             {error ? (
-              <p className="font-sans text-xs text-accent" role="alert">
+              <p className="font-sans text-xs text-primary" role="alert">
                 {error}
               </p>
             ) : null}
@@ -196,37 +196,37 @@ export function LotLive({
               {pending ? "Placing bid…" : "Place bid"}
             </Button>
 
-            <p className="font-sans text-[9px] uppercase tracking-[0.18em] text-muted opacity-60 text-center">
+            <p className="font-sans text-[9px] uppercase tracking-[0.18em] text-muted-foreground opacity-60 text-center">
               Your maximum is kept confidential
             </p>
           </form>
         ) : gate.kind === "signin" ? (
           <div className="space-y-3 py-2">
-            <p className="font-sans text-xs text-muted leading-relaxed">
+            <p className="font-sans text-xs text-muted-foreground leading-relaxed">
               You must be signed in to place a bid.
             </p>
             <a
               href="/sign-in"
-              className="block font-sans text-xs uppercase tracking-[0.18em] text-ink underline underline-offset-4 hover:text-muted transition-colors"
+              className="block font-sans text-xs uppercase tracking-[0.18em] text-ink underline underline-offset-4 hover:text-muted-foreground transition-colors"
             >
               Sign in to bid &rarr;
             </a>
           </div>
         ) : gate.kind === "register" ? (
           <div className="space-y-3 py-2">
-            <p className="font-sans text-xs text-muted leading-relaxed">
+            <p className="font-sans text-xs text-muted-foreground leading-relaxed">
               Registration is required to bid in this sale.
             </p>
             <a
               href={`/sales/${gate.saleId}`}
-              className="block font-sans text-xs uppercase tracking-[0.18em] text-ink underline underline-offset-4 hover:text-muted transition-colors"
+              className="block font-sans text-xs uppercase tracking-[0.18em] text-ink underline underline-offset-4 hover:text-muted-foreground transition-colors"
             >
               Register for this sale &rarr;
             </a>
           </div>
         ) : (
           <div className="py-2">
-            <p className="font-sans text-xs uppercase tracking-[0.18em] text-muted">
+            <p className="font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">
               Bidding has ended.
             </p>
           </div>

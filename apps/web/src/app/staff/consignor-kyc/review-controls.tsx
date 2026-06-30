@@ -15,11 +15,11 @@ const BTN_BASE =
 // The affirming decision (Approve / Clear) — filled ink, the decisive move.
 const BTN_SOLID = cn(BTN_BASE, "border border-ink bg-ink text-paper hover:bg-paper hover:text-ink");
 // The adverse decision (Reject / Flag) — outline drawn in accent to read as caution.
-const BTN_ADVERSE = cn(BTN_BASE, "border border-accent text-accent hover:bg-accent hover:text-paper");
+const BTN_ADVERSE = cn(BTN_BASE, "border border-primary text-primary hover:bg-primary hover:text-paper");
 // The current state — shown disabled/active so staff see where things stand.
 const BTN_ACTIVE = cn(BTN_BASE, "border border-ink bg-ink/5 text-ink");
 
-const LABEL = "text-[0.6rem] uppercase tracking-[0.18em] text-muted";
+const LABEL = "text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground";
 
 /** Decision controls for one consignor. Server actions guard + persist every
  *  transition; this governs presentation, the optional AML note, and feedback. */
@@ -100,7 +100,7 @@ export function ReviewControls({
           onChange={(e) => setNote(e.target.value)}
           rows={2}
           placeholder="Optional note (recorded against the AML decision)"
-          className="w-full resize-none border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
+          className="w-full resize-none border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted-foreground focus:border-ink focus:outline-none"
         />
         <div className="flex flex-wrap gap-2">
           {amlBtn("cleared", "Clear", false)}
@@ -109,7 +109,7 @@ export function ReviewControls({
       </div>
 
       {error ? (
-        <span className="text-xs uppercase tracking-[0.12em] text-accent">
+        <span className="text-xs uppercase tracking-[0.12em] text-primary">
           {error}
         </span>
       ) : null}

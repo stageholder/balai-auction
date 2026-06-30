@@ -8,7 +8,7 @@ export async function SaleRegistration({ saleId }: { saleId: string }) {
 
   if (!user) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-sm text-muted-foreground">
         <Link href="/sign-in" className="text-ink underline">
           Sign in
         </Link>{" "}
@@ -34,7 +34,7 @@ export async function SaleRegistration({ saleId }: { saleId: string }) {
     rejected: "Your registration was not approved.",
   };
   return (
-    <p className="text-sm text-muted">
+    <p className="text-sm text-muted-foreground">
       {label[registration.kycStatus] ?? "Registration status unknown."}
     </p>
   );

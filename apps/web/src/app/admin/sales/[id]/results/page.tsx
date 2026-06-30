@@ -19,7 +19,7 @@ export default async function SaleResultsPage({
       <h1 className="mb-6 text-2xl">{sale.title} — results</h1>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-xs uppercase tracking-[0.15em] text-muted">
+          <tr className="border-b border-line text-left text-xs uppercase tracking-[0.15em] text-muted-foreground">
             <th className="py-2">Lot</th>
             <th className="py-2">Title</th>
             <th className="py-2">Status</th>
@@ -41,7 +41,7 @@ export default async function SaleResultsPage({
           ))}
         </tbody>
       </table>
-      {rows.length === 0 ? <p className="mt-4 text-muted">No lots in this sale.</p> : null}
+      {rows.length === 0 ? <p className="mt-4 text-muted-foreground">No lots in this sale.</p> : null}
     </div>
   );
 }

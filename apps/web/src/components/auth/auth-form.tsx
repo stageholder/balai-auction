@@ -37,7 +37,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       <div>
         <label
           htmlFor="email"
-          className="block text-xs uppercase tracking-[0.15em] text-muted"
+          className="block text-xs uppercase tracking-[0.15em] text-muted-foreground"
         >
           Email
         </label>
@@ -53,7 +53,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       <div>
         <label
           htmlFor="password"
-          className="block text-xs uppercase tracking-[0.15em] text-muted"
+          className="block text-xs uppercase tracking-[0.15em] text-muted-foreground"
         >
           Password
         </label>
@@ -67,11 +67,11 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           className="mt-1 w-full border border-line bg-paper px-3 py-2 text-ink focus:border-ink focus:outline-none"
         />
       </div>
-      {error ? <p className="text-sm text-accent">{error}</p> : null}
+      {error ? <p className="text-sm text-primary">{error}</p> : null}
       <Button type="submit" disabled={pending} className="w-full">
         {isSignUp ? "Create account" : "Sign in"}
       </Button>
-      <p className="text-sm text-muted">
+      <p className="text-sm text-muted-foreground">
         {isSignUp ? (
           <>
             Already registered?{" "}

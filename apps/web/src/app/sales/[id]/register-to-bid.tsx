@@ -31,7 +31,7 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
   return (
     <form onSubmit={onSubmit} className="max-w-sm space-y-4">
       <div>
-        <label htmlFor="legalName" className="block text-xs uppercase tracking-[0.15em] text-muted">
+        <label htmlFor="legalName" className="block text-xs uppercase tracking-[0.15em] text-muted-foreground">
           Legal name
         </label>
         <input
@@ -42,7 +42,7 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
         />
       </div>
       <div>
-        <label htmlFor="phone" className="block text-xs uppercase tracking-[0.15em] text-muted">
+        <label htmlFor="phone" className="block text-xs uppercase tracking-[0.15em] text-muted-foreground">
           Phone
         </label>
         <input
@@ -53,7 +53,7 @@ export function RegisterToBidForm({ saleId }: { saleId: string }) {
           className="mt-1 w-full border border-line bg-paper px-3 py-2 focus:border-ink focus:outline-none"
         />
       </div>
-      {error ? <p className="text-sm text-accent">{error}</p> : null}
+      {error ? <p className="text-sm text-primary">{error}</p> : null}
       <Button type="submit" variant="accent" disabled={pending}>
         Register to bid
       </Button>

@@ -24,7 +24,7 @@ export default async function HomePage() {
         <p className="font-serif text-lg tracking-[0.2em] text-ink">
           {SITE.name}
         </p>
-        <p className="mt-3 font-sans text-[11px] uppercase tracking-[0.32em] text-muted">
+        <p className="mt-3 font-sans text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
           {SITE.tagline}
         </p>
         <h1 className="mt-6 max-w-3xl font-serif text-6xl leading-[0.98] tracking-tight text-ink md:text-7xl">
@@ -32,14 +32,14 @@ export default async function HomePage() {
           <br />
           brought to the rostrum.
         </h1>
-        <p className="mt-7 max-w-xl font-sans text-sm leading-relaxed text-muted">
+        <p className="mt-7 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
           Live sales, the upcoming calendar, and results from the room — open to
           browse, no account required.
         </p>
       </section>
 
       {sales.length === 0 ? (
-        <p className="mt-16 font-serif text-3xl italic leading-snug text-muted">
+        <p className="mt-16 font-serif text-3xl italic leading-snug text-muted-foreground">
           No sales are published yet.
         </p>
       ) : (
@@ -47,27 +47,27 @@ export default async function HomePage() {
           {/* Live now — the hero moment, given the accent and a live pulse */}
           {liveNow.length > 0 ? (
             <section aria-labelledby="live-heading">
-              <header className="flex items-baseline justify-between gap-4 border-b border-accent pb-4">
+              <header className="flex items-baseline justify-between gap-4 border-b border-primary pb-4">
                 <div className="flex items-baseline gap-3">
                   <span
                     aria-hidden="true"
                     className="relative inline-flex h-2 w-2 self-center"
                   >
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                   </span>
                   <h2
                     id="live-heading"
-                    className="font-serif text-4xl leading-none tracking-tight text-accent md:text-5xl"
+                    className="font-serif text-4xl leading-none tracking-tight text-primary md:text-5xl"
                   >
                     Live now
                   </h2>
                 </div>
-                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted">
+                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   {liveNow.length} {liveNow.length === 1 ? "sale" : "sales"}
                 </span>
               </header>
-              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted">
+              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
                 Bidding is open. Register and join before the gavel falls.
               </p>
               <div className="mt-6 grid gap-x-12 sm:grid-cols-2">
@@ -93,7 +93,7 @@ export default async function HomePage() {
                   label="View all upcoming"
                 />
               </header>
-              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted">
+              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
                 On the calendar. Browse the catalogue ahead of each sale.
               </p>
               <div className="mt-6 grid gap-x-12 sm:grid-cols-2">
@@ -119,7 +119,7 @@ export default async function HomePage() {
                   label="View all results"
                 />
               </header>
-              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted">
+              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
                 Sales now closed. Revisit what came under the hammer.
               </p>
               <div className="mt-6 grid gap-x-12 sm:grid-cols-2">
@@ -135,7 +135,7 @@ export default async function HomePage() {
             <section aria-labelledby="departments-heading">
               <h2
                 id="departments-heading"
-                className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted"
+                className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground"
               >
                 Browse by department
               </h2>
@@ -146,12 +146,12 @@ export default async function HomePage() {
                       href={`/auctions?department=${dept.slug}`}
                       className="group flex items-baseline justify-between gap-4 py-4"
                     >
-                      <span className="font-serif text-2xl leading-tight tracking-tight text-ink transition-colors duration-300 group-hover:text-accent">
+                      <span className="font-serif text-2xl leading-tight tracking-tight text-ink transition-colors duration-300 group-hover:text-primary">
                         {departmentLabel(dept.slug)}
                       </span>
                       <span
                         aria-hidden="true"
-                        className="font-sans text-sm text-muted transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-accent"
+                        className="font-sans text-sm text-muted-foreground transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-primary"
                       >
                         →
                       </span>
@@ -171,7 +171,7 @@ function ViewAllLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="group inline-flex shrink-0 items-baseline gap-2 font-sans text-[11px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-ink"
+      className="group inline-flex shrink-0 items-baseline gap-2 font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-ink"
     >
       {label}
       <span

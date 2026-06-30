@@ -19,7 +19,7 @@ export default async function InvoicesPage() {
     <div>
       {/* ── Header ── */}
       <div className="mb-10 border-b border-line pb-6">
-        <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted">
+        <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Account
         </p>
         <h1 className="font-serif text-4xl font-light text-ink">
@@ -28,20 +28,20 @@ export default async function InvoicesPage() {
       </div>
 
       {invoices.length === 0 ? (
-        <p className="py-16 text-center text-xs uppercase tracking-[0.15em] text-muted">
+        <p className="py-16 text-center text-xs uppercase tracking-[0.15em] text-muted-foreground">
           You have no invoices yet.
         </p>
       ) : (
         <div>
           {/* ── Ledger column headings ── */}
           <div className="mb-0 grid grid-cols-[1fr_auto_auto_auto] items-end gap-x-8 border-b border-ink pb-3">
-            <span className="text-xs uppercase tracking-[0.15em] text-muted">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
               Lot
             </span>
-            <span className="text-right text-xs uppercase tracking-[0.15em] text-muted">
+            <span className="text-right text-xs uppercase tracking-[0.15em] text-muted-foreground">
               Amount
             </span>
-            <span className="text-right text-xs uppercase tracking-[0.15em] text-muted">
+            <span className="text-right text-xs uppercase tracking-[0.15em] text-muted-foreground">
               Status
             </span>
             {/* spacer for action column */}
@@ -91,8 +91,8 @@ function InvoiceStatus({ status }: { status: string }) {
 
   if (status === "pending") {
     return (
-      <span className="flex items-center justify-end gap-1.5 text-xs uppercase tracking-[0.1em] text-accent">
-        <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+      <span className="flex items-center justify-end gap-1.5 text-xs uppercase tracking-[0.1em] text-primary">
+        <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
         {label}
       </span>
     );
@@ -107,7 +107,7 @@ function InvoiceStatus({ status }: { status: string }) {
   }
 
   return (
-    <span className="block text-right text-xs uppercase tracking-[0.1em] text-muted">
+    <span className="block text-right text-xs uppercase tracking-[0.1em] text-muted-foreground">
       {label}
     </span>
   );

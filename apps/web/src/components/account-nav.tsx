@@ -8,7 +8,7 @@ export async function AccountNav() {
     return (
       <Link
         href="/sign-in"
-        className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+        className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-ink"
       >
         Sign in
       </Link>
@@ -19,7 +19,7 @@ export async function AccountNav() {
       {user.role === "staff" ? (
         <Link
           href="/staff/registrations"
-          className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+          className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-ink"
         >
           Staff
         </Link>
@@ -27,24 +27,24 @@ export async function AccountNav() {
       {user.role === "consignor" ? (
         <Link
           href="/account/verification"
-          className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+          className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-ink"
         >
           Verification
         </Link>
       ) : null}
       <Link
         href="/account/saved"
-        className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+        className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-ink"
       >
         Saved
       </Link>
       <Link
         href="/invoices"
-        className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+        className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-ink"
       >
         Invoices
       </Link>
-      <span className="text-xs text-muted">{user.email}</span>
+      <span className="text-xs text-muted-foreground">{user.email}</span>
       <SignOutButton />
     </div>
   );

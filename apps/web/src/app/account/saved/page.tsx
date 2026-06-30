@@ -14,7 +14,7 @@ export default async function SavedPage() {
       {/* ── Header ── */}
       <div className="mb-10 flex items-baseline justify-between gap-4 border-b border-line pb-6">
         <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted">
+          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Account
           </p>
           <h1 className="font-serif text-4xl font-light text-ink">
@@ -22,7 +22,7 @@ export default async function SavedPage() {
           </h1>
         </div>
         {items.length > 0 ? (
-          <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted">
+          <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             {items.length} {items.length === 1 ? "lot" : "lots"}
           </span>
         ) : null}
@@ -30,12 +30,12 @@ export default async function SavedPage() {
 
       {items.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="font-serif text-2xl italic text-muted">
+          <p className="font-serif text-2xl italic text-muted-foreground">
             You haven&rsquo;t saved any lots yet.
           </p>
           <Link
             href="/auctions"
-            className="mt-6 inline-block text-xs uppercase tracking-[0.2em] text-accent transition-colors hover:text-ink"
+            className="mt-6 inline-block text-xs uppercase tracking-[0.2em] text-primary transition-colors hover:text-ink"
           >
             Browse the auctions
           </Link>

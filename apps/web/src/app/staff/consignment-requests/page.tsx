@@ -18,10 +18,10 @@ const STATUS_LABEL: Record<ConsignmentRequestStatus, string> = {
 // review reads as in-progress (ink outline); accepted is settled (ink filled);
 // declined is the closed-out outcome (accent).
 const STATUS_DOT: Record<ConsignmentRequestStatus, string> = {
-  pending: "bg-muted",
+  pending: "bg-muted-foreground",
   reviewing: "border border-ink",
   accepted: "bg-ink",
-  declined: "bg-accent",
+  declined: "bg-primary",
 };
 
 function formatSubmitted(date: Date): string {
@@ -35,7 +35,7 @@ function formatSubmitted(date: Date): string {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+      <dt className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </dt>
       <dd className="mt-1 text-sm text-ink">{value}</dd>
@@ -53,7 +53,7 @@ export default async function StaffConsignmentRequestsPage() {
     <div>
       <header className="mb-8">
         <h1 className="text-2xl">Consignment requests</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-muted-foreground">
           Public &ldquo;Sell with us&rdquo; inquiries awaiting triage.
           {requests.length > 0 ? (
             <>
@@ -72,7 +72,7 @@ export default async function StaffConsignmentRequestsPage() {
       </header>
 
       {requests.length === 0 ? (
-        <p className="text-muted">No consignment requests yet.</p>
+        <p className="text-muted-foreground">No consignment requests yet.</p>
       ) : (
         <ul className="flex flex-col gap-px bg-line">
           {requests.map((r) => {
@@ -102,16 +102,16 @@ export default async function StaffConsignmentRequestsPage() {
                       </span>
                     </div>
                     {/* Contact details are staff-only — this page is requireStaff. */}
-                    <p className="mt-1 text-sm text-muted">{contact}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{contact}</p>
                   </div>
 
-                  <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+                  <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
                     {department ?? "Department unspecified"}
                   </span>
 
                   <div>
                     <p className="text-base text-ink">{r.itemTitle}</p>
-                    <p className="mt-1 text-sm text-muted">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {r.itemDescription}
                     </p>
                   </div>

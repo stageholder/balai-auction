@@ -26,21 +26,21 @@ export function LotCard({ lot }: { lot: LotRecord }) {
         {/* Ornamental hairline — catalog separator */}
         <div
           aria-hidden="true"
-          className="mb-3 h-px w-8 bg-muted opacity-40"
+          className="mb-3 h-px w-8 bg-muted-foreground opacity-40"
         />
 
         {/* Lot number label */}
-        <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+        <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           Lot {lot.lotNumber}
         </p>
 
         {/* Title — display serif */}
-        <h3 className="font-serif mt-2 text-[22px] leading-snug text-ink transition-colors duration-200 group-hover:text-accent">
+        <h3 className="font-serif mt-2 text-[22px] leading-snug text-ink transition-colors duration-200 group-hover:text-primary">
           {lot.title}
         </h3>
 
         {/* Estimate range — tabular numerals, restrained */}
-        <p className="tnum mt-3 font-sans text-[11px] text-muted">
+        <p className="tnum mt-3 font-sans text-[11px] text-muted-foreground">
           Est. {formatRupiah(lot.estimateLow)} – {formatRupiah(lot.estimateHigh)}
         </p>
       </div>

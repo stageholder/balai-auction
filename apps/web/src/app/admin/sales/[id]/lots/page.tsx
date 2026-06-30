@@ -9,11 +9,11 @@ import { createLotAction } from "./actions";
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLES: Record<string, string> = {
-  live:       "text-accent border-accent",
+  live:       "text-primary border-primary",
   sold:       "text-ink border-ink",
-  unsold:     "text-muted border-muted",
-  paid:       "text-muted border-muted",
-  fulfilled:  "text-muted border-muted",
+  unsold:     "text-muted-foreground border-muted-foreground",
+  paid:       "text-muted-foreground border-muted-foreground",
+  fulfilled:  "text-muted-foreground border-muted-foreground",
 };
 
 export default async function AdminLotsPage({
@@ -33,7 +33,7 @@ export default async function AdminLotsPage({
 
       {/* ── Page header ── */}
       <header className="border-b-2 border-ink pb-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted mb-1">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">
           Sale catalogue
         </p>
         <h1 className="font-serif text-3xl text-ink">{sale.title}</h1>
@@ -43,7 +43,7 @@ export default async function AdminLotsPage({
       <section>
         {/* Column headers — ledger style */}
         <div
-          className="grid items-center gap-4 border-b border-ink pb-2 text-xs uppercase tracking-[0.15em] text-muted"
+          className="grid items-center gap-4 border-b border-ink pb-2 text-xs uppercase tracking-[0.15em] text-muted-foreground"
           style={{ gridTemplateColumns: "3rem 3rem 1fr auto 6rem" }}
         >
           <span>Lot</span>
@@ -55,7 +55,7 @@ export default async function AdminLotsPage({
 
         {/* Rows */}
         {lots.length === 0 ? (
-          <p className="py-8 text-sm text-muted">
+          <p className="py-8 text-sm text-muted-foreground">
             No lots yet — add the first below.
           </p>
         ) : (
@@ -72,7 +72,7 @@ export default async function AdminLotsPage({
                   {/* Lot number — catalogue plate numeral */}
                   <span
                     className={`font-serif text-xl leading-none tnum ${
-                      isLive ? "text-accent" : "text-ink"
+                      isLive ? "text-primary" : "text-ink"
                     }`}
                   >
                     {String(lot.lotNumber).padStart(3, "0")}
@@ -107,12 +107,12 @@ export default async function AdminLotsPage({
                       {lot.title}
                     </p>
                     {lot.description && (
-                      <p className="truncate text-xs text-muted mt-0.5">
+                      <p className="truncate text-xs text-muted-foreground mt-0.5">
                         {lot.description}
                       </p>
                     )}
                     {/* Consignment — ledger provenance line */}
-                    <p className="truncate text-xs text-muted mt-0.5">
+                    <p className="truncate text-xs text-muted-foreground mt-0.5">
                       <span className="uppercase tracking-[0.12em] text-[0.65rem]">
                         Consignor
                       </span>
@@ -122,7 +122,7 @@ export default async function AdminLotsPage({
                   </div>
 
                   {/* Estimate — tabular, right-aligned */}
-                  <p className="tnum text-right text-xs text-muted whitespace-nowrap">
+                  <p className="tnum text-right text-xs text-muted-foreground whitespace-nowrap">
                     {formatRupiah(lot.estimateLow)}
                     <span className="mx-1 text-line">–</span>
                     {formatRupiah(lot.estimateHigh)}
@@ -131,7 +131,7 @@ export default async function AdminLotsPage({
                   {/* Status badge — small caps stamp */}
                   <span
                     className={`tnum block border px-2 py-0.5 text-right text-xs uppercase tracking-[0.12em] ${
-                      STATUS_STYLES[lot.status] ?? "text-muted border-muted"
+                      STATUS_STYLES[lot.status] ?? "text-muted-foreground border-muted-foreground"
                     }`}
                   >
                     {lot.status}

@@ -18,7 +18,7 @@ export default async function AdminUsersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-ink">{u.email}</p>
-                <p className="text-xs uppercase tracking-[0.15em] text-muted">{u.role}</p>
+                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">{u.role}</p>
               </div>
               <RoleSelect userId={u.id} role={u.role} disabled={u.id === me?.id} />
             </div>

@@ -13,7 +13,7 @@ export function SignOutButton() {
   return (
     <button
       onClick={signOut}
-      className="text-xs uppercase tracking-[0.15em] text-muted hover:text-ink"
+      className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-ink"
     >
       Sign out
     </button>

@@ -8,24 +8,24 @@ export const dynamic = "force-dynamic";
 type Tone = "pending" | "positive" | "alert" | "neutral";
 
 const TONE_DOT: Record<Tone, string> = {
-  pending: "bg-accent",
+  pending: "bg-primary",
   positive: "bg-ink",
-  alert: "bg-accent",
+  alert: "bg-primary",
   neutral: "bg-line",
 };
 const TONE_TEXT: Record<Tone, string> = {
-  pending: "text-accent",
+  pending: "text-primary",
   positive: "text-ink",
-  alert: "text-accent",
-  neutral: "text-muted",
+  alert: "text-primary",
+  neutral: "text-muted-foreground",
 };
 
 function PageHeader({ subtitle }: { subtitle: string }) {
   return (
     <div className="mb-10 border-b border-line pb-6">
-      <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted">Account</p>
+      <p className="mb-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">Account</p>
       <h1 className="font-serif text-4xl font-light text-ink">Verification</h1>
-      <p className="mt-3 max-w-prose text-sm text-muted">{subtitle}</p>
+      <p className="mt-3 max-w-prose text-sm text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
@@ -44,7 +44,7 @@ export default async function VerificationPage() {
           <p className="font-serif text-2xl font-light text-ink">
             Verification is for consignor accounts.
           </p>
-          <p className="mx-auto mt-3 max-w-md text-sm text-muted">
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
             Identity checks and payout details are collected from sellers
             consigning lots. If you would like to consign with us, our specialists
             will be glad to help.
@@ -76,7 +76,7 @@ export default async function VerificationPage() {
       </section>
 
       {rejected ? (
-        <p className="mb-8 border-l-2 border-accent bg-accent/5 px-4 py-3 text-sm text-ink">
+        <p className="mb-8 border-l-2 border-primary bg-primary/5 px-4 py-3 text-sm text-ink">
           Your previous submission could not be verified. Please review your
           details below and resubmit — once is enough.
         </p>
@@ -108,7 +108,7 @@ function StatusCell({
 }) {
   return (
     <div className="px-6 py-5">
-      <p className="text-xs uppercase tracking-[0.15em] text-muted">{label}</p>
+      <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
       <p
         className={`mt-2 flex items-center gap-2 text-sm font-medium ${TONE_TEXT[tone]}`}
       >

@@ -37,10 +37,10 @@ export default async function SalePage({
   return (
     <div>
       <section className="mb-12 max-w-2xl">
-        <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted">
+        <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           {department ? (
             <>
-              <span className="text-accent">{department}</span>
+              <span className="text-primary">{department}</span>
               <span aria-hidden="true" className="mx-3 text-line">
                 /
               </span>
@@ -50,7 +50,7 @@ export default async function SalePage({
         </p>
         <h1 className="mt-3 text-4xl leading-tight">{sale.title}</h1>
         {sale.description ? (
-          <p className="mt-4 text-muted">{sale.description}</p>
+          <p className="mt-4 text-muted-foreground">{sale.description}</p>
         ) : null}
       </section>
 
@@ -58,7 +58,7 @@ export default async function SalePage({
         <div className="mb-10">
           <a
             href={`/live/${sale.id}`}
-            className="inline-block border border-accent px-5 py-2 text-sm uppercase tracking-[0.15em] text-accent hover:bg-accent hover:text-paper"
+            className="inline-block border border-primary px-5 py-2 text-sm uppercase tracking-[0.15em] text-primary hover:bg-primary hover:text-paper"
           >
             ● Watch live
           </a>
@@ -68,13 +68,13 @@ export default async function SalePage({
       {isClosed ? (
         /* ── Prices realized band — replaces the call-to-register ─── */
         <div className="mb-12 border-y border-line py-9">
-          <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-accent">
+          <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-primary">
             Prices realized
           </p>
 
           <dl className="mt-6 flex flex-wrap items-end gap-x-12 gap-y-6">
             <div>
-              <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+              <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Total realized
               </dt>
               <dd className="tnum font-serif mt-2 text-4xl leading-none text-ink">
@@ -82,19 +82,19 @@ export default async function SalePage({
               </dd>
             </div>
             <div className="border-l border-line pl-12">
-              <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+              <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Lots sold
               </dt>
               <dd className="tnum font-serif mt-2 text-2xl leading-none text-ink">
                 {lotsSold}
-                <span className="text-muted"> / {lotsOffered}</span>
+                <span className="text-muted-foreground"> / {lotsOffered}</span>
               </dd>
             </div>
           </dl>
 
           <Link
             href={`/sales/${sale.id}/results`}
-            className="mt-8 inline-block font-sans text-sm uppercase tracking-[0.15em] text-accent underline-offset-4 hover:underline"
+            className="mt-8 inline-block font-sans text-sm uppercase tracking-[0.15em] text-primary underline-offset-4 hover:underline"
           >
             View full results →
           </Link>
@@ -106,7 +106,7 @@ export default async function SalePage({
       )}
 
       {lots.length === 0 ? (
-        <p className="text-muted">No lots have been catalogued yet.</p>
+        <p className="text-muted-foreground">No lots have been catalogued yet.</p>
       ) : (
         <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {lots.map((lot) => (

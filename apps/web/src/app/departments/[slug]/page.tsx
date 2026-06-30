@@ -67,20 +67,20 @@ export default async function DepartmentPage({
     <div>
       {/* Editorial hero */}
       <section className="max-w-3xl">
-        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted">
+        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
           Department
         </p>
         <h1 className="mt-4 font-serif text-6xl leading-[0.95] tracking-tight">
           {department.label}
         </h1>
-        <p className="mt-6 max-w-xl font-sans text-base leading-relaxed text-muted">
+        <p className="mt-6 max-w-xl font-sans text-base leading-relaxed text-muted-foreground">
           {department.description}
         </p>
         <Link
           href={`/auctions?department=${slug}`}
           className="group mt-8 inline-flex items-baseline gap-2 font-sans text-xs uppercase tracking-[0.2em] text-ink"
         >
-          <span className="border-b border-line pb-1 transition-colors group-hover:border-accent group-hover:text-accent">
+          <span className="border-b border-line pb-1 transition-colors group-hover:border-primary group-hover:text-primary">
             Browse all {department.label} lots
           </span>
           <span
@@ -94,7 +94,7 @@ export default async function DepartmentPage({
 
       {/* Sales by lifecycle */}
       {visibleSections.length === 0 ? (
-        <p className="mt-20 border-t border-line pt-16 font-serif text-3xl italic text-muted">
+        <p className="mt-20 border-t border-line pt-16 font-serif text-3xl italic text-muted-foreground">
           No sales in this department yet.
         </p>
       ) : (
@@ -103,7 +103,7 @@ export default async function DepartmentPage({
             <section key={section.value}>
               <header
                 className={`flex items-baseline justify-between gap-4 border-b pb-4 ${
-                  section.live ? "border-accent" : "border-line"
+                  section.live ? "border-primary" : "border-line"
                 }`}
               >
                 <div className="flex items-baseline gap-3">
@@ -112,25 +112,25 @@ export default async function DepartmentPage({
                       aria-hidden="true"
                       className="relative inline-flex h-2 w-2 self-center"
                     >
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                     </span>
                   ) : null}
                   <h2
                     className={`font-serif text-4xl leading-none tracking-tight ${
-                      section.live ? "text-accent" : "text-ink"
+                      section.live ? "text-primary" : "text-ink"
                     }`}
                   >
                     {section.heading}
                   </h2>
                 </div>
-                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted">
+                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   {section.sales.length}{" "}
                   {section.sales.length === 1 ? "sale" : "sales"}
                 </span>
               </header>
 
-              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted">
+              <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-muted-foreground">
                 {section.blurb}
               </p>
 

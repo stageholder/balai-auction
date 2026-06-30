@@ -12,14 +12,14 @@ export default async function StaffRegistrationsPage() {
     <div>
       <h1 className="mb-8 text-3xl">Pending registrations</h1>
       {pending.length === 0 ? (
-        <p className="text-muted">No registrations awaiting review.</p>
+        <p className="text-muted-foreground">No registrations awaiting review.</p>
       ) : (
         <ul className="divide-y divide-line border-y border-line">
           {pending.map((r) => (
             <li key={r.id} className="flex items-center justify-between py-4">
               <div>
                 <p className="text-ink">{r.userLegalName ?? r.userEmail}</p>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                   {r.userEmail} · {r.saleTitle}
                 </p>
               </div>

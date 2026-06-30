@@ -64,7 +64,7 @@ export function PayoutAccountForm({
         });
       }}
     >
-      <p className="mb-2 text-[0.65rem] uppercase tracking-[0.18em] text-muted">
+      <p className="mb-2 text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
         Payout account
       </p>
       <div className="grid gap-2 sm:grid-cols-3">
@@ -81,7 +81,7 @@ export function PayoutAccountForm({
                 setError(false);
                 setValues((v) => ({ ...v, [f.key]: e.target.value }));
               }}
-              className="h-9 w-full border border-line bg-paper px-3 text-sm text-ink transition-colors placeholder:text-muted/60 hover:border-ink focus-visible:border-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink disabled:opacity-40"
+              className="h-9 w-full border border-line bg-paper px-3 text-sm text-ink transition-colors placeholder:text-muted-foreground/60 hover:border-ink focus-visible:border-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink disabled:opacity-40"
             />
           </label>
         ))}
@@ -98,12 +98,12 @@ export function PayoutAccountForm({
           {pending ? "Saving…" : "Save"}
         </button>
         {done && !pending ? (
-          <span className="text-xs uppercase tracking-[0.12em] text-muted">
+          <span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Saved
           </span>
         ) : null}
         {error && !pending ? (
-          <span className="text-xs uppercase tracking-[0.12em] text-accent">
+          <span className="text-xs uppercase tracking-[0.12em] text-primary">
             Save failed — try again
           </span>
         ) : null}

@@ -15,13 +15,13 @@ export default async function SearchPage({
   if (!q) {
     return (
       <div className="mx-auto max-w-2xl py-24 text-center">
-        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted">
+        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
           The Catalogue
         </p>
         <h1 className="mt-5 font-serif text-5xl leading-[0.95] tracking-tight">
           Search the catalogue
         </h1>
-        <p className="mt-6 font-sans text-sm leading-relaxed text-muted">
+        <p className="mt-6 font-sans text-sm leading-relaxed text-muted-foreground">
           Look across every sale and lot — by maker, medium, or title. Begin
           from the search field above to find what is coming under the hammer.
         </p>
@@ -40,16 +40,16 @@ export default async function SearchPage({
     <div>
       {/* Editorial header — echoes the query */}
       <section className="max-w-3xl">
-        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted">
+        <p className="font-sans text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
           Search
         </p>
         <h1 className="mt-4 font-serif text-5xl leading-[0.95] tracking-tight">
-          Results for <span className="text-accent">“{q}”</span>
+          Results for <span className="text-primary">“{q}”</span>
         </h1>
       </section>
 
       {nothing ? (
-        <p className="mt-16 font-serif text-2xl italic text-muted">
+        <p className="mt-16 font-serif text-2xl italic text-muted-foreground">
           No results for “{q}”.
         </p>
       ) : (
@@ -61,7 +61,7 @@ export default async function SearchPage({
                 <h2 className="font-serif text-4xl leading-none tracking-tight text-ink">
                   Sales
                 </h2>
-                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted">
+                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   {sales.length} {sales.length === 1 ? "sale" : "sales"}
                 </span>
               </header>
@@ -80,7 +80,7 @@ export default async function SearchPage({
                 <h2 className="font-serif text-4xl leading-none tracking-tight text-ink">
                   Lots
                 </h2>
-                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted">
+                <span className="tnum font-sans text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                   {lots.length} {lots.length === 1 ? "lot" : "lots"}
                 </span>
               </header>

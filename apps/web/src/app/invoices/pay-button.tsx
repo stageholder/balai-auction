@@ -30,7 +30,7 @@ export function PayButton({ invoiceId }: { invoiceId: string }) {
       <Button size="sm" variant="accent" onClick={onPay} disabled={pending}>
         Pay now
       </Button>
-      {error ? <span className="text-xs text-accent">{error}</span> : null}
+      {error ? <span className="text-xs text-primary">{error}</span> : null}
     </div>
   );
 }

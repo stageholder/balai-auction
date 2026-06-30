@@ -43,7 +43,7 @@ export default async function PublicSaleResultsPage({
     <div className="mx-auto max-w-4xl">
       {/* ── Results header ─────────────────────────────────────── */}
       <header className="border-b border-line pb-10">
-        <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-accent">
+        <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-primary">
           Prices realized
         </p>
 
@@ -51,7 +51,7 @@ export default async function PublicSaleResultsPage({
           {sale.title}
         </h1>
 
-        <p className="tnum mt-5 font-sans text-sm text-muted">
+        <p className="tnum mt-5 font-sans text-sm text-muted-foreground">
           {formatSaleDate(sale.startsAt)}
           {department ? (
             <>
@@ -66,7 +66,7 @@ export default async function PublicSaleResultsPage({
         {/* Realized total — the headline figure */}
         <dl className="mt-9 flex flex-wrap items-end gap-x-12 gap-y-6">
           <div>
-            <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+            <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Total realized
             </dt>
             <dd className="tnum font-serif mt-2 text-4xl leading-none text-ink">
@@ -74,12 +74,12 @@ export default async function PublicSaleResultsPage({
             </dd>
           </div>
           <div className="border-l border-line pl-12">
-            <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted">
+            <dt className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Lots sold
             </dt>
             <dd className="tnum font-serif mt-2 text-2xl leading-none text-ink">
               {lotsSold}
-              <span className="text-muted"> / {lotsOffered}</span>
+              <span className="text-muted-foreground"> / {lotsOffered}</span>
             </dd>
           </div>
         </dl>
@@ -87,13 +87,13 @@ export default async function PublicSaleResultsPage({
 
       {/* ── Results table ──────────────────────────────────────── */}
       {results.length === 0 ? (
-        <p className="mt-12 font-sans text-sm text-muted">
+        <p className="mt-12 font-sans text-sm text-muted-foreground">
           Results are not yet available.
         </p>
       ) : (
         <table className="mt-10 w-full border-collapse">
           <thead>
-            <tr className="border-b border-line text-left font-sans text-[10px] uppercase tracking-[0.18em] text-muted">
+            <tr className="border-b border-line text-left font-sans text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               <th className="w-16 py-3 font-normal">Lot</th>
               <th className="py-3 font-normal">Title</th>
               <th className="py-3 font-normal">Result</th>
@@ -108,13 +108,13 @@ export default async function PublicSaleResultsPage({
                   key={r.lotId}
                   className="border-b border-line align-baseline"
                 >
-                  <td className="tnum py-4 font-sans text-sm text-muted">
+                  <td className="tnum py-4 font-sans text-sm text-muted-foreground">
                     {r.lotNumber}
                   </td>
                   <td className="py-4 pr-6">
                     <Link
                       href={`/lots/${r.lotId}`}
-                      className="font-serif text-base text-ink underline-offset-4 transition-colors hover:text-accent hover:underline"
+                      className="font-serif text-base text-ink underline-offset-4 transition-colors hover:text-primary hover:underline"
                     >
                       {r.title}
                     </Link>
@@ -123,7 +123,7 @@ export default async function PublicSaleResultsPage({
                     {sold ? (
                       <span className="text-ink">Sold</span>
                     ) : (
-                      <span className="text-muted">Unsold</span>
+                      <span className="text-muted-foreground">Unsold</span>
                     )}
                   </td>
                   <td className="tnum py-4 text-right font-sans text-sm text-ink">

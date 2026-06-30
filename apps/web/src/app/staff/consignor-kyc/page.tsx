@@ -22,15 +22,15 @@ const AML_LABEL: Record<AmlStatus, string> = {
 // the affirming outcome reads as settled (ink); the adverse outcome is the
 // one that needs eyes (accent).
 const KYC_DOT: Record<KycStatus, string> = {
-  pending: "bg-muted",
+  pending: "bg-muted-foreground",
   approved: "bg-ink",
-  rejected: "bg-accent",
+  rejected: "bg-primary",
 };
 
 const AML_DOT: Record<AmlStatus, string> = {
-  pending: "bg-muted",
+  pending: "bg-muted-foreground",
   cleared: "bg-ink",
-  flagged: "bg-accent",
+  flagged: "bg-primary",
 };
 
 function StatusMarker({ dot, label }: { dot: string; label: string }) {
@@ -45,7 +45,7 @@ function StatusMarker({ dot, label }: { dot: string; label: string }) {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+      <dt className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </dt>
       <dd className="mt-1 text-sm text-ink">{value}</dd>
@@ -66,14 +66,14 @@ export default async function StaffConsignorKycPage() {
     <div>
       <header className="mb-8">
         <h1 className="text-2xl">Consignor KYC</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-muted-foreground">
           Identity, sanctions screening and AML decisions for consignors.
           {submitted.length > 0 ? (
             <>
               {" "}
               {submitted.length} submitted
               {flaggedCount > 0 ? (
-                <span className="text-accent">
+                <span className="text-primary">
                   {" · "}
                   {flaggedCount} with possible sanctions match
                 </span>
@@ -85,7 +85,7 @@ export default async function StaffConsignorKycPage() {
       </header>
 
       {consignors.length === 0 ? (
-        <p className="text-muted">No consignors on file.</p>
+        <p className="text-muted-foreground">No consignors on file.</p>
       ) : (
         <ul className="flex flex-col gap-px bg-line">
           {consignors.map((c) => {
@@ -116,7 +116,7 @@ export default async function StaffConsignorKycPage() {
                     <p className="font-serif text-xl text-ink">
                       {legalName ?? c.email}
                     </p>
-                    <p className="mt-1 text-sm text-muted">{c.email}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{c.email}</p>
                   </div>
 
                   {hasSubmitted ? (
@@ -132,7 +132,7 @@ export default async function StaffConsignorKycPage() {
                       <Field label="Payout account" value={payoutDest} />
                     </dl>
                   ) : (
-                    <p className="text-sm uppercase tracking-[0.12em] text-muted">
+                    <p className="text-sm uppercase tracking-[0.12em] text-muted-foreground">
                       Awaiting submission
                     </p>
                   )}
@@ -140,21 +140,21 @@ export default async function StaffConsignorKycPage() {
                   {/* Sanctions screen — accent callout when matched */}
                   {hasSubmitted ? (
                     matches.length > 0 ? (
-                      <div className="border-l-2 border-accent bg-accent/[0.04] px-4 py-3">
-                        <p className="text-xs font-medium uppercase tracking-[0.12em] text-accent">
+                      <div className="border-l-2 border-primary bg-primary/[0.04] px-4 py-3">
+                        <p className="text-xs font-medium uppercase tracking-[0.12em] text-primary">
                           ⚠ {matches.length} possible sanctions match
                         </p>
                         <ul className="mt-2 flex flex-col gap-1">
                           {matches.map((m) => (
                             <li key={m.name} className="text-sm text-ink">
                               <span className="text-ink">{m.name}</span>
-                              <span className="text-muted"> — {m.note}</span>
+                              <span className="text-muted-foreground"> — {m.note}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     ) : (
-                      <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted">
+                      <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                         <span
                           aria-hidden="true"
                           className="h-1.5 w-1.5 rounded-full bg-ink"
@@ -166,7 +166,7 @@ export default async function StaffConsignorKycPage() {
 
                   <div className="flex flex-wrap gap-x-8 gap-y-2 pt-1">
                     <span className="flex items-center gap-2">
-                      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+                      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
                         KYC
                       </span>
                       <StatusMarker
@@ -175,7 +175,7 @@ export default async function StaffConsignorKycPage() {
                       />
                     </span>
                     <span className="flex items-center gap-2">
-                      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+                      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
                         AML
                       </span>
                       <StatusMarker
@@ -186,7 +186,7 @@ export default async function StaffConsignorKycPage() {
                   </div>
 
                   {c.consignorAmlNote ? (
-                    <p className="text-sm text-muted">
+                    <p className="text-sm text-muted-foreground">
                       <span className="text-[0.6rem] uppercase tracking-[0.18em]">
                         AML note:
                       </span>{" "}
@@ -205,7 +205,7 @@ export default async function StaffConsignorKycPage() {
                       amlNote={c.consignorAmlNote}
                     />
                   ) : (
-                    <p className="text-sm text-muted">
+                    <p className="text-sm text-muted-foreground">
                       No identity submitted yet — nothing to decide.
                     </p>
                   )}

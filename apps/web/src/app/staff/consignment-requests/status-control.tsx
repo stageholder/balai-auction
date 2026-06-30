@@ -14,7 +14,7 @@ const BTN_BASE =
 // Accepting an item is the decisive, affirming move — filled ink.
 const BTN_SOLID = cn(BTN_BASE, "border border-ink bg-ink text-paper hover:bg-paper hover:text-ink");
 // Declining is the adverse move — outline drawn in accent to read as caution.
-const BTN_ADVERSE = cn(BTN_BASE, "border border-accent text-accent hover:bg-accent hover:text-paper");
+const BTN_ADVERSE = cn(BTN_BASE, "border border-primary text-primary hover:bg-primary hover:text-paper");
 // Moving into review is the neutral, in-progress step — ink outline.
 const BTN_NEUTRAL = cn(BTN_BASE, "border border-line text-ink hover:border-ink");
 // The current state — shown active so staff see where things stand.
@@ -67,7 +67,7 @@ export function StatusControl({
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+      <span className="text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground">
         Triage decision
       </span>
       <div className="flex flex-wrap gap-2">
@@ -76,7 +76,7 @@ export function StatusControl({
         {btn("declined", "Decline", BTN_ADVERSE)}
       </div>
       {error ? (
-        <span className="text-xs uppercase tracking-[0.12em] text-accent">
+        <span className="text-xs uppercase tracking-[0.12em] text-primary">
           {error}
         </span>
       ) : null}
