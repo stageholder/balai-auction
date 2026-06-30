@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import {
   prisma,
-  listRunningLiveSales,
+  listPublishedSales,
   listLotsForSale,
   listPayouts,
   listPendingRegistrations,
@@ -31,16 +31,19 @@ import { Badge } from "@/components/ui/badge";
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
-  const [liveSales, payouts, registrations, consignors, requests] =
+  const [publishedSales, payouts, registrations, consignors, requests] =
     await Promise.all([
-      listRunningLiveSales(prisma),
+      listPublishedSales(prisma),
       listPayouts(prisma),
       listPendingRegistrations(prisma),
       listConsignorsForReview(prisma),
       listConsignmentRequests(prisma),
     ]);
 
-  // Lots live now — count "live" lots across every running live sale.
+  // Live sales = any sale currently open (status "live"), matching the public view.
+  const liveSales = publishedSales.filter((s) => s.status === "live");
+
+  // Lots live now — count "live" lots across every live sale.
   const lotsPerSale = await Promise.all(
     liveSales.map((s) => listLotsForSale(prisma, s.id))
   );
