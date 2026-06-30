@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import type { IncrementTable } from "@auction/core";
 import { isDepartmentSlug, isValidCommissionPct, DEFAULT_SELLER_COMMISSION_PCT } from "@auction/core";
 import type { SaleStatus } from "@auction/db";
-import { prisma, createSale, updateSale, updateSaleStatus } from "@/lib/db";
+import { prisma, createSale, updateSale, updateSaleStatus, setSaleFeatured } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 
 const DEFAULT_INCREMENTS: IncrementTable = [
@@ -69,4 +69,14 @@ export async function setSaleStatusAction(
   await updateSaleStatus(prisma, id, status);
   revalidatePath(`/admin/sales/${id}`);
   revalidatePath("/admin/sales");
+}
+
+export async function toggleSaleFeaturedAction(
+  id: string,
+  featured: boolean
+): Promise<void> {
+  await requireStaff();
+  await setSaleFeatured(prisma, id, featured);
+  revalidatePath("/admin/sales");
+  revalidatePath("/");
 }
