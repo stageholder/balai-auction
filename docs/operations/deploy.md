@@ -42,13 +42,20 @@ DATABASE_URL="<DIRECT 5432 url>" DIRECT_URL="<DIRECT 5432 url>" \
   pnpm --filter @auction/db exec prisma migrate deploy
 ```
 
-Optional — seed demo data + default login users into the cloud project (set the
-cloud `DATABASE_URL`/`DIRECT_URL` + the three Supabase vars in
-`apps/web/.env.local` first):
+Optional — seed demo data + default login users into the cloud project. ⚠️ The
+two seed commands read **different** env files:
+
+- `pnpm db:seed` (catalogue) runs in `packages/db` and reads **`packages/db/.env`**.
+- `pnpm seed:admin` (Supabase Auth users) reads **`apps/web/.env.local`**.
 
 ```bash
-pnpm db:seed      # demo catalogue (resets it)
-pnpm seed:admin   # admin@balai.test etc. in cloud Supabase Auth
+# Catalogue — override inline (Prisma respects an already-set DATABASE_URL).
+# Use the DIRECT (5432) connection for the bulk writes, not the pooler:
+DATABASE_URL="<cloud direct 5432>" DIRECT_URL="<cloud direct 5432>" pnpm db:seed
+
+# Login users — point apps/web/.env.local at the CLOUD Supabase URL + service
+# key (+ cloud DATABASE_URL) first, then:
+pnpm seed:admin
 ```
 
 ## 4. Vercel project
