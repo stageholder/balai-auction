@@ -122,11 +122,11 @@ export default async function AuctionsPage({
             ) : null}
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/20"
+              className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/45"
             />
             <div className="absolute inset-0 flex items-end">
               <div className="mx-auto w-full max-w-6xl px-6 pb-14">
-                <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-paper/70">
+                <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-paper/85">
                   {activeLabel
                     ? `${activeLabel} · The Calendar`
                     : "The Auction Calendar"}
@@ -134,7 +134,7 @@ export default async function AuctionsPage({
                 <h1 className="mt-5 max-w-3xl font-serif text-5xl leading-[0.95] tracking-tight text-paper md:text-7xl">
                   {activeLabel ?? "Auctions"}
                 </h1>
-                <p className="mt-6 max-w-xl font-sans text-sm leading-relaxed text-paper/80">
+                <p className="mt-6 max-w-xl font-sans text-sm leading-relaxed text-paper/90">
                   {activeLabel
                     ? `Sales in ${activeLabel}, by where they sit in the season.`
                     : "A season of sales — live on the rostrum, scheduled ahead, and the results behind us. Open to browse, no account required."}

@@ -50,7 +50,7 @@ export default function SellPage() {
           />
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/45 to-ink/30"
+            className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/45"
           />
           <div className="absolute inset-0 flex items-end">
             <div className="mx-auto w-full max-w-6xl px-6 pb-12">

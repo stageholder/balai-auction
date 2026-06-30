@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/site";
 
@@ -28,6 +29,12 @@ export function HomeHero({
   const [paused, setPaused] = useState(false);
   const reducedMotion = useRef(false);
 
+  const count = slides.length;
+  const go = useCallback(
+    (dir: 1 | -1) => setActive((i) => (i + dir + count) % count),
+    [count]
+  );
+
   useEffect(() => {
     reducedMotion.current =
       typeof window !== "undefined" &&
@@ -35,38 +42,35 @@ export function HomeHero({
   }, []);
 
   useEffect(() => {
-    if (slides.length <= 1 || paused || reducedMotion.current) return;
-    const t = setInterval(() => {
-      setActive((i) => (i + 1) % slides.length);
-    }, INTERVAL_MS);
+    if (count <= 1 || paused || reducedMotion.current) return;
+    const t = setInterval(() => setActive((i) => (i + 1) % count), INTERVAL_MS);
     return () => clearInterval(t);
-  }, [slides.length, paused]);
+  }, [count, paused]);
 
   return (
     <section
       aria-label="Featured sale"
-      className="grid grid-cols-1 lg:grid-cols-2"
+      className="relative grid grid-cols-1 lg:grid-cols-2"
     >
-      {/* LEFT — copy + CTAs on a solid ink panel, fully legible */}
-      <div className="order-2 flex flex-col justify-center bg-ink px-6 py-14 sm:px-10 lg:order-1 lg:min-h-[70vh] lg:px-16">
+      {/* LEFT — copy + CTAs on a bright paper panel, fully legible */}
+      <div className="order-2 flex flex-col justify-center bg-paper px-6 py-14 sm:px-10 lg:order-1 lg:min-h-[70vh] lg:px-16">
         <div className="w-full max-w-xl lg:ml-auto lg:mr-0 lg:max-w-lg">
-          <p className="font-sans text-[11px] uppercase tracking-[0.34em] text-paper/70">
+          <p className="font-sans text-[11px] uppercase tracking-[0.34em] text-muted-foreground">
             {eyebrow}
           </p>
-          <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-paper md:text-6xl">
+          <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-ink md:text-6xl">
             Art and collections,
             <br />
             brought to the rostrum.
           </h1>
           {saleTitle ? (
-            <p className="mt-6 max-w-md font-sans text-sm leading-relaxed text-paper/75">
-              Now on view —{" "}
-              <span className="text-paper">{saleTitle}</span>. Live sales, the
-              upcoming calendar, and results from the room, open to browse with
-              no account required.
+            <p className="mt-6 max-w-md font-sans text-sm leading-relaxed text-muted-foreground">
+              Now on view — <span className="text-ink">{saleTitle}</span>. Live
+              sales, the upcoming calendar, and results from the room, open to
+              browse with no account required.
             </p>
           ) : (
-            <p className="mt-6 max-w-md font-sans text-sm leading-relaxed text-paper/75">
+            <p className="mt-6 max-w-md font-sans text-sm leading-relaxed text-muted-foreground">
               Live sales, the upcoming calendar, and results from the room —
               open to browse, no account required.
             </p>
@@ -78,12 +82,7 @@ export function HomeHero({
                 <Link href={`/sales/${saleId}`}>Browse the sale</Link>
               </Button>
             ) : null}
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-paper/40 bg-transparent text-paper hover:bg-paper/10 hover:text-paper"
-            >
+            <Button asChild size="lg" variant="outline">
               <Link href="/auctions">View all auctions</Link>
             </Button>
           </div>
@@ -92,7 +91,7 @@ export function HomeHero({
 
       {/* RIGHT — featured imagery; the slideshow lives here, contained */}
       <div
-        className="relative order-1 min-h-[44vh] overflow-hidden bg-secondary lg:order-2 lg:min-h-[70vh]"
+        className="relative order-1 min-h-[44vh] overflow-hidden border-line bg-secondary lg:order-2 lg:min-h-[70vh] lg:border-l"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
@@ -115,12 +114,6 @@ export function HomeHero({
           </div>
         ))}
 
-        {/* Soft edge so the image meets the ink panel without a hard seam */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-ink/25 to-transparent lg:block"
-        />
-
         {/* Wordmark watermark, top-right of the image */}
         <span
           aria-hidden="true"
@@ -130,7 +123,7 @@ export function HomeHero({
         </span>
 
         {/* Slide indicators */}
-        {slides.length > 1 ? (
+        {count > 1 ? (
           <div className="absolute bottom-5 left-5 flex items-center gap-2">
             {slides.map((slide, i) => (
               <button
@@ -153,6 +146,28 @@ export function HomeHero({
           </div>
         ) : null}
       </div>
+
+      {/* Edge controls — change the slideshow from either side of the hero */}
+      {count > 1 ? (
+        <>
+          <button
+            type="button"
+            aria-label="Previous featured lot"
+            onClick={() => go(-1)}
+            className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-ink/15 bg-paper/80 p-2.5 text-ink backdrop-blur-sm transition-colors hover:bg-paper lg:flex"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next featured lot"
+            onClick={() => go(1)}
+            className="absolute right-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-paper/25 bg-ink/35 p-2.5 text-paper backdrop-blur-sm transition-colors hover:bg-ink/55 lg:flex"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      ) : null}
     </section>
   );
 }

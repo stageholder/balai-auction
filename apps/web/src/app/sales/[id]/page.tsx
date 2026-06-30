@@ -79,7 +79,7 @@ export default async function SalePage({
           ) : null}
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/25"
+            className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/45"
           />
 
           <div className="absolute inset-0 flex items-end">

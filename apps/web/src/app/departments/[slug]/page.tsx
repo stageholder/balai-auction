@@ -98,7 +98,7 @@ export default async function DepartmentPage({
           )}
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/15"
+            className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/45"
           />
           <div className="absolute inset-0 flex items-end">
             <div className="mx-auto w-full max-w-6xl px-6 pb-14">
