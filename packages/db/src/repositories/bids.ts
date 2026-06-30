@@ -1,5 +1,5 @@
 import type { BidEvent } from "@auction/core";
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { bidRowToEvent, bidRowToRecord, toDbMoney, toMoney } from "../mappers";
 import type { BidHistoryItem, BidRecord, NewBid } from "../types";
 

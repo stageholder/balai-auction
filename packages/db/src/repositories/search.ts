@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { saleRowToRecord, toMoney } from "../mappers";
 import type { SaleRecord, SearchLotItem } from "../types";
 import { NON_PUBLIC_SALE_STATUSES } from "./sales";

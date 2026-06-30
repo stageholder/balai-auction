@@ -1,6 +1,6 @@
 import type { Invoice } from "@auction/core";
 import { computeSellerSettlement } from "@auction/core";
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { invoiceRowToRecord, ledgerEntryRowToRecord, toDbMoney, toMoney } from "../mappers";
 import type { InvoiceRecord, LedgerEntryRecord } from "../types";
 

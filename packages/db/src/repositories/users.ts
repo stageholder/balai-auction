@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { userRowToRecord } from "../mappers";
 import type { NewUser, UpsertUser, UserProfileUpdate, UserRecord, UserRole } from "../types";
 

@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { lotRowToRecord, toDbMoney } from "../mappers";
 import type { LotRecord, LotStatus, NewLot, UpdateLot } from "../types";
 

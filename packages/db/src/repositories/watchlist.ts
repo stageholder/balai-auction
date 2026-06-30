@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { toMoney } from "../mappers";
 import type { LotStatus, WatchlistItem } from "../types";
 

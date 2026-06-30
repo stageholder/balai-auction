@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "../generated/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { saleRowToRecord } from "../mappers";
 import type { NewSale, SaleRecord, SaleStatus, UpdateSale } from "../types";
 

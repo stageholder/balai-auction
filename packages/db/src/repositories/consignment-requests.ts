@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { consignmentRequestRowToRecord, toDbMoney } from "../mappers";
 import type {
   ConsignmentRequestRecord,

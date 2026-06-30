@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../generated/client";
+import type { PrismaClient } from "@prisma/client";
 import { consignorPayoutGate } from "@auction/core";
 import { payoutRowToRecord, toMoney, toDbMoney } from "../mappers";
 import type { KycStatus, AmlStatus, PayoutRecord, PayoutStatus } from "../types";
