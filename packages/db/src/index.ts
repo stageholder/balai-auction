@@ -11,3 +11,4 @@ export * from "./repositories/close";
 export * from "./repositories/results";
 export * from "./repositories/payouts";
 export * from "./repositories/search";
+export * from "./repositories/watchlist";

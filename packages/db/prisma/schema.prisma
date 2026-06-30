@@ -93,6 +93,7 @@ model User {
   invoices             Invoice[]
   consignedLots        Lot[]          @relation("ConsignorLots")
   payouts              Payout[]       @relation("ConsignorPayouts")
+  watchlist            Watchlist[]
   payoutBankCode       String?
   payoutAccountNumber  String?
   payoutAccountHolder  String?
@@ -144,6 +145,7 @@ model Lot {
   invoice       Invoice?
   ledgerEntries LedgerEntry[]
   payout        Payout?
+  watchers      Watchlist[]
 
   @@unique([saleId, lotNumber])
   @@index([status, closesAt])
@@ -228,4 +230,16 @@ model Payout {
 
   @@index([consignorId])
   @@index([status])
+}
+
+model Watchlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lotId     String
+  lot       Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, lotId])
+  @@index([userId])
 }

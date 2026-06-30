@@ -255,3 +255,15 @@ export interface SearchLotItem {
   estimateLow: number;
   estimateHigh: number;
 }
+
+export interface WatchlistItem {
+  id: string;
+  lotNumber: number;
+  title: string;
+  saleId: string;
+  saleTitle: string;
+  image: string | null;
+  status: LotStatus;
+  estimateLow: number;
+  estimateHigh: number;
+}
