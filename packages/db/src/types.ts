@@ -243,3 +243,15 @@ export interface PublicLotResult {
   status: LotStatus;
   hammer: number | null;
 }
+
+export interface SearchLotItem {
+  id: string;
+  lotNumber: number;
+  title: string;
+  saleId: string;
+  saleTitle: string;
+  image: string | null;
+  status: LotStatus;
+  estimateLow: number;
+  estimateHigh: number;
+}
