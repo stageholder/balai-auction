@@ -5,10 +5,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // identity aliases (kept)
-        paper: "var(--paper)",
-        ink: "var(--ink)",
-        line: "var(--line)",
+        // identity aliases — channel form so opacity modifiers work
+        // (text-paper/70, bg-ink/80, via-ink/45, border-line/30, …)
+        paper: "rgb(var(--paper) / <alpha-value>)",
+        ink: "rgb(var(--ink) / <alpha-value>)",
+        line: "rgb(var(--line) / <alpha-value>)",
         // shadcn semantic tokens, themed to the identity
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

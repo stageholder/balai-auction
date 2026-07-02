@@ -10,10 +10,12 @@
  * crimson primary.
  */
 :root {
-  /* identity hex aliases (kept) */
-  --paper: #faf8f4;
-  --ink: #1a1a1a;
-  --line: #e4ded3;
+  /* identity colours as space-separated RGB channels, so the Tailwind tokens
+     (rgb(var(--x) / <alpha-value>)) support opacity modifiers like text-paper/70
+     and via-ink/45. Values: paper #faf8f4, ink #1a1a1a, line #e4ded3. */
+  --paper: 250 248 244;
+  --ink: 26 26 26;
+  --line: 228 222 211;
 
   /* shadcn semantic tokens (HSL triplets) — themed to the identity */
   --background: 40 33% 97%; /* paper */

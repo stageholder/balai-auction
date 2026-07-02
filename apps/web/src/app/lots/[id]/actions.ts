@@ -7,14 +7,14 @@ import {
   getLot,
   getSale,
   getRegistration,
-  getBidEventsForLot,
-  appendBid,
-  updateLotClosesAt,
   getUser,
+  bidRowToEvent,
+  toDbMoney,
 } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { broadcastLotPrice } from "@/lib/realtime";
 import { notifyOutbid } from "@/lib/notifications";
+import { formatRupiah } from "@/lib/format";
 
 export async function placeBid(
   lotId: string,
@@ -25,6 +25,10 @@ export async function placeBid(
   currentPrice?: number;
   closesAt?: string;
   leading?: boolean;
+  /** Minimum acceptable maximum for the NEXT bid, after this one. */
+  floor?: number;
+  /** The bidder's own confidential maximum after this bid. */
+  yourMax?: number;
 }> {
   const user = await requireUser();
 
@@ -47,64 +51,124 @@ export async function placeBid(
   const sale = await getSale(prisma, lot.saleId);
   if (!sale) return { ok: false, error: "Sale not found." };
 
-  const events = await getBidEventsForLot(prisma, lotId);
-  const floor = nextBidFloor(lot.startingPrice, events, sale.incrementTable);
-  if (maxAmount < floor) {
-    return { ok: false, error: `Your maximum must be at least ${floor}.` };
-  }
+  // Critical section: serialize with concurrent bids AND the close path on this
+  // lot via a per-lot advisory lock (released at commit). Everything that reads
+  // the bid ledger, validates the floor, appends the bid, and extends the close
+  // runs under the lock and re-reads authoritative state, so no bid is dropped,
+  // no bid lands on an already-closed lot, and the anti-snipe extension can't be
+  // clobbered by a stale concurrent write.
+  const outcome = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lotId}, 0))`;
 
-  // Resolved price after including this bid (stored as the bid's revealed amount).
-  const resolution = resolveBids(
-    lot.startingPrice,
-    [...events, { bidderId: user.id, maxAmount, createdAt: now.getTime() }],
-    sale.incrementTable
-  );
+    const fresh = await tx.lot.findUnique({
+      where: { id: lotId },
+      select: { status: true, closesAt: true },
+    });
+    if (!fresh || fresh.status !== "live" || fresh.closesAt <= now) {
+      return { kind: "closed" as const };
+    }
 
-  const priorLeaderId = resolveBids(
-    lot.startingPrice,
-    events,
-    sale.incrementTable
-  ).winnerId;
+    const rows = await tx.bid.findMany({
+      where: { lotId },
+      orderBy: { createdAt: "asc" },
+      select: { bidderId: true, maxAmount: true, createdAt: true },
+    });
+    const events = rows.map(bidRowToEvent);
 
-  await appendBid(prisma, {
-    lotId,
-    bidderId: user.id,
-    maxAmount,
-    amount: resolution.currentPrice,
+    const floor = nextBidFloor(lot.startingPrice, events, sale.incrementTable);
+    if (maxAmount < floor) {
+      return { kind: "belowFloor" as const, floor };
+    }
+
+    const newEvents = [
+      ...events,
+      { bidderId: user.id, maxAmount, createdAt: now.getTime() },
+    ];
+    const resolution = resolveBids(lot.startingPrice, newEvents, sale.incrementTable);
+    const priorLeaderId = resolveBids(
+      lot.startingPrice,
+      events,
+      sale.incrementTable
+    ).winnerId;
+
+    // Stored `amount` is the revealed price at this moment; `maxAmount` is the
+    // confidential proxy ceiling used for resolution.
+    await tx.bid.create({
+      data: {
+        lotId,
+        bidderId: user.id,
+        maxAmount: toDbMoney(maxAmount),
+        amount: toDbMoney(resolution.currentPrice),
+        type: "bid",
+      },
+    });
+
+    // Soft-close: a late bid extends the close (monotonic — computed from the
+    // fresh close time under the lock).
+    const extended = applySoftClose(
+      fresh.closesAt.getTime(),
+      now.getTime(),
+      softCloseWindowMs(sale.mode)
+    );
+    let closesAt = fresh.closesAt;
+    if (extended !== fresh.closesAt.getTime()) {
+      closesAt = new Date(extended);
+      await tx.lot.update({ where: { id: lotId }, data: { closesAt } });
+    }
+
+    const nextFloor = nextBidFloor(lot.startingPrice, newEvents, sale.incrementTable);
+    const yourMax = Math.max(
+      maxAmount,
+      ...events.filter((e) => e.bidderId === user.id).map((e) => e.maxAmount)
+    );
+
+    return {
+      kind: "ok" as const,
+      currentPrice: resolution.currentPrice,
+      winnerId: resolution.winnerId,
+      priorLeaderId,
+      closesAt,
+      nextFloor,
+      yourMax,
+      bidCount: newEvents.length,
+    };
   });
 
-  // Soft-close: a late bid extends the close.
-  const extended = applySoftClose(
-    lot.closesAt.getTime(),
-    now.getTime(),
-    softCloseWindowMs(sale.mode)
-  );
-  let closesAt = lot.closesAt;
-  if (extended !== lot.closesAt.getTime()) {
-    closesAt = new Date(extended);
-    await updateLotClosesAt(prisma, lotId, closesAt);
+  if (outcome.kind === "closed") {
+    return { ok: false, error: "Bidding has ended for this lot." };
+  }
+  if (outcome.kind === "belowFloor") {
+    return {
+      ok: false,
+      error: `Your maximum must be at least ${formatRupiah(outcome.floor)}.`,
+      floor: outcome.floor,
+    };
   }
 
+  // Side effects (network I/O) run AFTER the transaction commits — never hold a
+  // DB lock across a broadcast/email.
   await broadcastLotPrice(lotId, {
-    currentPrice: resolution.currentPrice,
-    closesAt: closesAt.toISOString(),
-    bidCount: events.length + 1,
+    currentPrice: outcome.currentPrice,
+    closesAt: outcome.closesAt.toISOString(),
+    bidCount: outcome.bidCount,
   });
 
   if (
-    priorLeaderId &&
-    priorLeaderId !== user.id &&
-    resolution.winnerId !== priorLeaderId
+    outcome.priorLeaderId &&
+    outcome.priorLeaderId !== user.id &&
+    outcome.winnerId !== outcome.priorLeaderId
   ) {
-    const outbid = await getUser(prisma, priorLeaderId);
+    const outbid = await getUser(prisma, outcome.priorLeaderId);
     if (outbid) await notifyOutbid(outbid.email, lot.title, lotId);
   }
 
   revalidatePath(`/lots/${lotId}`);
   return {
     ok: true,
-    currentPrice: resolution.currentPrice,
-    closesAt: closesAt.toISOString(),
-    leading: resolution.winnerId === user.id,
+    currentPrice: outcome.currentPrice,
+    closesAt: outcome.closesAt.toISOString(),
+    leading: outcome.winnerId === user.id,
+    floor: outcome.nextFloor,
+    yourMax: outcome.yourMax,
   };
 }

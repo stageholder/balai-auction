@@ -24,15 +24,21 @@ function maskLabels(bids: BidHistoryItem[]): Map<string, string> {
  * Bid history for a lot: a price chart + the chronological list of bids.
  * `reveal` shows real bidder emails (operator console); otherwise bidders are
  * masked ("Bidder 1…") for the public catalogue.
+ *
+ * `winnerId` is the CURRENT leader from the proxy resolver (highest maximum) —
+ * used to tag the right bidder as "Leading". This is deliberately NOT "the most
+ * recent bid": in a proxy auction the newest bidder is often the underbidder.
  */
 export function BidActivity({
   bids,
   startingPrice,
   reveal = false,
+  winnerId = null,
 }: {
   bids: BidHistoryItem[]; // oldest → newest
   startingPrice: number;
   reveal?: boolean;
+  winnerId?: string | null;
 }) {
   if (bids.length === 0) {
     return (
@@ -44,6 +50,12 @@ export function BidActivity({
 
   const labels = maskLabels(bids);
   const rows = [...bids].reverse(); // newest first in the list
+  // The row to tag "Leading" is the winner's most-recent bid (rows are newest
+  // first, so the first match). Falls back to none when there's no live winner.
+  const leadingRowId =
+    winnerId != null
+      ? (rows.find((b) => b.bidderId === winnerId)?.id ?? null)
+      : null;
 
   return (
     <div className="space-y-6">
@@ -68,7 +80,7 @@ export function BidActivity({
             </tr>
           </thead>
           <tbody>
-            {rows.map((b, i) => (
+            {rows.map((b) => (
               <tr
                 key={b.id}
                 className="border-b border-line last:border-0 odd:bg-muted/30"
@@ -78,7 +90,7 @@ export function BidActivity({
                 </td>
                 <td className="px-4 py-2.5 text-ink">
                   {reveal ? b.bidderEmail : labels.get(b.bidderId)}
-                  {i === 0 ? (
+                  {b.id === leadingRowId ? (
                     <span className="ml-2 text-[0.65rem] uppercase tracking-[0.1em] text-primary">
                       Leading
                     </span>
@@ -92,6 +104,12 @@ export function BidActivity({
           </tbody>
         </table>
       </div>
+
+      <p className="font-sans text-xs leading-relaxed text-muted-foreground">
+        Each amount is the leading bid at that moment. Every bidder&rsquo;s
+        maximum is kept confidential — the price only rises as far as needed to
+        stay ahead of the next-highest maximum.
+      </p>
     </div>
   );
 }

@@ -69,17 +69,39 @@ export default async function LotPage({
 
   // Live-bidding data is computed only when the lot is still live; settled and
   // unsold lots short-circuit so we avoid needless bid resolution.
-  let live: { currentPrice: number; gate: BidGate } | null = null;
+  let live:
+    | {
+        currentPrice: number;
+        gate: BidGate;
+        youStatus: "leading" | "outbid" | null;
+        yourMax: number | null;
+        winnerId: string | null;
+      }
+    | null = null;
   if (!settled && lot.status !== "unsold") {
     const events = await getBidEventsForLot(prisma, lot.id);
-    const currentPrice = resolveBids(
-      lot.startingPrice,
-      events,
-      sale.incrementTable
-    ).currentPrice;
+    const resolution = resolveBids(lot.startingPrice, events, sale.incrementTable);
+    const currentPrice = resolution.currentPrice;
     const floor = nextBidFloor(lot.startingPrice, events, sale.incrementTable);
 
     const user = await getCurrentUser();
+
+    // The viewer's own confidential maximum (highest across their bids), and
+    // whether that maximum is currently leading — computed from the resolver,
+    // NOT bid recency, so it's always truthful.
+    const yourMaxRaw = user
+      ? events
+          .filter((e) => e.bidderId === user.id)
+          .reduce((m, e) => Math.max(m, e.maxAmount), 0)
+      : 0;
+    const yourMax = yourMaxRaw > 0 ? yourMaxRaw : null;
+    const youStatus: "leading" | "outbid" | null =
+      user && yourMax !== null
+        ? resolution.winnerId === user.id
+          ? "leading"
+          : "outbid"
+        : null;
+
     let gate: BidGate;
     if (lot.status !== "live" || lot.closesAt <= now) {
       gate = { kind: "closed" };
@@ -92,7 +114,13 @@ export default async function LotPage({
           ? { kind: "open", floor }
           : { kind: "register", saleId: lot.saleId };
     }
-    live = { currentPrice, gate };
+    live = {
+      currentPrice,
+      gate,
+      youStatus,
+      yourMax,
+      winnerId: resolution.winnerId,
+    };
   }
 
   const department = departmentLabel(sale.category);
@@ -291,6 +319,8 @@ export default async function LotPage({
                 initialPrice={live.currentPrice}
                 initialClosesAt={lot.closesAt.toISOString()}
                 gate={live.gate}
+                initialYouStatus={live.youStatus}
+                initialYourMax={live.yourMax}
               />
             ) : null}
           </div>
@@ -307,7 +337,11 @@ export default async function LotPage({
             Bid history
           </h2>
           <div className="mt-6 max-w-2xl">
-            <BidActivity bids={bids} startingPrice={lot.startingPrice} />
+            <BidActivity
+              bids={bids}
+              startingPrice={lot.startingPrice}
+              winnerId={live?.winnerId ?? null}
+            />
           </div>
         </section>
       ) : null}

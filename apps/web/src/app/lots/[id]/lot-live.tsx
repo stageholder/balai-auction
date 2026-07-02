@@ -14,6 +14,8 @@ type BidGate =
   | { kind: "register"; saleId: string }
   | { kind: "closed" };
 
+type YouStatus = "leading" | "outbid" | null;
+
 // ── countdown hook ────────────────────────────────────────────────────────────
 
 interface CountdownState {
@@ -53,21 +55,43 @@ export function LotLive({
   initialPrice,
   initialClosesAt,
   gate,
+  initialYouStatus = null,
+  initialYourMax = null,
 }: {
   lotId: string;
   initialPrice: number;
   initialClosesAt: string;
   gate: BidGate;
+  /** Server-computed standing; optional (the live-sale stage omits it). */
+  initialYouStatus?: YouStatus;
+  initialYourMax?: number | null;
 }) {
   const router = useRouter();
   const [price, setPrice] = useState(initialPrice);
   const [closesAt, setClosesAt] = useState(initialClosesAt);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [youStatus, setYouStatus] = useState<"leading" | "outbid" | null>(null);
+  const [youStatus, setYouStatus] = useState<YouStatus>(initialYouStatus);
+  const [yourMax, setYourMax] = useState<number | null>(initialYourMax);
+  const gateFloor = gate.kind === "open" ? gate.floor : null;
+  const [floor, setFloor] = useState(gateFloor ?? 0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Subscribe to the public lot channel for live price updates.
+  // The server is the source of truth. When a router.refresh() re-renders the
+  // page (after our bid, or the debounced reconcile below), mirror the fresh
+  // props back into state so status/floor/max never go stale.
+  useEffect(() => setPrice(initialPrice), [initialPrice]);
+  useEffect(() => setClosesAt(initialClosesAt), [initialClosesAt]);
+  useEffect(() => setYouStatus(initialYouStatus), [initialYouStatus]);
+  useEffect(() => setYourMax(initialYourMax), [initialYourMax]);
+  useEffect(() => {
+    if (gateFloor !== null) setFloor(gateFloor);
+  }, [gateFloor]);
+
+  // Subscribe to the public lot channel for live price updates. A price move we
+  // didn't cause means someone else bid — snap the price for immediacy, then
+  // debounce a refresh to re-derive our leading/outbid status + floor + history.
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
     const channel = supabase
@@ -75,12 +99,15 @@ export function LotLive({
       .on("broadcast", { event: "price" }, ({ payload }) => {
         if (typeof payload?.currentPrice === "number") setPrice(payload.currentPrice);
         if (typeof payload?.closesAt === "string") setClosesAt(payload.closesAt);
+        if (refreshTimer.current) clearTimeout(refreshTimer.current);
+        refreshTimer.current = setTimeout(() => router.refresh(), 900);
       })
       .subscribe();
     return () => {
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
       supabase.removeChannel(channel);
     };
-  }, [lotId]);
+  }, [lotId, router]);
 
   const { label: countdown, urgent } = useCountdown(new Date(closesAt).getTime());
 
@@ -94,21 +121,23 @@ export function LotLive({
       const result = await placeBid(lotId, maxAmount);
       if (!result.ok) {
         setError(result.error ?? "Could not place bid.");
+        // The floor may have moved since page load — surface the new minimum.
+        if (typeof result.floor === "number") setFloor(result.floor);
         return;
       }
       if (typeof result.currentPrice === "number") setPrice(result.currentPrice);
       if (result.closesAt) setClosesAt(result.closesAt);
+      if (typeof result.floor === "number") setFloor(result.floor);
+      if (typeof result.yourMax === "number") setYourMax(result.yourMax);
       if (inputRef.current) inputRef.current.value = "";
       const leading = result.leading === true;
       setYouStatus(leading ? "leading" : "outbid");
       if (leading) {
         toast.success(
-          `You're the highest bidder at ${formatRupiah(
-            result.currentPrice ?? price
-          )}.`
+          `You're the highest bidder at ${formatRupiah(result.currentPrice ?? price)}.`
         );
       } else {
-        toast("Bid placed — but you've been outbid. Raise your maximum to lead.");
+        toast("Bid placed — but an existing maximum is higher. Raise yours to lead.");
       }
       router.refresh();
     } catch {
@@ -124,7 +153,6 @@ export function LotLive({
       <div aria-hidden="true" className="h-[3px] w-full bg-ink" />
 
       <div className="px-6 pb-7 pt-5">
-
         {/* ── Live badge ── */}
         <div className="mb-5 flex items-center gap-2">
           <span
@@ -144,14 +172,24 @@ export function LotLive({
           <p className="tnum font-serif text-[2.2rem] leading-none tracking-tight text-ink">
             {formatRupiah(price)}
           </p>
+
+          {/* Your standing — always truthful (derived from the resolver, not
+              from who bid last). Shows your confidential maximum too. */}
           {youStatus === "leading" ? (
             <p className="mt-2.5 inline-flex items-center gap-1.5 font-sans text-xs font-medium text-primary">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
               You are the highest bidder
+              {yourMax !== null ? (
+                <span className="text-muted-foreground">
+                  · your max {formatRupiah(yourMax)}
+                </span>
+              ) : null}
             </p>
           ) : youStatus === "outbid" ? (
             <p className="mt-2.5 font-sans text-xs text-muted-foreground">
-              You&rsquo;ve been outbid — raise your maximum to lead.
+              You&rsquo;ve been outbid
+              {yourMax !== null ? ` (your max ${formatRupiah(yourMax)})` : ""} —
+              raise your maximum to lead.
             </p>
           ) : null}
         </div>
@@ -189,17 +227,17 @@ export function LotLive({
               </label>
               <p className="mb-2 tnum font-sans text-xs text-muted-foreground">
                 Minimum&ensp;
-                <span className="text-ink">{formatRupiah(gate.floor)}</span>
+                <span className="text-ink">{formatRupiah(floor)}</span>
               </p>
               <input
                 ref={inputRef}
                 id="maxAmount"
                 name="maxAmount"
                 type="number"
-                min={gate.floor}
+                min={floor}
                 step={1}
                 required
-                placeholder={String(gate.floor)}
+                placeholder={String(floor)}
                 className="tnum w-full border border-line bg-paper px-4 py-3 font-sans text-sm text-ink placeholder:text-muted-foreground focus:border-ink focus:outline-none"
               />
             </div>
@@ -219,8 +257,13 @@ export function LotLive({
               {pending ? "Placing bid…" : "Place bid"}
             </Button>
 
-            <p className="font-sans text-[9px] uppercase tracking-[0.18em] text-muted-foreground opacity-60 text-center">
-              Your maximum is kept confidential
+            {/* How proxy bidding works — set expectations so a "price didn't
+                move" moment reads as intended, not broken. */}
+            <p className="font-sans text-[11px] leading-relaxed text-muted-foreground">
+              Enter the most you&rsquo;re willing to pay. We bid for you
+              automatically, only as much as needed to keep you ahead — so the
+              price often sits below your maximum, and raising a maximum
+              you&rsquo;re already leading with won&rsquo;t change it.
             </p>
           </form>
         ) : gate.kind === "signin" ? (
