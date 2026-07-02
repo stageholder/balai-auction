@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/close-lots",
-      "schedule": "* * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

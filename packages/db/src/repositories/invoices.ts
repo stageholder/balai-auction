@@ -4,6 +4,11 @@ import type { PrismaClient } from "@prisma/client";
 import { invoiceRowToRecord, ledgerEntryRowToRecord, toDbMoney, toMoney } from "../mappers";
 import type { InvoiceRecord, LedgerEntryRecord } from "../types";
 
+// Money transactions do several sequential writes; give them generous headroom
+// so a high-latency connection (e.g. a remote pooler) can't abort a settlement
+// mid-way. In production (app co-located with the DB) these finish well under 5s.
+const TXN_OPTS = { timeout: 30_000, maxWait: 10_000 } as const;
+
 export async function createInvoiceWithLedger(
   db: PrismaClient,
   input: { lotId: string; buyerId: string; invoice: Invoice }
@@ -30,7 +35,7 @@ export async function createInvoiceWithLedger(
       })),
     });
     return created;
-  });
+  }, TXN_OPTS);
   return invoiceRowToRecord(row);
 }
 
@@ -127,7 +132,7 @@ export async function markInvoicePaid(
     }
 
     return true;
-  });
+  }, TXN_OPTS);
 }
 
 export async function listInvoicesForBuyer(

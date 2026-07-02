@@ -58,7 +58,7 @@ export async function placeBid(
   // no bid lands on an already-closed lot, and the anti-snipe extension can't be
   // clobbered by a stale concurrent write.
   const outcome = await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lotId}, 0))`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lotId}, 0))`;
 
     const fresh = await tx.lot.findUnique({
       where: { id: lotId },
@@ -132,7 +132,7 @@ export async function placeBid(
       yourMax,
       bidCount: newEvents.length,
     };
-  });
+  }, { timeout: 30_000, maxWait: 10_000 });
 
   if (outcome.kind === "closed") {
     return { ok: false, error: "Bidding has ended for this lot." };

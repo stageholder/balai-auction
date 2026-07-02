@@ -38,7 +38,7 @@ export async function closeLot(
     // Serialize bidding + closing on THIS lot via a per-lot advisory lock
     // (auto-released at transaction end). This closes the race where a bid
     // committed at the exact close instant would be settled on a stale snapshot.
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lotId}, 0))`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lotId}, 0))`;
 
     // Re-read authoritative status + bids INSIDE the lock, so settlement can
     // never miss a bid that landed between the pre-check and here.
@@ -104,7 +104,7 @@ export async function closeLot(
       winnerId: settlement.winnerId,
       hammerPrice: settlement.outcome === "sold" ? settlement.hammerPrice : 0,
     };
-  });
+  }, { timeout: 30_000, maxWait: 10_000 });
 }
 
 /** Close every live lot whose closesAt has passed. */
