@@ -1,7 +1,15 @@
 "use server";
 
+import { headers } from "next/headers";
 import { isDepartmentSlug } from "@auction/core";
+import type { NewMedia } from "@auction/db";
 import { prisma, createConsignmentRequest } from "@/lib/db";
+import { uploadPublicImage } from "@/lib/storage";
+import { rateLimit } from "@/lib/rate-limit";
+import {
+  notifyConsignmentReceived,
+  notifyStaffNewConsignment,
+} from "@/lib/notifications";
 
 /** Typed result surfaced back to the public Sell form. */
 export type ConsignmentActionResult =
@@ -31,6 +39,29 @@ function parseEstimate(raw: string): number | null {
   return n;
 }
 
+const MAX_PHOTOS = 8;
+
+/** Best-effort client key from proxy headers for rate limiting. */
+async function clientKey(): Promise<string> {
+  const h = await headers();
+  const fwd = h.get("x-forwarded-for");
+  return (fwd?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown").slice(0, 100);
+}
+
+/** Upload the submitted photographs to the public bucket. Invalid/oversized
+ *  files throw from the storage layer; we surface a friendly message. */
+async function readPhotos(formData: FormData): Promise<NewMedia[]> {
+  const files = formData
+    .getAll("photos")
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .slice(0, MAX_PHOTOS);
+  const uploaded: NewMedia[] = [];
+  for (const file of files) {
+    uploaded.push(await uploadPublicImage(file, "consignment"));
+  }
+  return uploaded;
+}
+
 /**
  * PUBLIC consignment inquiry — anyone may submit, so there is deliberately NO
  * requireUser here. Everything is validated and length-capped server-side; the
@@ -40,6 +71,21 @@ export async function submitConsignmentRequestAction(
   _prev: ConsignmentActionResult | null,
   formData: FormData
 ): Promise<ConsignmentActionResult> {
+  // Honeypot: a real person never fills the hidden "company" field. Pretend it
+  // worked (don't tip off the bot) but persist nothing.
+  if (String(formData.get("company") ?? "").trim() !== "") {
+    return { ok: true };
+  }
+
+  // Best-effort throttle on this unauthenticated endpoint.
+  const limit = rateLimit(`consign:${await clientKey()}`, 5, 10 * 60 * 1000);
+  if (!limit.ok) {
+    return {
+      ok: false,
+      error: "You've sent several submissions just now. Please try again shortly.",
+    };
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -78,6 +124,19 @@ export async function submitConsignmentRequestAction(
   // sellerEstimate: non-negative integer or null.
   const sellerEstimate = parseEstimate(estimateRaw);
 
+  let photos: NewMedia[];
+  try {
+    photos = await readPhotos(formData);
+  } catch (err) {
+    const kind = err instanceof Error ? err.name : "unknown error";
+    console.error(`consignment photo upload failed (${kind})`);
+    return {
+      ok: false,
+      error:
+        "One of your photos couldn't be uploaded — please use JPEG, PNG or WebP under 10MB.",
+    };
+  }
+
   try {
     await createConsignmentRequest(prisma, {
       name,
@@ -87,12 +146,24 @@ export async function submitConsignmentRequestAction(
       itemTitle,
       itemDescription,
       sellerEstimate,
+      photos,
     });
   } catch (err) {
     // Log only the error TYPE — never the submitted contact PII.
     const kind = err instanceof Error ? err.name : "unknown error";
     console.error(`consignment request submit failed (${kind})`);
     return { ok: false, error: "Submission failed. Please try again." };
+  }
+
+  // Notifications are best-effort and must never fail the submission — the
+  // seller has already been told (and staff can always poll the queue).
+  try {
+    await Promise.allSettled([
+      notifyConsignmentReceived(email, name, itemTitle),
+      notifyStaffNewConsignment(name, itemTitle, photos.length),
+    ]);
+  } catch {
+    /* ignore */
   }
 
   return { ok: true };

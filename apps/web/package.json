@@ -9,7 +9,8 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:bootstrap": "tsx scripts/bootstrap-users.ts"
+    "db:bootstrap": "tsx scripts/bootstrap-users.ts",
+    "storage:setup": "tsx scripts/ensure-buckets.ts"
   },
   "dependencies": {
     "@auction/core": "workspace:*",

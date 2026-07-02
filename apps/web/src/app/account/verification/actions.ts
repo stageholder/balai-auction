@@ -1,8 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma, submitConsignorKyc } from "@/lib/db";
+import type { NewMedia } from "@auction/db";
+import {
+  prisma,
+  submitConsignorKyc,
+  countConsignorKycDocuments,
+} from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { uploadPrivateDoc } from "@/lib/storage";
 
 /** Typed result surfaced back to the verification form. */
 export type KycActionResult =
@@ -10,6 +16,20 @@ export type KycActionResult =
   | { ok: false; error: string };
 
 const ID_TYPES = ["passport", "national_id", "driver_license"] as const;
+const MAX_DOCS = 4;
+
+/** Upload the submitted identity documents to the PRIVATE bucket. */
+async function readDocuments(formData: FormData): Promise<NewMedia[]> {
+  const files = formData
+    .getAll("documents")
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .slice(0, MAX_DOCS);
+  const uploaded: NewMedia[] = [];
+  for (const file of files) {
+    uploaded.push(await uploadPrivateDoc(file));
+  }
+  return uploaded;
+}
 
 /**
  * Consignor submits THEIR OWN identity + payout details.
@@ -47,6 +67,31 @@ export async function submitConsignorKycAction(
     return { ok: false, error: "Please choose a valid identity document type." };
   }
 
+  let documents: NewMedia[];
+  try {
+    documents = await readDocuments(formData);
+  } catch (err) {
+    const kind = err instanceof Error ? err.name : "unknown error";
+    console.error(`consignor KYC document upload failed for ${user.id} (${kind})`);
+    return {
+      ok: false,
+      error:
+        "One of your documents couldn't be uploaded — please use JPEG, PNG, WebP or PDF under 10MB.",
+    };
+  }
+
+  // Require a document on the FIRST submission; a later text-only resubmission
+  // may keep the documents already on file.
+  if (documents.length === 0) {
+    const onFile = await countConsignorKycDocuments(prisma, user.id);
+    if (onFile === 0) {
+      return {
+        ok: false,
+        error: "Please upload a photo or scan of your identity document.",
+      };
+    }
+  }
+
   try {
     await submitConsignorKyc(prisma, user.id, {
       legalName,
@@ -55,6 +100,7 @@ export async function submitConsignorKycAction(
       bankCode,
       accountNumber,
       accountHolder,
+      documents,
     });
   } catch (err) {
     // Surface a typed error instead of an unhandled server-action crash (e.g. a

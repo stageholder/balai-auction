@@ -138,6 +138,41 @@ export default async function StaffConsignmentRequestsPage() {
                         <p className="mt-1 text-sm text-muted-foreground">
                           {r.itemDescription}
                         </p>
+
+                        {r.photos.length > 0 ? (
+                          <div className="mt-4">
+                            <p className="mb-2 text-[0.55rem] uppercase tracking-[0.16em] text-muted-foreground">
+                              {r.photos.length} photograph
+                              {r.photos.length === 1 ? "" : "s"}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {r.photos.map((p) =>
+                                p.url ? (
+                                  <a
+                                    key={p.id}
+                                    href={p.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="relative block h-20 w-20 overflow-hidden border border-line bg-line/30 transition-opacity hover:opacity-80"
+                                    title="Open full size"
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={p.url}
+                                      alt=""
+                                      className="h-full w-full object-cover"
+                                    />
+                                  </a>
+                                ) : null
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mt-4 text-[0.55rem] uppercase tracking-[0.16em] text-muted-foreground/70">
+                            No photographs submitted
+                          </p>
+                        )}
+
                         <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
                           <Field label="Asking estimate" value={estimate} />
                           <Field

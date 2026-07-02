@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { FilePicker } from "@/components/media/file-picker";
 import { submitConsignorKycAction, type KycActionResult } from "./actions";
 
 const FIELD =
@@ -40,9 +41,11 @@ function SubmitButton({ rejected }: { rejected: boolean }) {
 export function VerificationForm({
   defaults,
   rejected,
+  hasDocuments,
 }: {
   defaults: VerificationDefaults;
   rejected: boolean;
+  hasDocuments: boolean;
 }) {
   const [result, formAction] = useActionState<KycActionResult | null, FormData>(
     submitConsignorKycAction,
@@ -111,6 +114,22 @@ export function VerificationForm({
             />
           </div>
         </div>
+
+        <FilePicker
+          name="documents"
+          label="Identity documents"
+          accept="image/png,image/jpeg,image/webp,application/pdf"
+          maxFiles={4}
+          hint={
+            hasDocuments
+              ? "Documents are on file. Upload again only to replace them. Clear photo or scan; JPEG, PNG, WebP or PDF, 10MB each."
+              : "A clear photo or scan of your document (both sides for an ID card), plus proof of address if you have it. JPEG, PNG, WebP or PDF, 10MB each."
+          }
+        />
+        <p className="text-xs text-muted-foreground">
+          Your documents are stored privately and shown only to our compliance
+          team — never publicly.
+        </p>
       </fieldset>
 
       <div className="border-t border-line" />

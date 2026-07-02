@@ -1,6 +1,14 @@
 import type { PrismaClient } from "@prisma/client";
-import { userRowToRecord } from "../mappers";
-import type { NewUser, UpsertUser, UserProfileUpdate, UserRecord, UserRole } from "../types";
+import { mediaAssetRowToRecord, userRowToRecord } from "../mappers";
+import type {
+  ConsignorReviewRecord,
+  NewMedia,
+  NewUser,
+  UpsertUser,
+  UserProfileUpdate,
+  UserRecord,
+  UserRole,
+} from "../types";
 
 export async function createUser(
   db: PrismaClient,
@@ -106,8 +114,10 @@ export async function submitConsignorKyc(
     bankCode: string;
     accountNumber: string;
     accountHolder: string;
+    documents?: NewMedia[];
   }
 ): Promise<UserRecord> {
+  const documents = input.documents ?? [];
   const row = await db.user.update({
     where: { id: userId },
     data: {
@@ -122,6 +132,26 @@ export async function submitConsignorKyc(
       consignorKycStatus: "pending",
       consignorAmlStatus: "pending",
       consignorAmlNote: null,
+      // Replace the document set only when new files were uploaded, so a
+      // text-only resubmission keeps the identity docs already on file.
+      ...(documents.length > 0
+        ? {
+            kycDocuments: {
+              deleteMany: {},
+              create: documents.map((m, i) => ({
+                kind: "kyc_document" as const,
+                bucket: m.bucket,
+                path: m.path,
+                url: m.url ?? null,
+                contentType: m.contentType,
+                sizeBytes: m.sizeBytes,
+                originalName: m.originalName ?? null,
+                caption: m.caption ?? null,
+                sortOrder: i,
+              })),
+            },
+          }
+        : {}),
     },
   });
   return userRowToRecord(row);
@@ -154,10 +184,25 @@ export async function setConsignorAml(
   return userRowToRecord(row);
 }
 
-export async function listConsignorsForReview(db: PrismaClient): Promise<UserRecord[]> {
+export async function countConsignorKycDocuments(
+  db: PrismaClient,
+  userId: string
+): Promise<number> {
+  return db.mediaAsset.count({
+    where: { kycUserId: userId, kind: "kyc_document" },
+  });
+}
+
+export async function listConsignorsForReview(
+  db: PrismaClient
+): Promise<ConsignorReviewRecord[]> {
   const rows = await db.user.findMany({
     where: { role: "consignor" },
     orderBy: { email: "asc" },
+    include: { kycDocuments: { orderBy: { sortOrder: "asc" } } },
   });
-  return rows.map(userRowToRecord);
+  return rows.map((row) => ({
+    ...userRowToRecord(row),
+    kycDocuments: row.kycDocuments.map(mediaAssetRowToRecord),
+  }));
 }

@@ -8,10 +8,15 @@ import type {
 
 /** Store a public "Sell with us" submission. Input is validated + length-capped
  *  at the action boundary; the repo just persists. */
+const PHOTOS_INCLUDE = {
+  photos: { orderBy: { sortOrder: "asc" as const } },
+};
+
 export async function createConsignmentRequest(
   db: PrismaClient,
   input: NewConsignmentRequest
 ): Promise<ConsignmentRequestRecord> {
+  const photos = input.photos ?? [];
   const row = await db.consignmentRequest.create({
     data: {
       name: input.name,
@@ -22,7 +27,24 @@ export async function createConsignmentRequest(
       itemDescription: input.itemDescription,
       sellerEstimate:
         input.sellerEstimate != null ? toDbMoney(input.sellerEstimate) : null,
+      photos:
+        photos.length > 0
+          ? {
+              create: photos.map((m, i) => ({
+                kind: "consignment_photo" as const,
+                bucket: m.bucket,
+                path: m.path,
+                url: m.url ?? null,
+                contentType: m.contentType,
+                sizeBytes: m.sizeBytes,
+                originalName: m.originalName ?? null,
+                caption: m.caption ?? null,
+                sortOrder: i,
+              })),
+            }
+          : undefined,
     },
+    include: PHOTOS_INCLUDE,
   });
   return consignmentRequestRowToRecord(row);
 }
@@ -32,6 +54,7 @@ export async function listConsignmentRequests(
 ): Promise<ConsignmentRequestRecord[]> {
   const rows = await db.consignmentRequest.findMany({
     orderBy: { createdAt: "desc" },
+    include: PHOTOS_INCLUDE,
   });
   return rows.map(consignmentRequestRowToRecord);
 }

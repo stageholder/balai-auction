@@ -42,19 +42,26 @@ export async function searchLots(
         { description: { contains: term, mode: "insensitive" } },
       ],
     },
-    include: { sale: { select: { title: true } } },
+    include: {
+      sale: { select: { title: true } },
+      media: {
+        where: { url: { not: null } },
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { url: true },
+      },
+    },
     orderBy: [{ saleId: "asc" }, { lotNumber: "asc" }],
     take: limit,
   });
   return rows.map((l) => {
-    const images = Array.isArray(l.images) ? (l.images as string[]) : [];
     return {
       id: l.id,
       lotNumber: l.lotNumber,
       title: l.title,
       saleId: l.saleId,
       saleTitle: l.sale.title,
-      image: images[0] ?? null,
+      image: l.media[0]?.url ?? null,
       status: l.status,
       estimateLow: toMoney(l.estimateLow),
       estimateHigh: toMoney(l.estimateHigh),

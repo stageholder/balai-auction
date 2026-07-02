@@ -3,7 +3,8 @@
   "private": true,
   "engines": { "node": ">=20" },
   "scripts": {
-    "setup": "docker compose up -d postgres && supabase start && pnpm db:migrate && pnpm db:seed && pnpm seed:admin",
+    "setup": "docker compose up -d postgres && supabase start && pnpm db:migrate && pnpm storage:setup && pnpm db:seed && pnpm seed:admin",
+    "storage:setup": "pnpm --filter @auction/web storage:setup",
     "dev": "pnpm --filter @auction/web dev",
     "live": "pnpm --filter @auction/live-runner dev",
     "build": "pnpm --filter @auction/web build",

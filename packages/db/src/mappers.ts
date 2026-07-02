@@ -5,11 +5,52 @@ import type {
   InvoiceRecord,
   LedgerEntryRecord,
   LotRecord,
+  MediaAssetRecord,
   PayoutRecord,
   RegistrationRecord,
   SaleRecord,
   UserRecord,
 } from "./types";
+
+/** The MediaAsset columns any owning-record mapper needs. */
+export interface MediaAssetRow {
+  id: string;
+  kind: MediaAssetRecord["kind"];
+  bucket: string;
+  path: string;
+  url: string | null;
+  contentType: string;
+  sizeBytes: number;
+  originalName: string | null;
+  caption: string | null;
+  sortOrder: number;
+  createdAt: Date;
+}
+
+export function mediaAssetRowToRecord(row: MediaAssetRow): MediaAssetRecord {
+  return {
+    id: row.id,
+    kind: row.kind,
+    bucket: row.bucket,
+    path: row.path,
+    url: row.url,
+    contentType: row.contentType,
+    sizeBytes: row.sizeBytes,
+    originalName: row.originalName,
+    caption: row.caption,
+    sortOrder: row.sortOrder,
+    createdAt: row.createdAt,
+  };
+}
+
+/** Ordered list of public URLs from a media relation (nulls/private dropped). */
+export function mediaUrls(media: MediaAssetRow[] | undefined): string[] {
+  if (!media) return [];
+  return [...media]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((m) => m.url)
+    .filter((u): u is string => typeof u === "string" && u.length > 0);
+}
 
 export function consignmentRequestRowToRecord(row: {
   id: string;
@@ -22,6 +63,7 @@ export function consignmentRequestRowToRecord(row: {
   sellerEstimate: bigint | null;
   status: ConsignmentRequestRecord["status"];
   createdAt: Date;
+  photos?: MediaAssetRow[];
 }): ConsignmentRequestRecord {
   return {
     id: row.id,
@@ -34,6 +76,7 @@ export function consignmentRequestRowToRecord(row: {
     sellerEstimate: row.sellerEstimate === null ? null : toMoney(row.sellerEstimate),
     status: row.status,
     createdAt: row.createdAt,
+    photos: (row.photos ?? []).map(mediaAssetRowToRecord),
   };
 }
 
@@ -180,7 +223,7 @@ export function lotRowToRecord(row: {
   lotNumber: number;
   title: string;
   description: string | null;
-  images: unknown;
+  media?: MediaAssetRow[];
   estimateLow: bigint;
   estimateHigh: bigint;
   startingPrice: bigint;
@@ -196,7 +239,9 @@ export function lotRowToRecord(row: {
     lotNumber: row.lotNumber,
     title: row.title,
     description: row.description,
-    images: Array.isArray(row.images) ? (row.images as string[]) : [],
+    // Read contract preserved: `images` is the ordered list of public URLs,
+    // now sourced from the MediaAsset relation. Callers MUST include `media`.
+    images: mediaUrls(row.media),
     estimateLow: toMoney(row.estimateLow),
     estimateHigh: toMoney(row.estimateHigh),
     startingPrice: toMoney(row.startingPrice),

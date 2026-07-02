@@ -90,6 +90,18 @@ async function makeSale(opts: {
   });
 }
 
+/** A MediaAsset descriptor for a local /public/seed image (not Supabase). */
+function localSeedImage(url: string) {
+  return {
+    bucket: "seed",
+    path: url,
+    url,
+    contentType: "image/jpeg",
+    sizeBytes: 0,
+    originalName: null,
+  };
+}
+
 async function addLot(
   saleId: string,
   n: number,
@@ -104,7 +116,7 @@ async function addLot(
     description:
       "Provenance and a full condition report are available on request. " +
       "Estimates do not include the buyer's premium.",
-    images: [`/seed/${spec.image}.jpg`],
+    media: [localSeedImage(`/seed/${spec.image}.jpg`)],
     estimateLow: spec.low,
     estimateHigh: spec.high,
     startingPrice: Math.round(spec.low * 0.5),
@@ -350,23 +362,31 @@ async function main(): Promise<void> {
     const lots = await prisma.lot.findMany({
       where: { saleId: s.id },
       orderBy: { lotNumber: "asc" },
-      select: { id: true, images: true },
+      select: {
+        id: true,
+        media: { orderBy: { sortOrder: "asc" }, select: { url: true } },
+      },
     });
     const pool = lots
-      .map((l) => (Array.isArray(l.images) ? (l.images as string[])[0] : null))
+      .map((l) => l.media[0]?.url ?? null)
       .filter((x): x is string => !!x);
     if (pool.length === 0) continue;
     for (let i = 0; i < lots.length; i++) {
-      const gallery = [
-        pool[i],
-        pool[(i + 1) % pool.length],
-        pool[(i + 2) % pool.length],
-      ]
+      const gallery = [pool[(i + 1) % pool.length], pool[(i + 2) % pool.length]]
         .filter((v): v is string => typeof v === "string")
+        .filter((v) => v !== pool[i]) // don't duplicate the lot's own lead image
         .filter((v, idx, a) => a.indexOf(v) === idx);
       const lotId = lots[i]?.id;
-      if (lotId) {
-        await prisma.lot.update({ where: { id: lotId }, data: { images: gallery } });
+      if (lotId && gallery.length > 0) {
+        // The lead image is already sortOrder 0; append the siblings after it.
+        await prisma.mediaAsset.createMany({
+          data: gallery.map((url, idx) => ({
+            lotId,
+            kind: "lot_image" as const,
+            ...localSeedImage(url),
+            sortOrder: idx + 1,
+          })),
+        });
       }
     }
   }

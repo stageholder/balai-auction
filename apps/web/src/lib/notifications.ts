@@ -88,6 +88,61 @@ export function buildReceiptEmail(
   };
 }
 
+export function buildConsignmentAckEmail(
+  name: string,
+  itemTitle: string
+): { subject: string; html: string } {
+  const first = name.trim().split(/\s+/)[0] || "there";
+  return {
+    subject: `We've received your submission — ${itemTitle}`,
+    html: wrap(
+      "Thank you — it's with our specialists",
+      `<p>Dear ${esc(first)},</p>
+       <p>We've received the details and photographs of <strong>${esc(itemTitle)}</strong>. A specialist from the relevant department will review it and write back with our thoughts and a likely estimate.</p>
+       <p>There's no obligation, and nothing to pay to enquire.</p>`
+    ),
+  };
+}
+
+export function buildConsignmentAlertEmail(
+  name: string,
+  itemTitle: string,
+  photoCount: number
+): { subject: string; html: string } {
+  const photos =
+    photoCount > 0
+      ? `${photoCount} photograph${photoCount === 1 ? "" : "s"} attached`
+      : "no photographs";
+  return {
+    subject: `New consignment inquiry — ${itemTitle}`,
+    html: wrap(
+      "New consignment inquiry",
+      `<p><strong>${esc(name)}</strong> submitted <strong>${esc(itemTitle)}</strong> (${esc(photos)}).</p>
+       <p><a href="${appUrl()}/staff/consignment-requests">Review it in the consignment queue →</a></p>`
+    ),
+  };
+}
+
+/** Acknowledge a public "Sell with us" submission to the seller. */
+export async function notifyConsignmentReceived(
+  to: string,
+  name: string,
+  itemTitle: string
+): Promise<void> {
+  await sendEmail({ to, ...buildConsignmentAckEmail(name, itemTitle) });
+}
+
+/** Alert the consignments desk that a new inquiry landed. No-op if unset. */
+export async function notifyStaffNewConsignment(
+  name: string,
+  itemTitle: string,
+  photoCount: number
+): Promise<void> {
+  const to = process.env.CONSIGNMENT_ALERT_EMAIL ?? process.env.RESEND_FROM;
+  if (!to) return;
+  await sendEmail({ to, ...buildConsignmentAlertEmail(name, itemTitle, photoCount) });
+}
+
 export async function notifyRegistrationDecision(
   to: string,
   saleTitle: string,

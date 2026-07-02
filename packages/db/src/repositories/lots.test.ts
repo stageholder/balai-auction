@@ -11,6 +11,9 @@ import {
   updateLotClosesAt,
   updateLot,
   openQueuedLot,
+  addLotMedia,
+  removeLotMedia,
+  listLotMedia,
 } from "./lots";
 import { createUser } from "./users";
 
@@ -168,7 +171,7 @@ describe("createLot status", () => {
 });
 
 describe("updateLot", () => {
-  it("updates fields incl. money + images, leaving others unchanged", async () => {
+  it("updates fields incl. money, leaving others unchanged", async () => {
     const sale = await makeSale();
     const lot = await createLot(
       db,
@@ -177,11 +180,9 @@ describe("updateLot", () => {
     const updated = await updateLot(db, lot.id, {
       title: "Updated Title",
       reserve: 2_000_000,
-      images: ["https://example.com/a.jpg"],
     });
     expect(updated.title).toBe("Updated Title");
     expect(updated.reserve).toBe(2_000_000);
-    expect(updated.images).toEqual(["https://example.com/a.jpg"]);
     expect(updated.startingPrice).toBe(lot.startingPrice);
   });
 
@@ -228,6 +229,75 @@ describe("lot consignor", () => {
 
     const cleared = await updateLot(db, lot.id, { consignorId: null });
     expect(cleared.consignorId).toBeNull();
+  });
+});
+
+describe("lot media", () => {
+  function sampleMedia(name: string) {
+    return {
+      bucket: "lots",
+      path: `lot/${name}`,
+      url: `https://cdn.example.com/${name}`,
+      contentType: "image/jpeg",
+      sizeBytes: 1234,
+    };
+  }
+
+  it("derives images (in order) from media created with the lot", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(db, {
+      ...sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z")),
+      media: [sampleMedia("a.jpg"), sampleMedia("b.jpg")],
+    });
+    expect(lot.images).toEqual([
+      "https://cdn.example.com/a.jpg",
+      "https://cdn.example.com/b.jpg",
+    ]);
+    const fetched = await getLot(db, lot.id);
+    expect(fetched?.images).toEqual(lot.images);
+  });
+
+  it("appends, lists and removes lot media", async () => {
+    const sale = await makeSale();
+    const lot = await createLot(db, {
+      ...sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z")),
+      media: [sampleMedia("a.jpg")],
+    });
+    await addLotMedia(db, lot.id, [sampleMedia("b.jpg"), sampleMedia("c.jpg")]);
+
+    const media = await listLotMedia(db, lot.id);
+    expect(media.map((m) => m.url)).toEqual([
+      "https://cdn.example.com/a.jpg",
+      "https://cdn.example.com/b.jpg",
+      "https://cdn.example.com/c.jpg",
+    ]);
+
+    const removed = await removeLotMedia(db, lot.id, media[1]!.id);
+    expect(removed).toEqual({ bucket: "lots", path: "lot/b.jpg" });
+
+    const after = await getLot(db, lot.id);
+    expect(after?.images).toEqual([
+      "https://cdn.example.com/a.jpg",
+      "https://cdn.example.com/c.jpg",
+    ]);
+  });
+
+  it("does not remove media belonging to another lot", async () => {
+    const sale = await makeSale();
+    const a = await createLot(db, {
+      ...sampleLot(sale.id, 1, new Date("2026-07-08T00:00:00.000Z")),
+      media: [sampleMedia("a.jpg")],
+    });
+    const b = await createLot(db, {
+      ...sampleLot(sale.id, 2, new Date("2026-07-08T00:00:00.000Z")),
+      media: [sampleMedia("b.jpg")],
+    });
+    const bMedia = await listLotMedia(db, b.id);
+    expect(await removeLotMedia(db, a.id, bMedia[0]!.id)).toBeNull();
+    // b's media is untouched
+    expect((await getLot(db, b.id))?.images).toEqual([
+      "https://cdn.example.com/b.jpg",
+    ]);
   });
 });
 

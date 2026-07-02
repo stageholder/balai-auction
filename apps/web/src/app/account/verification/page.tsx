@@ -1,5 +1,5 @@
 import type { UserRecord } from "@auction/db";
-import { prisma, getUser } from "@/lib/db";
+import { prisma, getUser, countConsignorKycDocuments } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { VerificationForm } from "./verification-form";
 
@@ -58,6 +58,7 @@ export default async function VerificationPage() {
   const aml = amlStatus(user.consignorAmlStatus);
   const bank = bankOnFile(user);
   const rejected = user.consignorKycStatus === "rejected";
+  const hasDocuments = (await countConsignorKycDocuments(prisma, user.id)) > 0;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -84,6 +85,7 @@ export default async function VerificationPage() {
 
       <VerificationForm
         rejected={rejected}
+        hasDocuments={hasDocuments}
         defaults={{
           legalName: user.consignorLegalName ?? user.legalName ?? "",
           idType: user.consignorIdType ?? "",

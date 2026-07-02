@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import type { LotRecord } from "@auction/db";
-import { ImagePlus } from "lucide-react";
+import type { LotRecord, MediaAssetRecord } from "@auction/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FilePicker } from "@/components/media/file-picker";
+import {
+  LotImageManager,
+  type RemoveLotImageResult,
+} from "./lot-image-manager";
 
 const NATIVE_SELECT =
   "flex h-11 w-full appearance-none rounded-sm border border-input bg-card px-3 py-2 text-sm text-ink transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
@@ -62,13 +64,17 @@ export function LotForm({
   lot,
   action,
   consignors,
+  media,
+  removeImageAction,
 }: {
   lot?: LotRecord;
   action: (formData: FormData) => void;
   consignors: { id: string; email: string }[];
+  /** Existing catalogue images (edit mode only). */
+  media?: MediaAssetRecord[];
+  /** Bound server action to delete one existing image (edit mode only). */
+  removeImageAction?: (mediaId: string) => Promise<RemoveLotImageResult>;
 }) {
-  const [preview, setPreview] = useState<string | null>(lot?.images[0] ?? null);
-
   return (
     <form action={action} className="space-y-6">
       {/* Identity */}
@@ -194,15 +200,13 @@ export function LotForm({
         </CardContent>
       </Card>
 
-      {/* Consignment & media */}
+      {/* Consignment */}
       <Card>
         <CardHeader>
-          <CardTitle>Consignment &amp; media</CardTitle>
-          <CardDescription>
-            Who consigned the lot, and its lead catalogue image.
-          </CardDescription>
+          <CardTitle>Consignment</CardTitle>
+          <CardDescription>Who consigned the lot.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent>
           <Field label="Consignor" htmlFor="consignorId">
             <div className="relative">
               <select
@@ -221,40 +225,31 @@ export function LotForm({
               <SelectChevron />
             </div>
           </Field>
+        </CardContent>
+      </Card>
 
-          <Field
-            label="Image"
-            htmlFor="image"
-            hint="PNG, JPEG or WebP. Replaces the lead image."
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-sm border border-line bg-line/40">
-                {preview ? (
-                  <Image
-                    src={preview}
-                    alt=""
-                    fill
-                    sizes="56px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <ImagePlus className="absolute inset-0 m-auto h-5 w-5 text-muted-foreground" />
-                )}
-              </div>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="cursor-pointer py-2.5 file:mr-3 file:cursor-pointer file:rounded-sm file:border file:border-line file:bg-paper file:px-3 file:py-1 file:text-xs file:uppercase file:tracking-[0.12em] file:text-ink"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setPreview(URL.createObjectURL(file));
-                }}
-              />
-            </div>
-          </Field>
+      {/* Catalogue images */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Catalogue images</CardTitle>
+          <CardDescription>
+            The first image is the lead shown to bidders. PNG, JPEG or WebP.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {lot && removeImageAction ? (
+            <LotImageManager
+              initial={media ?? []}
+              removeAction={removeImageAction}
+            />
+          ) : null}
+          <FilePicker
+            name="images"
+            label={lot ? "Add images" : "Images"}
+            accept="image/png,image/jpeg,image/webp"
+            maxFiles={8}
+            hint="Up to 8 images, 10MB each."
+          />
         </CardContent>
       </Card>
 

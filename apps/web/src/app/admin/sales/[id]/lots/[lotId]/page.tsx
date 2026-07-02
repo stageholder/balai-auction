@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { prisma, getLot, listConsignors, listBidsForLot } from "@/lib/db";
+import {
+  prisma,
+  getLot,
+  listConsignors,
+  listBidsForLot,
+  listLotMedia,
+} from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
 import { BidActivity } from "@/components/bid-activity";
 import { LotForm } from "../lot-form";
-import { updateLotAction } from "../actions";
+import { updateLotAction, removeLotImageAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +26,7 @@ export default async function EditLotPage({
   if (!lot || lot.saleId !== id) notFound();
   const consignors = await listConsignors(prisma);
   const bids = await listBidsForLot(prisma, lotId);
+  const media = await listLotMedia(prisma, lotId);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -51,7 +58,9 @@ export default async function EditLotPage({
       <LotForm
         lot={lot}
         consignors={consignors}
+        media={media}
         action={updateLotAction.bind(null, id, lot.id)}
+        removeImageAction={removeLotImageAction.bind(null, id, lot.id)}
       />
     </div>
   );

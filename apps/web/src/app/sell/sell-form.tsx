@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FilePicker } from "@/components/media/file-picker";
 import {
   submitConsignmentRequestAction,
   type ConsignmentActionResult,
@@ -187,7 +188,28 @@ export function SellForm() {
             className="tnum"
           />
         </div>
+
+        <FilePicker
+          name="photos"
+          label="Photographs"
+          accept="image/png,image/jpeg,image/webp"
+          maxFiles={8}
+          hint="Up to 8 images — front, back, signature, marks and any damage. JPEG, PNG or WebP, 10MB each."
+        />
       </fieldset>
+
+      {/* Honeypot: hidden from people, tempting to bots. A filled value is
+          silently discarded server-side. Not exposed to assistive tech. */}
+      <div aria-hidden className="hidden">
+        <label htmlFor="company">Company</label>
+        <input
+          id="company"
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
 
       {/* ── Feedback + action ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -17,6 +17,33 @@ export type LedgerKind =
   | "refund";
 export type PayoutStatus = "pending" | "released" | "paid" | "failed";
 export type InvoiceStatus = "pending" | "paid" | "refunded";
+export type MediaKind = "lot_image" | "consignment_photo" | "kyc_document";
+
+export interface MediaAssetRecord {
+  id: string;
+  kind: MediaKind;
+  bucket: string;
+  path: string;
+  /** Public URL for public-bucket assets; null for private (KYC) documents. */
+  url: string | null;
+  contentType: string;
+  sizeBytes: number;
+  originalName: string | null;
+  caption: string | null;
+  sortOrder: number;
+  createdAt: Date;
+}
+
+/** A not-yet-persisted asset, produced by the storage layer after upload. */
+export interface NewMedia {
+  bucket: string;
+  path: string;
+  url?: string | null;
+  contentType: string;
+  sizeBytes: number;
+  originalName?: string | null;
+  caption?: string | null;
+}
 
 export interface UserRecord {
   id: string;
@@ -119,7 +146,7 @@ export interface NewLot {
   lotNumber: number;
   title: string;
   description?: string;
-  images?: string[];
+  media?: NewMedia[];
   estimateLow: number;
   estimateHigh: number;
   startingPrice: number;
@@ -218,7 +245,6 @@ export interface UpdateLot {
   lotNumber?: number;
   title?: string;
   description?: string | null;
-  images?: string[];
   estimateLow?: number;
   estimateHigh?: number;
   startingPrice?: number;
@@ -286,6 +312,7 @@ export interface ConsignmentRequestRecord {
   sellerEstimate: number | null;
   status: ConsignmentRequestStatus;
   createdAt: Date;
+  photos: MediaAssetRecord[];
 }
 
 export interface NewConsignmentRequest {
@@ -296,6 +323,13 @@ export interface NewConsignmentRequest {
   itemTitle: string;
   itemDescription: string;
   sellerEstimate?: number | null;
+  photos?: NewMedia[];
+}
+
+/** A consignor row for the staff KYC review queue, with their uploaded
+ *  identity documents (private assets — resolve via signed URLs at render). */
+export interface ConsignorReviewRecord extends UserRecord {
+  kycDocuments: MediaAssetRecord[];
 }
 
 export interface BidHistoryItem {

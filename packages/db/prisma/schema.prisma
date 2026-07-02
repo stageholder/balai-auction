@@ -57,6 +57,12 @@ enum AmlStatus {
   flagged
 }
 
+enum MediaKind {
+  lot_image // auction catalogue photo (public bucket)
+  consignment_photo // seller-submitted artwork photo (public bucket)
+  kyc_document // identity / proof document (PRIVATE bucket, signed-URL access only)
+}
+
 enum LedgerParty {
   buyer
   seller
@@ -108,6 +114,7 @@ model User {
   consignorKycStatus   KycStatus  @default(pending)
   consignorAmlStatus   AmlStatus  @default(pending)
   consignorAmlNote     String?
+  kycDocuments         MediaAsset[]   @relation("UserKycDocs")
 }
 
 model Sale {
@@ -139,7 +146,7 @@ model Lot {
   lotNumber     Int
   title         String
   description   String?
-  images        Json          @default("[]")
+  media         MediaAsset[]
   estimateLow   BigInt
   estimateHigh  BigInt
   startingPrice BigInt
@@ -270,6 +277,36 @@ model ConsignmentRequest {
   sellerEstimate  BigInt?
   status          ConsignmentRequestStatus @default(pending)
   createdAt       DateTime                 @default(now())
+  photos          MediaAsset[]
 
   @@index([status])
+}
+
+/// Uploaded binary asset (image or document) stored in Supabase Storage.
+/// Exactly one owning FK is set per row (lot / consignment request / KYC user).
+/// `url` holds the public URL for public-bucket assets; it is null for private
+/// (KYC) documents, which are reached only via short-lived signed URLs.
+model MediaAsset {
+  id           String    @id @default(uuid())
+  kind         MediaKind
+  bucket       String // Storage bucket name ("lots" | "kyc-docs")
+  path         String // object key within the bucket
+  url          String? // public URL (public buckets only); null for private docs
+  contentType  String
+  sizeBytes    Int
+  originalName String?
+  caption      String? // catalogue caption, or the KYC document label
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+
+  lotId                String?
+  lot                  Lot?                @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  consignmentRequestId String?
+  consignmentRequest   ConsignmentRequest? @relation(fields: [consignmentRequestId], references: [id], onDelete: Cascade)
+  kycUserId            String?
+  kycUser              User?               @relation("UserKycDocs", fields: [kycUserId], references: [id], onDelete: Cascade)
+
+  @@index([lotId])
+  @@index([consignmentRequestId])
+  @@index([kycUserId])
 }

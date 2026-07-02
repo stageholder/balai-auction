@@ -1,8 +1,9 @@
-import { Check } from "lucide-react";
-import type { KycStatus, AmlStatus } from "@auction/db";
+import { Check, FileText } from "lucide-react";
+import type { KycStatus, AmlStatus, MediaAssetRecord } from "@auction/db";
 import { prisma, listConsignorsForReview } from "@/lib/db";
 import { screenName } from "@auction/core";
 import { requireStaff } from "@/lib/auth";
+import { createSignedUrl } from "@/lib/storage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import {
@@ -54,9 +55,81 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Identity documents live in a PRIVATE bucket — mint a short-lived signed URL
+ *  per document so staff can view them without exposing a public link. */
+async function signDocuments(
+  docs: MediaAssetRecord[]
+): Promise<Map<string, string | null>> {
+  const entries = await Promise.all(
+    docs.map(
+      async (d) =>
+        [d.id, await createSignedUrl(d.bucket, d.path, 600)] as const
+    )
+  );
+  return new Map(entries);
+}
+
+function DocumentViewer({
+  docs,
+  urls,
+}: {
+  docs: MediaAssetRecord[];
+  urls: Map<string, string | null>;
+}) {
+  return (
+    <div>
+      <p className="mb-2 text-[0.55rem] uppercase tracking-[0.16em] text-muted-foreground">
+        Identity documents ({docs.length})
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {docs.map((d) => {
+          const url = urls.get(d.id) ?? null;
+          const isImage = d.contentType.startsWith("image/");
+          if (!url) {
+            return (
+              <span
+                key={d.id}
+                className="flex h-20 w-20 items-center justify-center border border-line bg-line/30 text-[0.55rem] text-muted-foreground"
+              >
+                Unavailable
+              </span>
+            );
+          }
+          return (
+            <a
+              key={d.id}
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              title={d.originalName ?? "Open document"}
+              className="relative flex h-20 w-20 items-center justify-center overflow-hidden border border-line bg-line/30 transition-opacity hover:opacity-80"
+            >
+              {isImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex flex-col items-center gap-1 p-1 text-center">
+                  <FileText className="h-6 w-6 text-muted-foreground" aria-hidden />
+                  <span className="text-[0.55rem] uppercase tracking-[0.1em] text-muted-foreground">
+                    PDF
+                  </span>
+                </span>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default async function StaffConsignorKycPage() {
   await requireStaff();
   const consignors = await listConsignorsForReview(prisma);
+  // Pre-sign every document once so each row can render its viewer.
+  const signedUrls = await signDocuments(
+    consignors.flatMap((c) => c.kycDocuments)
+  );
 
   const submitted = consignors.filter((c) => c.consignorLegalName);
   const flaggedCount = submitted.filter(
@@ -172,6 +245,19 @@ export default async function StaffConsignorKycPage() {
                               />
                               <Field label="Payout account" value={payoutDest} />
                             </dl>
+
+                            {/* Uploaded identity documents (private, signed) */}
+                            {c.kycDocuments.length > 0 ? (
+                              <DocumentViewer
+                                docs={c.kycDocuments}
+                                urls={signedUrls}
+                              />
+                            ) : (
+                              <p className="border-l-2 border-primary/40 bg-primary/[0.03] px-3 py-2 text-xs text-muted-foreground">
+                                No identity documents uploaded — request a photo
+                                or scan before approving.
+                              </p>
+                            )}
 
                             {/* Sanctions screen — accent callout when matched */}
                             {matches.length > 0 ? (

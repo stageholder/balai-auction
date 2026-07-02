@@ -129,6 +129,13 @@ public = true
 file_size_limit = "10MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
 
+# Private bucket for consignor KYC / identity documents. NOT public — access is
+# only ever via short-lived signed URLs minted for staff (see lib/storage.ts).
+[storage.buckets.kyc-docs]
+public = false
+file_size_limit = "10MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/webp", "application/pdf"]
+
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
 enabled = true

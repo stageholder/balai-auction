@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import type { NewMedia } from "@auction/db";
 import {
   prisma,
   createLot,
@@ -11,20 +12,26 @@ import {
   listConsignors,
   updateLotClosesAt,
   closeLot,
+  addLotMedia,
+  removeLotMedia,
 } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
-import { uploadLotImage } from "@/lib/storage";
+import { uploadPublicImage, deleteObject, PUBLIC_BUCKET } from "@/lib/storage";
+import type { RemoveLotImageResult } from "./lot-image-manager";
 
-async function readImages(
-  formData: FormData,
-  existing: string[]
-): Promise<string[]> {
-  const file = formData.get("image");
-  if (file instanceof File && file.size > 0) {
-    const url = await uploadLotImage(file);
-    return [url, ...existing];
+const MAX_LOT_IMAGES = 8;
+
+/** Upload any newly-selected catalogue images to the public bucket. */
+async function readNewImages(formData: FormData): Promise<NewMedia[]> {
+  const files = formData
+    .getAll("images")
+    .filter((f): f is File => f instanceof File && f.size > 0)
+    .slice(0, MAX_LOT_IMAGES);
+  const uploaded: NewMedia[] = [];
+  for (const file of files) {
+    uploaded.push(await uploadPublicImage(file, "lot"));
   }
-  return existing;
+  return uploaded;
 }
 
 function readFields(formData: FormData) {
@@ -53,7 +60,7 @@ export async function createLotAction(
     rawConsignor && consignors.some((c) => c.id === rawConsignor)
       ? rawConsignor
       : null;
-  const images = await readImages(formData, []);
+  const media = await readNewImages(formData);
   const fields = readFields(formData);
   // NewLot.description is optional string (not nullable) — coerce null→undefined.
   await createLot(prisma, {
@@ -61,7 +68,7 @@ export async function createLotAction(
     ...fields,
     description: fields.description ?? undefined,
     consignorId,
-    images,
+    media,
     // Live sales queue their lots; the runner opens them one at a time.
     status: sale.mode === "live" ? "queued" : undefined,
   });
@@ -83,10 +90,42 @@ export async function updateLotAction(
     rawConsignor && consignors.some((c) => c.id === rawConsignor)
       ? rawConsignor
       : null;
-  const images = await readImages(formData, lot.images);
-  await updateLot(prisma, lotId, { ...readFields(formData), consignorId, images });
+  await updateLot(prisma, lotId, { ...readFields(formData), consignorId });
+  // Newly-selected images are appended after any existing ones (deletes are
+  // handled live by the image manager).
+  const media = await readNewImages(formData);
+  if (media.length > 0) await addLotMedia(prisma, lotId, media);
   revalidatePath(`/admin/sales/${saleId}/lots`);
   redirect(`/admin/sales/${saleId}/lots`);
+}
+
+/** Delete one catalogue image from a lot (and its stored object). Staff only. */
+export async function removeLotImageAction(
+  saleId: string,
+  lotId: string,
+  mediaId: string
+): Promise<RemoveLotImageResult> {
+  await requireStaff();
+  let removed: { bucket: string; path: string } | null;
+  try {
+    removed = await removeLotMedia(prisma, lotId, mediaId);
+  } catch (err) {
+    console.error(
+      `remove lot image failed for ${lotId} (${err instanceof Error ? err.name : "unknown"})`
+    );
+    return { ok: false, error: "Could not remove the image. Please try again." };
+  }
+  if (!removed) {
+    return { ok: false, error: "That image is not part of this lot." };
+  }
+  // Best-effort object cleanup — only for real uploads in the public bucket
+  // (seed images live in a pseudo-bucket and have no stored object).
+  if (removed.bucket === PUBLIC_BUCKET) {
+    await deleteObject(removed.bucket, removed.path);
+  }
+  revalidatePath(`/admin/sales/${saleId}/lots`);
+  revalidatePath(`/admin/sales/${saleId}/lots/${lotId}`);
+  return { ok: true };
 }
 
 export type CloseLotNowResult =

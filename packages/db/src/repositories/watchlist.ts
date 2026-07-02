@@ -38,19 +38,26 @@ export async function listWatchlist(
     orderBy: { createdAt: "desc" },
     include: {
       lot: {
-        include: { sale: { select: { title: true } } },
+        include: {
+          sale: { select: { title: true } },
+          media: {
+            where: { url: { not: null } },
+            orderBy: { sortOrder: "asc" },
+            take: 1,
+            select: { url: true },
+          },
+        },
       },
     },
   });
   return rows.map((r) => {
-    const images = Array.isArray(r.lot.images) ? (r.lot.images as string[]) : [];
     return {
       id: r.lot.id,
       lotNumber: r.lot.lotNumber,
       title: r.lot.title,
       saleId: r.lot.saleId,
       saleTitle: r.lot.sale.title,
-      image: images[0] ?? null,
+      image: r.lot.media[0]?.url ?? null,
       status: r.lot.status as LotStatus,
       estimateLow: toMoney(r.lot.estimateLow),
       estimateHigh: toMoney(r.lot.estimateHigh),
