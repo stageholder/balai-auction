@@ -11,3 +11,13 @@ packages/db/.env
 apps/web/.next/
 apps/web/next-env.d.ts
 apps/web/.env.local
+
+# Ruflo runtime artifacts (local, not committed)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude-flow/
+.swarm/
+.agents/
+ruvector.db
+agentdb.rvf
+agentdb.rvf.lock
